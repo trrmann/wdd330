@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+        <h1 id="countdown" style="
+            font-size: 3rem;
+            color: #fff;
+            background: linear-gradient(90deg, #4e54c8, #8f94fb);
+            padding: 1em 2em;
+            border-radius: 1em;
+            box-shadow: 0 4px 16px rgba(78,84,200,0.2);
+            text-align: center;
+            letter-spacing: 0.1em;
+            margin-bottom: 1em;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+        "></h1>
+    <label for="numericInput">Seconds:</label>
+    <input type="number" id="numericInput" name="numericInput" value="10">
+    <button id="startButton">Start</button>
+    <script>
+        const countDownElement = document.getElementById("countdown");
+        const numericInput = document.getElementById("numericInput");
+        const startButton = document.getElementById("startButton");
+        let countDown = Number(numericInput.value);
+        countDownElement.innerText = countDown.toString();
+        var interval;
+        var timeout;
+        startButton.addEventListener('click', () => {
+            const buttonState = startButton.innerText;
+            switch(buttonState) {
+                case "Start":
+                    var inputValue = Number(numericInput.value);
+                    if (isNaN(inputValue) || inputValue <= 0) {
+                        alert('Please enter a number of seconds greater than 0.');
+                        numericInput.focus();
+                        return;
+                    }
+                    console.log('countdown started!');
+                    countDown = inputValue;
+                    countDownElement.innerText = countDown;
+                    interval = setInterval(() => {
+                        countDown -= 1;
+                        countDownElement.innerText = countDown;
+                        console.log('countdown interval executed!');
+                    }, 1000);
+                    timeout = setTimeout(() => {
+                        clearInterval(interval);
+                        countDownElement.innerText = 'Time\'s up!';
+                        startButton.innerText = "Start";
+                        console.log('countdown completed!');
+                    }, inputValue * 1000);
+                    startButton.innerText = "Pause";
+                    break;
+                case "Pause":
+                    clearInterval(interval);
+                    clearTimeout(timeout);
+                    startButton.innerText = "Resume";
+                    break;
+                case "Resume":
+                    interval = setInterval(() => {
+                        countDown -= 1;
+                        countDownElement.innerText = countDown;
+                        console.log('countdown interval executed!');
+                    }, 1000);
+                    timeout = setTimeout(() => {
+                        clearInterval(interval);
+                        countDownElement.innerText = 'Time\'s up!';
+                        startButton.innerText = "Start";
+                        console.log('countdown completed!');
+                    }, countDown * 1000);
+                    startButton.innerText = "Pause";
+                    break;
+            }
+        });
+        console.log('Inline script loaded!');
+    </script>
+</body>
+</html>
