@@ -1,0 +1,36 @@
+# Ignore all .private.md files in any folder
+**/.private.md
+
+# Node modules and build outputs
+node_modules/
+dist/
+build/
+
+# Vite / local dev
+.vite/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Editor directories
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Database / session dumps
+*.session.sql
+*.sql
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Ignore lockfiles only if you intentionally don't want them tracked
+# package-lock.json
