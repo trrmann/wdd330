@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+  <style>
+body {
+  font-family: Consolas, sans-serif;
+}
+
+h1 {
+  font-family: Acme, sans-serif;
+}
+
+input,
+button {
+  padding: 0.5rem;
+}
+
+input {
+  background-color: #fff;
+  border: 1px solid rgb(0 0 0 / 50%);
+}
+
+input:focus:valid {
+  background-color: #e5ffe5;
+}
+
+input:focus:invalid {
+  background-color: #ffffe0;
+}
+
+div {
+  margin: 1rem;
+  border: 1px solid rgb(0 0 0 / 10%);
+  padding: 0.5rem;
+}
+
+#message {
+  background-color: #bed;
+  visibility: hidden;
+}
+
+#description {
+  background-color: #ddd;
+}
+
+.check {
+  list-style: "✓ ";
+}
+
+em {
+  color: green;
+}
+  </style>
+</head>
+<body>
+    <main>
+  <h1>Validation API and :valid/:invalid pseudo-classes</h1>
+  <form>
+    <label for="code">Enter Code: </label>
+    <input type="password" id="code" required pattern="^(?=(?:[^A-Z]*[A-Z]){1}[^A-Z]*$)(?=(?:\D*\d){2}\D*$)[A-Za-z\d]{6,}$">
+    <button type="button">Check Code</button>
+  </form>
+  <div id="message" ></div>
+  <div id="description" >
+    <ul>
+      <li>A valid input
+        <ol class="check">
+          <li>contains 1 uppercase letter</li>
+          <li>is exactly 2 digits</li>
+          <li>has at least six characters</li>
+          <li>has only letters and digits</li>
+        </ol>
+      </li>
+      <li>CSS :valid & :invalid pseudo-classes <br><em>&mdash; input background-color turns green when valid entry is detected</em></li>
+      <li>The browser's native Constraint Validation API tool tip popup is being prevented
+        <br><em>&mdash; this is because the "Check Code" button has type="button" versus type="submit" or the default</em>
+      </li>
+    </ul>
+  </div>
+</main>
+<script>
+document.querySelector("button").addEventListener("click", function (e) {
+  const code = document.querySelector("#code");
+  const message = document.querySelector("#message");
+
+  if (code.checkValidity()) {
+    message.textContent = "A valid code was entered.";
+    message.style.backgroundColor = "#e5ffe5";
+  } else {
+    message.textContent = "❌ The code is invalid. Please enter a valid one.";
+    message.style.backgroundColor = "#ffe5e5";
+  }
+  message.style.visibility = "visible";
+});
+</script>
+</body>
+</html>

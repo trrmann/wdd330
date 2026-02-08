@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: right;
+            font-family: Roboto, Helvetica, sans-serif;
+        }
+        header,
+        h1,
+        footer {
+            width: 100%;
+            background-color: #000;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+
+        footer {
+            font-size: 13px;
+            letter-spacing: 1.5pt;
+        }
+
+        h1,
+        h2 {
+            margin: 0;
+        }
+        h2,
+        #currentdate {
+            color: yellow;
+        }
+
+        main {
+            margin: 10px auto;
+            border: 1px solid rgb(0 0 0 / 10%);
+            padding: 10px;
+            max-width: 500px;
+            background-color: #abe;
+            box-shadow: 0 0 30px;
+            text-align: center;
+        }
+
+        h3 {
+            font-size: 24px;
+            margin: 0 0 15px 0;
+            border-bottom: 1px solid #777;
+            padding: 0;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin: 5px;
+            text-align:right;
+        }
+
+        input {
+            padding: 0.25rem;
+            width: 100px;
+        }
+        input:invalid {
+            background-color:rgb(255,0,0,50%);
+            color: #000;
+        }
+        input:valid {
+            background-color: rgb(0,128,0,50%);;
+            color: #000;
+        }
+        .hide {
+            display: none;
+        }
+        .inactive {
+            color: rgb(0 0 0 / 20%);
+        }
+
+        .gridform {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-gap: 0.25rem;
+
+            .gridform label {
+                text-align: right;
+            }
+        }
+        button {
+            padding: 0.5rem;
+            margin: 10px auto;
+        }
+
+        #output {
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Form Validation</h1>
+    <main>
+        <h3>Future Value</h3>
+        <div class="gridform">
+            <label for="principle">Principle: </label>
+            <input type="number" id="principle" name="principal" min="1" required>
+            <label class="hide" id="principleConfirmLabel" for="principleConfirm">Confirm Principle: </label>
+            <input class="hide" type="number" id="principleConfirm" min="1" required>
+            <label for="annualrate">Annual rate: </label>
+            <input type="text" id="annualrate" placeholder=".08" required>
+            <label for="years">Years: </label>
+            <input type="number" id="years" name="years" min="1" required>
+            <label for="periods">Periods: </label>
+            <input type="number" id="periods" name="periods" min="1" max="365" required>
+        </div>
+        <button class="inactive" onclick="doFV()">Compute Future Value</button>
+        <hr> Future Value: <span id="output"></span>
+    </main>
+    <footer>
+        &copy;<span id="theyear"></span> • Antonia Francesca • Utah • WDD
+    </footer>
+    <script>
+        function doFV() {
+            const button = document.querySelector("button");
+            if(!button.classList.contains("inactive")) {
+                // INPUT
+                let p = parseFloat(document.getElementById("principle").value);
+                let r = parseFloat(document.getElementById("annualrate").value);
+                let n = parseInt(document.getElementById("periods").value);
+                let y = parseInt(document.getElementById("years").value);
+                // PROCESSING
+                let output = computeFutureValue(p, r, n, y);
+                // OUTPUT with formatting
+                document.getElementById("output").innerHTML = `$${output.toFixed(2)}`;
+            }
+        }
+
+        // computer future value function
+        // p = principal, r = annual rate, y = number of years, n = periods of year.
+
+        function computeFutureValue(p, r, n, y) {
+            let er = r / n; // effective rate per period
+            let totalperiods = n * y;
+            return p * Math.pow(1 + er, totalperiods);
+        }
+
+        // get and display the current year
+        document.getElementById("theyear").textContent = new Date().getFullYear();
+
+        const principalElement = document.getElementById("principle");
+        const principalConfirmElement = document.getElementById("principleConfirm");
+        const principalConfirmLabelElement = document.getElementById("principleConfirmLabel");
+        const annualRateElement = document.getElementById("annualrate");
+        const yearsElement = document.getElementById("years");
+        const periodsElement = document.getElementById("periods");
+
+        function validateButton() {
+            const button = document.querySelector("button");
+            if((principalConfirmElement.value === principalElement.value) &&
+            (annualRateElement.value > 0) &&
+            (yearsElement.value > 0) &&
+            (periodsElement.value > 0))
+            {
+                if(button.classList.contains("inactive")) {
+                    button.classList.remove("inactive");
+                }
+            } else {
+                if(!button.classList.contains("inactive")) {
+                    button.classList.add("inactive");
+                }
+            }
+        }
+
+        principalElement.addEventListener("input",(event) => {
+            if(principalElement.value) {
+                if(principalConfirmElement.classList.contains("hide")) {
+                    principalConfirmElement.classList.remove("hide");
+                    principalConfirmLabelElement.classList.remove("hide");
+                }
+            } else {
+                if(!principalConfirmElement.classList.contains("hide")) {
+                    principalConfirmElement.classList.add("hide");
+                    principalConfirmLabelElement.classList.add("hide");
+                }
+            }
+        });
+        principalConfirmElement.addEventListener("blur",(event) => {
+            if(principalConfirmElement.value) {
+                if(principalConfirmElement.value !== principalElement.value) {
+                    alert("Principal mismatch, please enter the value of the same Principle again in the Confirm Principle field to match the Principle.")
+                }
+            } else {
+                alert("Please enter the value of the Principle again in the Confirm Principle field.")
+            }
+            validateButton();
+        });
+        annualRateElement.addEventListener("blur",(event) => {
+            if(annualRateElement.value) {
+                if(annualRateElement.value <= 0) {
+                    alert("Invalid Annual Rate, it must be greater than 0.")
+                }
+            } else {
+                alert("Please enter the value of the Annual rate.")
+            }
+            validateButton();
+        });
+        yearsElement.addEventListener("blur",(event) => {
+            if(yearsElement.value) {
+                if(yearsElement.value <= 0) {
+                    alert("Invalid number of years, it must be greater than 0.")
+                }
+            } else {
+                alert("Please enter the number of years.")
+            }
+            validateButton();
+        });
+        periodsElement.addEventListener("blur",(event) => {
+            if(periodsElement.value) {
+                if(periodsElement.value <= 0) {
+                    alert("Invalid number of periods, it must be greater than 0.")
+                }
+            } else {
+                alert("Please enter the number of periods.")
+            }
+            validateButton();
+        });
+    </script>
+</body>
+</html>
