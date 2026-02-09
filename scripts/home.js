@@ -18,6 +18,7 @@ const mainClassName = 'main';
 const footerId = 'mainFooter';
 const footerTemplateId = 'footerTemplate';
 const footerClassName = 'footer';
+
 site.init(
   bodyClass,
   headerId,

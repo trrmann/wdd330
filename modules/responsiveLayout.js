@@ -39,3 +39,95 @@ export const morePage = {
   title: 'More',
   content: '<p>More options and settings.</p>',
 };
+
+export function loadPage(pageName) {
+  let page;
+  switch (pageName) {
+    case 'home':
+      page = homePage;
+      break;
+    case 'recipes':
+      page = recipesPage;
+      break;
+    case 'mealplan':
+      page = mealPlanPage;
+      break;
+    case 'shopping':
+      page = shoppingPage;
+      break;
+    case 'more':
+      page = morePage;
+      break;
+    default:
+      page = homePage;
+  }
+
+  const mainElement = document.querySelector('.main');
+  const titleElement = mainElement.querySelector('h2');
+  const contentElement = mainElement.querySelector('.content-wrapper');
+
+  if (titleElement) {
+    titleElement.textContent = page.title;
+  }
+  if (contentElement) {
+    contentElement.innerHTML = page.content;
+    if (pageName === 'home') {
+      loadRecipeCards();
+    }
+  }
+}
+
+export async function loadRecipeCards(searchTerm = '') {
+  const recipeCardContainer = document.querySelector('.recipe-cards');
+  const template = document.getElementById('recipeCardTemplate');
+
+  if (!recipeCardContainer || !template) return;
+
+  recipeCardContainer.innerHTML = ''; // Clear existing cards
+
+  try {
+    const response = await fetch('./data/mock-recipes.json');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    let recipes = await response.json();
+
+    // Filter recipes if a search term is provided
+    if (searchTerm) {
+      recipes = recipes.filter(
+        (recipe) =>
+          recipe.title.toLowerCase().includes(searchTerm) ||
+          recipe.description.toLowerCase().includes(searchTerm),
+      );
+    }
+
+    if (recipes.length === 0) {
+      recipeCardContainer.innerHTML = '<p>No recipes found.</p>';
+      return;
+    }
+
+    recipes.forEach((recipe) => {
+      const cardClone = template.content.cloneNode(true);
+      const img = cardClone.querySelector('img');
+      const title = cardClone.querySelector('h4');
+      const description = cardClone.querySelector('p');
+
+      if (img) {
+        img.src = recipe.image;
+        img.alt = recipe.title;
+      }
+      if (title) {
+        title.textContent = recipe.title;
+      }
+      if (description) {
+        description.textContent = recipe.description;
+      }
+      recipeCardContainer.appendChild(cardClone);
+    });
+  } catch (error) {
+    console.error('Error loading recipe cards:', error);
+    recipeCardContainer.innerHTML =
+      '<p>Could not load recipes. Please try again later.</p>';
+  }
+}
+

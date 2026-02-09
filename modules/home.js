@@ -1,16 +1,9 @@
-// Home Module
-// Purpose: Introduction and navigation to main features.
-import {
-  homePage,
-  recipesPage,
-  mealPlanPage,
-  shoppingPage,
-  morePage,
-} from './responsiveLayout.js';
-// Site-wide layout and navigation object will be moved to the end of the file.
+
+
+import { homePage, loadPage, loadRecipeCards } from './responsiveLayout.js';
 
 // Header object
-export const header = {
+const header = {
   element: null,
   init(
     headerId,
@@ -80,7 +73,7 @@ export const header = {
 };
 
 // Menu object
-export const menu = {
+const menu = {
   element: null,
   init(menuId, menuTemplateId, menuClassName) {
     const templateId = menuTemplateId || 'menuTemplate';
@@ -94,7 +87,7 @@ export const menu = {
 };
 
 // Main object
-export const main = {
+const main = {
   element: null,
   init(mainId, mainTemplateId, mainClassName, page) {
     const templateId = mainTemplateId || 'mainTemplate';
@@ -120,7 +113,7 @@ export const main = {
 };
 
 // Footer object
-export const footer = {
+const footer = {
   element: null,
   init(footerId, footerTemplateId, footerClassName) {
     const templateId = footerTemplateId || 'footerTemplate';
@@ -173,7 +166,7 @@ export const site = {
           body.appendChild(this.main.element);
           // If the initial page is home, load the recipe cards
           if (this.main.element.querySelector('.recipe-cards')) {
-            this.loadRecipeCards();
+            loadRecipeCards();
           }
         }
         if (this.footer.element) body.appendChild(this.footer.element);
@@ -192,7 +185,7 @@ export const site = {
 
     const triggerSearch = () => {
       const searchTerm = searchInput.value.toLowerCase();
-      this.loadRecipeCards(searchTerm);
+      loadRecipeCards(searchTerm);
     };
 
     if (searchButton) {
@@ -210,14 +203,14 @@ export const site = {
     const mealPlanButton = mainElement.querySelector('.meal-plan-summary');
     if (mealPlanButton) {
       mealPlanButton.addEventListener('click', () => {
-        this.loadPage('mealplan');
+        loadPage('mealplan');
       });
     }
 
     const shoppingListButton = mainElement.querySelector('.shopping-list-btn');
     if (shoppingListButton) {
       shoppingListButton.addEventListener('click', () => {
-        this.loadPage('shopping');
+        loadPage('shopping');
       });
     }
   },
@@ -227,97 +220,9 @@ export const site = {
       item.addEventListener('click', (event) => {
         event.preventDefault();
         const pageName = event.target.hash.substring(1);
-        this.loadPage(pageName);
+        loadPage(pageName);
       });
     });
   },
-  loadPage(pageName) {
-    let page;
-    switch (pageName) {
-      case 'home':
-        page = homePage;
-        break;
-      case 'recipes':
-        page = recipesPage;
-        break;
-      case 'mealplan':
-        page = mealPlanPage;
-        break;
-      case 'shopping':
-        page = shoppingPage;
-        break;
-      case 'more':
-        page = morePage;
-        break;
-      default:
-        page = homePage;
-    }
-
-    const mainElement = document.querySelector('.main');
-    const titleElement = mainElement.querySelector('h2');
-    const contentElement = mainElement.querySelector('.content-wrapper');
-
-    if (titleElement) {
-      titleElement.textContent = page.title;
-    }
-    if (contentElement) {
-      contentElement.innerHTML = page.content;
-      if (pageName === 'home') {
-        this.loadRecipeCards();
-      }
-    }
-  },
-  async loadRecipeCards(searchTerm = '') {
-    const recipeCardContainer = document.querySelector('.recipe-cards');
-    const template = document.getElementById('recipeCardTemplate');
-
-    if (!recipeCardContainer || !template) return;
-
-    recipeCardContainer.innerHTML = ''; // Clear existing cards
-
-    try {
-      const response = await fetch('./data/mock-recipes.json');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      let recipes = await response.json();
-
-      // Filter recipes if a search term is provided
-      if (searchTerm) {
-        recipes = recipes.filter(
-          (recipe) =>
-            recipe.title.toLowerCase().includes(searchTerm) ||
-            recipe.description.toLowerCase().includes(searchTerm),
-        );
-      }
-
-      if (recipes.length === 0) {
-        recipeCardContainer.innerHTML = '<p>No recipes found.</p>';
-        return;
-      }
-
-      recipes.forEach((recipe) => {
-        const cardClone = template.content.cloneNode(true);
-        const img = cardClone.querySelector('img');
-        const title = cardClone.querySelector('h4');
-        const description = cardClone.querySelector('p');
-
-        if (img) {
-          img.src = recipe.image;
-          img.alt = recipe.title;
-        }
-        if (title) {
-          title.textContent = recipe.title;
-        }
-        if (description) {
-          description.textContent = recipe.description;
-        }
-        recipeCardContainer.appendChild(cardClone);
-      });
-    } catch (error) {
-      console.error('Error loading recipe cards:', error);
-      recipeCardContainer.innerHTML =
-        '<p>Could not load recipes. Please try again later.</p>';
-    }
-  },
 };
+
