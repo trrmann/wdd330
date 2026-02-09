@@ -1,4 +1,11 @@
 /* Mobile menu: vertical */
+.menu-list {
+  padding: 1rem;
+  display: none;
+}
+.menu-list.active {
+  display: flex;
+}
 /* Mobile header: logo left, title center, hamburger right */
 .header-row {
   display: flex;
@@ -21,23 +28,12 @@
 }
 .header-hamburger {
   display: block;
-  flex: 0 0 auto;
-}
-/* Mobile menu: vertical, hidden by default, shown when active */
-.menu-list {
-  flex-direction: column;
-  gap: 0.5rem;
-  align-items: stretch;
-  display: none;
-}
-.menu-list.active {
-  display: flex;
+  z-index: 1001;
 }
 /* Mobile footer: centered, compact */
 .footer.wdd330 {
-  font-size: 0.95rem;
-  padding: 0.75rem 0;
+  font-size: 0.9rem;
 }
 .copyright {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }

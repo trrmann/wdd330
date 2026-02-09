@@ -1,0 +1,36 @@
+<!-- Chow Planner Mobile Wireframe -->
+<svg width="350" height="600" viewBox="0 0 350 600" xmlns="http://www.w3.org/2000/svg" font-family="Source Sans Pro, Arial, sans-serif">
+  <rect x="35" y="25" width="280" height="500" fill="#F5F5DC" stroke="#2D2D2D" stroke-width="2"/>
+  <!-- Header with word placeholders -->
+  <!-- Redesigned full-width header and menu for clarity -->
+  <!-- Centered full-width header and menu for mobile wireframe -->
+  <rect x="55" y="40" width="240" height="60" rx="16" fill="#38421f" stroke="#2D2D2D" stroke-width="2"/>
+  <!-- LOGO above title/hamburger row -->
+  <text x="175" y="60" font-size="15" text-anchor="middle" fill="#C2B280" font-family="Oswald, Arial Black, Impact, sans-serif" font-weight="bold">LOGO</text>
+  <!-- Title and hamburger on same line, padded from left, no collision -->
+  <text x="162" y="88" font-size="20" text-anchor="middle" fill="#F5F5DC" font-family="Oswald, Arial Black, Impact, sans-serif" font-weight="bold" letter-spacing="2">CHOW PLANNER</text>
+  <!-- Add spacing between title and hamburger icon -->
+  <g>
+    <rect x="268" y="72" width="22" height="3" rx="1.5" fill="#C2B280" />
+    <rect x="268" y="79" width="22" height="3" rx="1.5" fill="#C2B280" />
+    <rect x="268" y="86" width="22" height="3" rx="1.5" fill="#C2B280" />
+  </g>
+  <!-- Expandable menu section, full width, below header -->
+  <rect x="55" y="98" width="240" height="100" rx="12" fill="#4B5320" stroke="#2D2D2D" stroke-width="2"/>
+  <text x="175" y="120" font-size="15" text-anchor="middle" fill="#F5F5DC" font-family="Oswald, Arial Black, Impact, sans-serif" font-weight="bold">Home</text>
+  <text x="175" y="136" font-size="15" text-anchor="middle" fill="#F5F5DC" font-family="Oswald, Arial Black, Impact, sans-serif" font-weight="bold">Recipes</text>
+  <text x="175" y="152" font-size="15" text-anchor="middle" fill="#F5F5DC" font-family="Oswald, Arial Black, Impact, sans-serif" font-weight="bold">Meal Plan</text>
+  <text x="175" y="168" font-size="15" text-anchor="middle" fill="#F5F5DC" font-family="Oswald, Arial Black, Impact, sans-serif" font-weight="bold">Shopping</text>
+  <text x="175" y="184" font-size="15" text-anchor="middle" fill="#F5F5DC" font-family="Oswald, Arial Black, Impact, sans-serif" font-weight="bold">More</text>
+  <!-- Search bar below header and menu, clear separation -->
+  <rect x="65" y="208" width="220" height="28" rx="8" fill="#FFF" stroke="#38421f" stroke-width="1"/>
+  <text x="175" y="227" font-size="13" text-anchor="middle" fill="#38421f" font-family="Oswald, Arial Black, Impact, sans-serif">SEARCH BAR</text>
+  <rect x="65" y="248" width="220" height="32" rx="10" fill="#C2B280" stroke="#38421f" stroke-width="1"/>
+  <text x="175" y="269" font-size="13" text-anchor="middle" fill="#38421f" font-family="Oswald, Arial Black, Impact, sans-serif">MEAL PLAN SUMMARY</text>
+  <rect x="65" y="288" width="220" height="120" rx="10" fill="#FFF" stroke="#38421f" stroke-width="1"/>
+  <text x="175" y="348" font-size="13" text-anchor="middle" fill="#38421f" font-family="Oswald, Arial Black, Impact, sans-serif">RECIPE CARDS</text>
+  <rect x="65" y="418" width="220" height="28" rx="8" fill="#C2B280" stroke="#38421f" stroke-width="1"/>
+  <text x="175" y="436" font-size="13" text-anchor="middle" fill="#38421f" font-family="Oswald, Arial Black, Impact, sans-serif">SHOPPING LIST BTN</text>
+  <rect x="65" y="458" width="220" height="28" rx="8" fill="#38421f" stroke="#2D2D2D" stroke-width="1"/>
+  <text x="175" y="476" font-size="13" text-anchor="middle" fill="#F5F5DC" font-family="Oswald, Arial Black, Impact, sans-serif">FOOTER NAV</text>
+</svg>

@@ -1,5 +1,14 @@
 @media (min-width: 1025px) {
   /* Laptop header: logo left, title center, hamburger hidden */
+  .header-hamburger {
+    display: none;
+  }
+  .menu-list {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 1rem;
+  }
   .header-row {
     display: flex;
     align-items: center;
@@ -22,25 +31,14 @@
     text-align: center;
     font-size: 2rem;
   }
-  .header-hamburger {
-    display: none;
-  }
-  /* Laptop menu: horizontal, centered */
-  .menu-list {
-    flex-direction: row;
-    gap: 2rem;
-    justify-content: center;
-    align-items: center;
-    display: flex;
-  }
   /* Laptop footer: centered, largest */
   .footer.wdd330 {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     padding: 1.25rem 0;
     text-align: center;
   }
   .copyright {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     text-align: center;
   }
 }

@@ -1,0 +1,43 @@
+<!-- Chow Planner Tablet Wireframe -->
+<svg width="500" height="700" viewBox="0 0 500 700" xmlns="http://www.w3.org/2000/svg" font-family="Source Sans Pro, Arial, sans-serif">
+  <rect x="50" y="50" width="400" height="600" fill="#F5F5DC" stroke="#2D2D2D" stroke-width="2"/>
+  <!-- Header with word placeholders -->
+  <rect x="70" y="75" width="360" height="60" rx="16" fill="#38421f" stroke="#2D2D2D" stroke-width="2"/>
+  <!-- Header row: logo, title, hamburger icon -->
+  <text x="106" y="111" font-size="16" text-anchor="middle" fill="#C2B280" font-family="Oswald, Arial Black, Impact, sans-serif" font-weight="bold">LOGO</text>
+  <text x="250" y="113" font-size="22" text-anchor="middle" fill="#F5F5DC" font-family="Oswald, Arial Black, Impact, sans-serif" font-weight="bold" letter-spacing="2">CHOW PLANNER</text>
+  <g>
+    <rect x="385" y="95" width="28" height="4" rx="2" fill="#C2B280" />
+    <rect x="385" y="103" width="28" height="4" rx="2" fill="#C2B280" />
+    <rect x="385" y="111" width="28" height="4" rx="2" fill="#C2B280" />
+  </g>
+  <!-- Search Bar (moved below menu) -->
+  <!-- Vertical menu items below header -->
+  <rect x="70" y="135" width="360" height="90" rx="12" fill="#4B5320" stroke="#2D2D2D" stroke-width="2"/>
+  <text x="160" y="160" font-size="15" text-anchor="middle" fill="#F5F5DC" font-family="Oswald, Arial Black, Impact, sans-serif" font-weight="bold">Home</text>
+  <text x="160" y="185" font-size="15" text-anchor="middle" fill="#F5F5DC" font-family="Oswald, Arial Black, Impact, sans-serif" font-weight="bold">Meal Plan</text>
+  <text x="160" y="210" font-size="15" text-anchor="middle" fill="#F5F5DC" font-family="Oswald, Arial Black, Impact, sans-serif" font-weight="bold">More</text>
+  <text x="340" y="160" font-size="15" text-anchor="middle" fill="#F5F5DC" font-family="Oswald, Arial Black, Impact, sans-serif" font-weight="bold">Recipes</text>
+  <text x="340" y="185" font-size="15" text-anchor="middle" fill="#F5F5DC" font-family="Oswald, Arial Black, Impact, sans-serif" font-weight="bold">Shopping</text>
+  <!-- Search bar -->
+  <rect x="65" y="235" width="370" height="32" rx="8" fill="#FFF" stroke="#38421f" stroke-width="1"/>
+  <text x="250" y="255" font-size="14" text-anchor="middle" fill="#38421f" font-family="Oswald, Arial Black, Impact, sans-serif">SEARCH BAR</text>
+  <!-- Meal Plan Summary and Shopping List Btn on same row -->
+  <rect x="65" y="275" width="175" height="32" rx="8" fill="#C2B280" stroke="#38421f" stroke-width="1"/>
+  <rect x="255" y="275" width="180" height="32" rx="8" fill="#C2B280" stroke="#38421f" stroke-width="1"/>
+  <text x="152" y="295" font-size="13" text-anchor="middle" fill="#38421f" font-family="Oswald, Arial Black, Impact, sans-serif">MEAL PLAN</text>
+  <text x="345" y="295" font-size="13" text-anchor="middle" fill="#38421f" font-family="Oswald, Arial Black, Impact, sans-serif">SHOPPING LIST</text>
+  <!-- Recipe Cards Grid (2 columns) -->
+    <!-- Recipe Cards 2x2 Grid -->
+    <rect x="65" y="317" width="175" height="120" rx="10" fill="#FFF" stroke="#38421f" stroke-width="1"/>
+    <rect x="255" y="317" width="175" height="120" rx="10" fill="#FFF" stroke="#38421f" stroke-width="1"/>
+    <rect x="65" y="452" width="175" height="120" rx="10" fill="#FFF" stroke="#38421f" stroke-width="1"/>
+    <rect x="255" y="452" width="175" height="120" rx="10" fill="#FFF" stroke="#38421f" stroke-width="1"/>
+    <text x="152" y="377" font-size="13" text-anchor="middle" fill="#38421f" font-family="Oswald, Arial Black, Impact, sans-serif">RECIPE CARD</text>
+    <text x="345" y="377" font-size="13" text-anchor="middle" fill="#38421f" font-family="Oswald, Arial Black, Impact, sans-serif">RECIPE CARD</text>
+    <text x="152" y="512" font-size="13" text-anchor="middle" fill="#38421f" font-family="Oswald, Arial Black, Impact, sans-serif">RECIPE CARD</text>
+    <text x="345" y="512" font-size="13" text-anchor="middle" fill="#38421f" font-family="Oswald, Arial Black, Impact, sans-serif">RECIPE CARD</text>
+    <!-- Footer -->
+    <rect x="65" y="587" width="370" height="32" rx="8" fill="#38421f" stroke="#2D2D2D" stroke-width="1"/>
+    <text x="250" y="609" font-size="13" text-anchor="middle" fill="#F5F5DC" font-family="Oswald, Arial Black, Impact, sans-serif">FOOTER NAV</text>
+</svg>

@@ -1,24 +1,6 @@
-// Site-wide layout and navigation object
 // Home Module
 // Purpose: Introduction and navigation to main features.
-// ...existing code...
-// ...existing code...
-
-// ...existing code...
-
-// ...existing code...
-
-// ...existing code...
-
-// ...existing code...
-
-// ...existing code...
-
 // Site-wide layout and navigation object will be moved to the end of the file.
-
-// Header object
-// Home Module
-// Purpose: Introduction and navigation to main features.
 
 // Header object
 export const header = {
@@ -68,6 +50,7 @@ export const header = {
         const isActive = menuList.classList.toggle('active');
         menuList.setAttribute('aria-hidden', isActive ? 'false' : 'true');
         hamburgerBtn.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+
         // Switch hamburger icon
         if (isActive) {
           // Change to X icon using two rotated rectangles
