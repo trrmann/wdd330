@@ -8,7 +8,11 @@
 }
 .header-logo {
   flex: 0 0 auto;
-  font-size: 1rem;
+}
+.header-logo img {
+  width: 24px;
+  height: 18px;
+  display: block;
 }
 .header-title {
   flex: 1 1 auto;

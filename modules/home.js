@@ -43,6 +43,48 @@ export const header = {
     // Initialize and append menu
     menu.init(menuId, menuTemplateId, menuClassName);
     if (menu.element) headerElem.appendChild(menu.element);
+
+    // Hamburger menu toggle logic
+    const hamburgerBtn = headerElem.querySelector('.header-hamburger');
+    const hamburgerIcon = hamburgerBtn
+      ? hamburgerBtn.querySelector('.hamburger-icon')
+      : null;
+    const menuList = menu.element
+      ? menu.element.querySelector('.menu-list')
+      : null;
+    if (hamburgerBtn && menuList && hamburgerIcon) {
+      // Restore original hamburger icon markup
+      hamburgerIcon.innerHTML = `
+        <rect y="2" width="28" height="4" rx="2" fill="currentColor" />
+        <rect y="8" width="28" height="4" rx="2" fill="currentColor" />
+        <rect y="14" width="28" height="4" rx="2" fill="currentColor" />
+      `;
+      // Hide menu-list by default for tablet/mobile
+      // Hide menu-list by default
+      menuList.classList.remove('active');
+      menuList.setAttribute('aria-hidden', 'true');
+      hamburgerBtn.setAttribute('aria-expanded', 'false');
+      hamburgerBtn.addEventListener('click', () => {
+        const isActive = menuList.classList.toggle('active');
+        menuList.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+        hamburgerBtn.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+        // Switch hamburger icon
+        if (isActive) {
+          // Change to X icon using two rotated rectangles
+          hamburgerIcon.innerHTML = `
+            <rect x="0" y="8" width="28" height="4" rx="2" fill="currentColor" transform="rotate(45 14 10)" />
+            <rect x="0" y="8" width="28" height="4" rx="2" fill="currentColor" transform="rotate(-45 14 10)" />
+          `;
+        } else {
+          // Change to hamburger icon (3 lines)
+          hamburgerIcon.innerHTML = `
+            <rect y="2" width="28" height="4" rx="2" fill="currentColor" />
+            <rect y="8" width="28" height="4" rx="2" fill="currentColor" />
+            <rect y="14" width="28" height="4" rx="2" fill="currentColor" />
+          `;
+        }
+      });
+    }
     this.element = headerElem;
   },
 };
