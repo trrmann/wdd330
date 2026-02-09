@@ -24,10 +24,6 @@ if ($gitRemote -match "^git@github.com:(.+)\.git$") {
 Write-Host "Opening $webUrl in your default browser..."
 Start-Process $webUrl
 
-Write-Host "Opening $webUrl in your default browser..."
-Start-Process $webUrl
-$gitRemote = $(git config --get remote.origin.url)
-
 if (-not $gitRemote) {
     Write-Host "No remote 'origin' found."
     exit 1
