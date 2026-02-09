@@ -2,60 +2,56 @@
 // Purpose: To manage the layout and content of different pages.
 
 export const homePage = {
-  init() {
+  init(templateId = 'homePageTemplate') {
+    const template = document.getElementById(templateId);
+    if (!template) return { title: 'Error', content: '' };
     return {
       title: 'Welcome to Chow Planner',
-      content: `
-    <div class="search-bar">
-      <input type="search" placeholder="SEARCH BAR">
-      <button>Search</button>
-    </div>
-    <div class="home-actions">
-      <div class="meal-plan-summary">
-        MEAL PLAN SUMMARY
-      </div>
-      <button class="shopping-list-btn">SHOPPING LIST</button>
-    </div>
-    <div class="recipe-cards">
-      <!-- Recipe cards will be dynamically inserted here -->
-    </div>
-  `,
+      content: template.innerHTML,
     };
   },
 };
 
 export const recipesPage = {
-  init() {
+  init(templateId = 'recipesPageTemplate') {
+    const template = document.getElementById(templateId);
+    if (!template) return { title: 'Error', content: '' };
     return {
       title: 'Recipes',
-      content: '<p>Here you can find and manage your recipes.</p>',
+      content: template.innerHTML,
     };
   },
 };
 
 export const mealPlanPage = {
-  init() {
+  init(templateId = 'mealPlanPageTemplate') {
+    const template = document.getElementById(templateId);
+    if (!template) return { title: 'Error', content: '' };
     return {
       title: 'Meal Plan',
-      content: '<p>Plan your meals for the week here.</p>',
+      content: template.innerHTML,
     };
   },
 };
 
 export const shoppingPage = {
-  init() {
+  init(templateId = 'shoppingPageTemplate') {
+    const template = document.getElementById(templateId);
+    if (!template) return { title: 'Error', content: '' };
     return {
       title: 'Shopping List',
-      content: '<p>Manage your shopping list here.</p>',
+      content: template.innerHTML,
     };
   },
 };
 
 export const morePage = {
-  init() {
+  init(templateId = 'morePageTemplate') {
+    const template = document.getElementById(templateId);
+    if (!template) return { title: 'Error', content: '' };
     return {
       title: 'More',
-      content: '<p>More options and settings.</p>',
+      content: template.innerHTML,
     };
   },
 };
