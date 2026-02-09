@@ -1,6 +1,13 @@
 
 
-import { homePage, loadPage, loadRecipeCards } from './responsiveLayout.js';
+import {
+  homePage,
+  recipesPage,
+  mealPlanPage,
+  shoppingPage,
+  morePage,
+  loadRecipeCards,
+} from './responsiveLayout.js';
 
 // Header object
 const header = {
@@ -110,6 +117,42 @@ const main = {
 
     this.element = mainElem;
   },
+  loadPage(pageName) {
+    let page;
+    switch (pageName) {
+      case 'home':
+        page = homePage;
+        break;
+      case 'recipes':
+        page = recipesPage;
+        break;
+      case 'mealplan':
+        page = mealPlanPage;
+        break;
+      case 'shopping':
+        page = shoppingPage;
+        break;
+      case 'more':
+        page = morePage;
+        break;
+      default:
+        page = homePage;
+    }
+
+    const mainElement = document.querySelector('.main');
+    const titleElement = mainElement.querySelector('h2');
+    const contentElement = mainElement.querySelector('.content-wrapper');
+
+    if (titleElement) {
+      titleElement.textContent = page.title;
+    }
+    if (contentElement) {
+      contentElement.innerHTML = page.content;
+      if (pageName === 'home') {
+        loadRecipeCards();
+      }
+    }
+  },
 };
 
 // Footer object
@@ -203,14 +246,14 @@ export const site = {
     const mealPlanButton = mainElement.querySelector('.meal-plan-summary');
     if (mealPlanButton) {
       mealPlanButton.addEventListener('click', () => {
-        loadPage('mealplan');
+        this.main.loadPage('mealplan');
       });
     }
 
     const shoppingListButton = mainElement.querySelector('.shopping-list-btn');
     if (shoppingListButton) {
       shoppingListButton.addEventListener('click', () => {
-        loadPage('shopping');
+        this.main.loadPage('shopping');
       });
     }
   },
@@ -220,7 +263,7 @@ export const site = {
       item.addEventListener('click', (event) => {
         event.preventDefault();
         const pageName = event.target.hash.substring(1);
-        loadPage(pageName);
+        this.main.loadPage(pageName);
       });
     });
   },

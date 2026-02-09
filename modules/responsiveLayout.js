@@ -40,42 +40,7 @@ export const morePage = {
   content: '<p>More options and settings.</p>',
 };
 
-export function loadPage(pageName) {
-  let page;
-  switch (pageName) {
-    case 'home':
-      page = homePage;
-      break;
-    case 'recipes':
-      page = recipesPage;
-      break;
-    case 'mealplan':
-      page = mealPlanPage;
-      break;
-    case 'shopping':
-      page = shoppingPage;
-      break;
-    case 'more':
-      page = morePage;
-      break;
-    default:
-      page = homePage;
-  }
 
-  const mainElement = document.querySelector('.main');
-  const titleElement = mainElement.querySelector('h2');
-  const contentElement = mainElement.querySelector('.content-wrapper');
-
-  if (titleElement) {
-    titleElement.textContent = page.title;
-  }
-  if (contentElement) {
-    contentElement.innerHTML = page.content;
-    if (pageName === 'home') {
-      loadRecipeCards();
-    }
-  }
-}
 
 export async function loadRecipeCards(searchTerm = '') {
   const recipeCardContainer = document.querySelector('.recipe-cards');
