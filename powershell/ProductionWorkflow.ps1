@@ -33,6 +33,19 @@ Run-Step "Commit.ps1" "Committing changes"
 Run-Step "Push.ps1" "Pushing to GitHub"
 Run-Step "ShowRepo.ps1" "Opening GitHub repository page"
 Run-Step "ShowSite.ps1" "Opening GitHub Pages site"
+
+Write-Host "\n=== Opening Trello board ==="
+$trelloScript = Join-Path $scriptDir "ShowTrello.ps1"
+if (Test-Path $trelloScript) {
+    & $trelloScript
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "ShowTrello.ps1 failed. Exiting workflow."
+        exit $LASTEXITCODE
+    }
+} else {
+    Write-Host "ShowTrello.ps1 not found. Skipping."
+}
+
 Write-Host "\n=== Opening HTML, CSS, and Accessibility Validators ==="
 $validatorScript = Join-Path $scriptDir "ShowValidator.ps1"
 $siteUrl = ""

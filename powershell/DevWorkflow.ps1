@@ -36,3 +36,15 @@ if (Test-Path $scriptPath) {
 } else {
     Write-Host "ShowSite.ps1 not found. Skipping."
 }
+
+Write-Host "\n=== Opening Trello board ==="
+$trelloScript = Join-Path $scriptDir "ShowTrello.ps1"
+if (Test-Path $trelloScript) {
+    & $trelloScript
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "ShowTrello.ps1 failed. Exiting workflow."
+        exit $LASTEXITCODE
+    }
+} else {
+    Write-Host "ShowTrello.ps1 not found. Skipping."
+}
