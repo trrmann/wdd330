@@ -59,3 +59,4 @@ if ($Dev) {
         Write-Host "Could not parse user and repo from: $repoPath"
         exit 1
     }
+}
