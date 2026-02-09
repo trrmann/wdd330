@@ -13,7 +13,11 @@ function Run-Step {
     Write-Host "\n=== $Description ==="
     $scriptPath = Join-Path $scriptDir $ScriptName
     if (Test-Path $scriptPath) {
-        & $scriptPath @Args
+        if ($Args.Count -gt 0) {
+            & $scriptPath @Args
+        } else {
+            & $scriptPath
+        }
         if ($LASTEXITCODE -ne 0) {
             Write-Host "$Description failed. Exiting workflow."
             exit $LASTEXITCODE
