@@ -24,23 +24,6 @@ if ($gitRemote -match "^git@github.com:(.+)\.git$") {
 Write-Host "Opening $webUrl in your default browser..."
 Start-Process $webUrl
 
-if (-not $gitRemote) {
-    Write-Host "No remote 'origin' found."
-    exit 1
-}
-
-# Convert SSH or HTTPS URL to web URL
-if ($gitRemote -match "^git@github.com:(.+)\.git$") {
-    $repoPath = $Matches[1]
-    $webUrl = "https://github.com/$repoPath"
-} elseif ($gitRemote -match "^https://github.com/(.+)\.git$") {
-    $repoPath = $Matches[1]
-    $webUrl = "https://github.com/$repoPath"
-} else {
-    Write-Host "Unrecognized remote URL format: $gitRemote"
-    exit 1
-}
-
 Write-Host "Opening $webUrl in your default browser..."
 Start-Process $webUrl
 ## Get the remote URL

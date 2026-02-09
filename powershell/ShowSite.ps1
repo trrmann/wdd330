@@ -59,35 +59,3 @@ if ($Dev) {
         Write-Host "Could not parse user and repo from: $repoPath"
         exit 1
     }
-}
-
-# Otherwise, open GitHub Pages site
-# Get the remote URL
-$gitRemote = git config --get remote.origin.url
-
-if (-not $gitRemote) {
-    Write-Host "No remote 'origin' found."
-    exit 1
-}
-
-# Convert SSH or HTTPS URL to user/repo
-if ($gitRemote -match "^git@github.com:(.+)\.git$") {
-    $repoPath = $Matches[1]
-} elseif ($gitRemote -match "^https://github.com/(.+)\.git$") {
-    $repoPath = $Matches[1]
-} else {
-    Write-Host "Unrecognized remote URL format: $gitRemote"
-    exit 1
-}
-
-# Extract user and repo
-if ($repoPath -match "^([^/]+)/(.+)$") {
-    $user = $Matches[1]
-    $repo = $Matches[2]
-    $siteUrl = "https://$user.github.io/$repo/"
-    Write-Host "Opening $siteUrl in your default browser..."
-    Start-Process $siteUrl
-} else {
-    Write-Host "Could not parse user and repo from: $repoPath"
-    exit 1
-}
