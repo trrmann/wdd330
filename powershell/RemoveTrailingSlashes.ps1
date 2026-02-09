@@ -22,13 +22,31 @@ $voidElements = @(
 
 
 # Read file line by line and only remove '/>' at the end of void element lines
+
 $lines = Get-Content $indexPath
+$inVoidElement = $false
+$voidElementName = ""
+$startIdx = 0
+
 for ($i = 0; $i -lt $lines.Count; $i++) {
     $line = $lines[$i]
     foreach ($element in $voidElements) {
-        if ($line -match "<${element}[^>]*?/>") {
+        # Detect start of a multi-line void element
+        if ($line -match "<${element}[^>]*$" -and $line -notmatch '/>$') {
+            $inVoidElement = $true
+            $voidElementName = $element
+            $startIdx = $i
+        }
+        # Single-line void element
+        elseif ($line -match "<${element}[^>]*?/>") {
             $lines[$i] = $line -replace '/>$', '>'
         }
+    }
+    # If inside a multi-line void element, look for end
+    if ($inVoidElement -and $line -match '/>$') {
+        $lines[$i] = $line -replace '/>$', '>'
+        $inVoidElement = $false
+        $voidElementName = ""
     }
 }
 Set-Content -Path $indexPath -Value $lines -Encoding UTF8
