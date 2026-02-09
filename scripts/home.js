@@ -2,7 +2,7 @@
 // Purpose: Entry point for site layout and navigation logic.
 
 import { site } from '../modules/home.js';
-import '../scripts/getDates.js';
+import './getDates.js';
 
 // Pass body class and header id to site.init()
 const bodyClass = document.body.className;

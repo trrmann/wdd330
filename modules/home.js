@@ -1,5 +1,12 @@
 // Home Module
 // Purpose: Introduction and navigation to main features.
+import {
+  homePage,
+  recipesPage,
+  mealPlanPage,
+  shoppingPage,
+  morePage,
+} from './responsiveLayout.js';
 // Site-wide layout and navigation object will be moved to the end of the file.
 
 // Header object
@@ -89,13 +96,25 @@ export const menu = {
 // Main object
 export const main = {
   element: null,
-  init(mainId, mainTemplateId, mainClassName) {
+  init(mainId, mainTemplateId, mainClassName, page) {
     const templateId = mainTemplateId || 'mainTemplate';
     const template = document.getElementById(templateId);
     if (!template) return;
     let mainElem = template.content.firstElementChild.cloneNode(true);
     if (mainClassName) mainElem.className = mainClassName;
     if (mainId) mainElem.id = mainId;
+
+    if (page) {
+      const titleElement = mainElem.querySelector('h2');
+      if (titleElement) {
+        titleElement.textContent = page.title;
+      }
+      const contentElement = mainElem.querySelector('p');
+      if (contentElement) {
+        contentElement.innerHTML = page.content;
+      }
+    }
+
     this.element = mainElem;
   },
 };
@@ -144,7 +163,7 @@ export const site = {
         menuTemplateId,
         menuClassName,
       );
-      this.main.init(mainId, mainTemplateId, mainClassName);
+      this.main.init(mainId, mainTemplateId, mainClassName, homePage);
       this.footer.init(footerId, footerTemplateId, footerClassName);
       // Append elements to body with specified class
       const body = document.querySelector(`body.${bodyClass}`);
@@ -154,6 +173,50 @@ export const site = {
         if (this.footer.element) body.appendChild(this.footer.element);
       }
       this.initialized = true;
+      this.addMenuEventListeners();
+    }
+  },
+  addMenuEventListeners() {
+    const menuItems = document.querySelectorAll('.menu-item a');
+    menuItems.forEach((item) => {
+      item.addEventListener('click', (event) => {
+        event.preventDefault();
+        const pageName = event.target.hash.substring(1);
+        this.loadPage(pageName);
+      });
+    });
+  },
+  loadPage(pageName) {
+    let page;
+    switch (pageName) {
+      case 'home':
+        page = homePage;
+        break;
+      case 'recipes':
+        page = recipesPage;
+        break;
+      case 'mealplan':
+        page = mealPlanPage;
+        break;
+      case 'shopping':
+        page = shoppingPage;
+        break;
+      case 'more':
+        page = morePage;
+        break;
+      default:
+        page = homePage;
+    }
+
+    const mainElement = document.querySelector('.main');
+    const titleElement = mainElement.querySelector('h2');
+    const contentElement = mainElement.querySelector('p');
+
+    if (titleElement) {
+      titleElement.textContent = page.title;
+    }
+    if (contentElement) {
+      contentElement.innerHTML = page.content;
     }
   },
 };
