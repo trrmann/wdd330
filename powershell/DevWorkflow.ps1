@@ -25,6 +25,7 @@ function Run-Step {
 
 Run-Step "Lint.ps1" "Linting code"
 Run-Step "Format.ps1" "Formatting code"
+Run-Step "RemoveTrailingSlashes.ps1" "Fixing trailing slashes in HTML void elements"
 Write-Host "\n=== Opening local website ==="
 $scriptPath = Join-Path $scriptDir "ShowSite.ps1"
 if (Test-Path $scriptPath) {

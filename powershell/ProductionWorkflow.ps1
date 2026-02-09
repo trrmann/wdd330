@@ -29,6 +29,7 @@ function Run-Step {
 
 Run-Step "Lint.ps1" "Linting code"
 Run-Step "Format.ps1" "Formatting code"
+Run-Step "RemoveTrailingSlashes.ps1" "Fixing trailing slashes in HTML void elements"
 Run-Step "Commit.ps1" "Committing changes"
 Run-Step "Push.ps1" "Pushing to GitHub"
 Run-Step "ShowRepo.ps1" "Opening GitHub repository page"
