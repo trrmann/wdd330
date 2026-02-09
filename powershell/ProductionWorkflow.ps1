@@ -10,7 +10,7 @@ function Run-Step {
         [string]$Description,
         [string[]]$StepArgs = @()
     )
-    Write-Host "\n=== $Description ==="
+    Write-Host "=== $Description ==="
     $scriptPath = Join-Path $scriptDir $ScriptName
     if (Test-Path $scriptPath) {
         if ($StepArgs.Count -gt 0) {
@@ -35,7 +35,7 @@ Run-Step "Push.ps1" "Pushing to GitHub"
 Run-Step "ShowRepo.ps1" "Opening GitHub repository page"
 Run-Step "ShowSite.ps1" "Opening GitHub Pages site"
 
-Write-Host "\n=== Opening Trello board ==="
+Write-Host "=== Opening Trello board ==="
 $trelloScript = Join-Path $scriptDir "ShowTrello.ps1"
 if (Test-Path $trelloScript) {
     & $trelloScript

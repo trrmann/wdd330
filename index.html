@@ -24,22 +24,56 @@
       href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap"
       rel="stylesheet"
     >
-    <script src="scripts/getdates.js" defer></script>
+    <script type="module" src="scripts/home.js"></script>
   </head>
   <body class="body">
-    <header class="header">
-      <h1 class="headerTitle">WDD330 - Tracy Mann</h1>
-    </header>
-    <main class="main">
-      <p>This is a simple HTML page with linked CSS and JavaScript files.</p>
-      <button id="actionButton">Click Me!</button>
-    </main>
-    <footer class="footer">
-      <p>
-        <span class="currentyear"></span> Tracy Robert Mann - South Carolina,
-        USA.
-      </p>
-      <p class="lastModified"></p>
-    </footer>
+    <template id="headerTemplate">
+      <header class="header">
+        <div class="header-row">
+          <span class="header-logo">LOGO</span>
+          <h1 class="header-title">CHOW PLANNER</h1>
+          <button class="header-hamburger" aria-label="Open menu" tabindex="0">
+            <svg
+              class="hamburger-icon"
+              width="28"
+              height="20"
+              viewBox="0 0 28 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect y="2" width="28" height="4" rx="2" fill="currentColor" />
+              <rect y="8" width="28" height="4" rx="2" fill="currentColor" />
+              <rect y="14" width="28" height="4" rx="2" fill="currentColor" />
+            </svg>
+          </button>
+        </div>
+      </header>
+    </template>
+    <template id="menuTemplate">
+      <nav class="menu">
+        <ul class="menu-list">
+          <li class="menu-item"><a href="#home">Home</a></li>
+          <li class="menu-item"><a href="#recipes">Recipes</a></li>
+          <li class="menu-item"><a href="#mealplan">Meal Plan</a></li>
+          <li class="menu-item"><a href="#shopping">Shopping</a></li>
+          <li class="menu-item"><a href="#more">More</a></li>
+        </ul>
+      </nav>
+    </template>
+    <template id="mainTemplate">
+      <main class="main">
+        <p>This is a simple HTML page with linked CSS and JavaScript files.</p>
+        <button id="actionButton">Click Me!</button>
+      </main>
+    </template>
+    <template id="footerTemplate">
+      <footer class="footer wdd330">
+        <div class="footer-content">
+          <span class="copyright"
+            >&copy; <span class="currentyear"></span> Tracy Robert Mann</span
+          >
+        </div>
+      </footer>
+    </template>
   </body>
 </html>

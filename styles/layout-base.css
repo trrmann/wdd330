@@ -1,3 +1,4 @@
+/* Root variables */
 :root {
   --primary-color: #4b5320; /* army green */
   --secondary-color: #c2b280; /* khaki */
@@ -38,4 +39,99 @@ th {
 }
 tr:nth-child(even) {
   background-color: var(--table-row-alt-bg);
+}
+
+/* Menu base styles */
+.menu {
+  width: 100%;
+  margin: 0 auto;
+}
+.menu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.menu-item {
+  border-radius: 8px;
+  background: var(--primary-color);
+  color: var(--neutral-color);
+  font-family: var(--heading-font);
+  font-weight: bold;
+  text-align: center;
+  margin: 0;
+}
+.menu-item a {
+  display: block;
+  padding: 0.75rem 1.5rem;
+  color: var(--neutral-color);
+  text-decoration: none;
+  font-size: 1rem;
+}
+.menu-item a:hover {
+  background: var(--secondary-color);
+  color: var(--primary-color);
+}
+
+/* Header base styles */
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.header-logo {
+  font-family: var(--heading-font);
+  font-size: 1.2rem;
+  color: var(--secondary-color);
+  background: var(--primary-color);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+}
+.header-title {
+  flex: 1;
+  text-align: center;
+  font-family: var(--heading-font);
+  font-size: 2rem;
+  color: var(--site-header);
+  background: none;
+  margin: 0;
+}
+.header-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+.hamburger-icon rect {
+  fill: var(--secondary-color);
+}
+
+/* Footer base styles */
+.footer.wdd330 {
+  width: 100%;
+  background: var(--primary-color);
+  color: var(--neutral-color);
+  border-radius: 8px;
+  margin: 2rem 0 0 0;
+  padding: 1rem 0;
+  text-align: center;
+  font-family: var(--heading-font);
+}
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.copyright {
+  font-size: 1rem;
+  font-weight: bold;
 }

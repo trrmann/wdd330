@@ -1,23 +1,45 @@
-/* Mobile styles (up to 600px) */
-body {
-  padding: 1rem;
-}
+...existing code...
 
-.header,
-.footer {
-  text-align: center;
-}
+...existing code...
 
-.main {
+...existing code...
+
+/* Mobile menu: vertical */
+/* Mobile header: logo left, title center, hamburger right */
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+}
+.header-logo {
+  flex: 0 0 auto;
   font-size: 1rem;
 }
-table {
-  width: 100%;
-  font-size: 0.95rem;
-  border-collapse: collapse;
+.header-title {
+  flex: 1 1 auto;
+  text-align: center;
+  font-size: 1.2rem;
 }
-th,
-td {
-  padding: 0.5rem 0.5rem;
-  text-align: left;
+.header-hamburger {
+  display: block;
+  flex: 0 0 auto;
+}
+/* Mobile menu: vertical, hidden by default, shown when active */
+.menu-list {
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: stretch;
+  display: none;
+}
+.menu-list.active {
+  display: flex;
+}
+/* Mobile footer: centered, compact */
+.footer.wdd330 {
+  font-size: 0.95rem;
+  padding: 0.75rem 0;
+}
+.copyright {
+  font-size: 0.95rem;
 }
