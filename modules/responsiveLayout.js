@@ -4,8 +4,19 @@
 export const homePage = {
   title: 'Welcome to Chow Planner',
   content: `
-    <p>This is a simple HTML page with linked CSS and JavaScript files.</p>
-    <button id="actionButton">Click Me!</button>
+    <div class="search-bar">
+      <input type="search" placeholder="SEARCH BAR">
+      <button>Search</button>
+    </div>
+    <div class="home-actions">
+      <div class="meal-plan-summary">
+        MEAL PLAN SUMMARY
+      </div>
+      <button class="shopping-list-btn">SHOPPING LIST</button>
+    </div>
+    <div class="recipe-cards">
+      <!-- Recipe cards will be dynamically inserted here -->
+    </div>
   `,
 };
 

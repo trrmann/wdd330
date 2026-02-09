@@ -19,4 +19,28 @@
   .footer.wdd330 {
     font-size: 1rem;
   }
+
+  .content-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .search-bar {
+    grid-column: 1 / -1; /* Span both columns */
+  }
+
+  .recipe-cards {
+    grid-column: 1 / -1; /* Span both columns */
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .home-actions {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
 }

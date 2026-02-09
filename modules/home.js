@@ -109,7 +109,7 @@ export const main = {
       if (titleElement) {
         titleElement.textContent = page.title;
       }
-      const contentElement = mainElem.querySelector('p');
+      const contentElement = mainElem.querySelector('.content-wrapper');
       if (contentElement) {
         contentElement.innerHTML = page.content;
       }
@@ -169,11 +169,56 @@ export const site = {
       const body = document.querySelector(`body.${bodyClass}`);
       if (body) {
         if (this.header.element) body.appendChild(this.header.element);
-        if (this.main.element) body.appendChild(this.main.element);
+        if (this.main.element) {
+          body.appendChild(this.main.element);
+          // If the initial page is home, load the recipe cards
+          if (this.main.element.querySelector('.recipe-cards')) {
+            this.loadRecipeCards();
+          }
+        }
         if (this.footer.element) body.appendChild(this.footer.element);
       }
       this.initialized = true;
       this.addMenuEventListeners();
+      this.addHomePageEventListeners();
+    }
+  },
+  addHomePageEventListeners() {
+    const mainElement = this.main.element;
+    if (!mainElement) return;
+
+    const searchInput = mainElement.querySelector('.search-bar input');
+    const searchButton = mainElement.querySelector('.search-bar button');
+
+    const triggerSearch = () => {
+      const searchTerm = searchInput.value.toLowerCase();
+      this.loadRecipeCards(searchTerm);
+    };
+
+    if (searchButton) {
+      searchButton.addEventListener('click', triggerSearch);
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          triggerSearch();
+        }
+      });
+    }
+
+    const mealPlanButton = mainElement.querySelector('.meal-plan-summary');
+    if (mealPlanButton) {
+      mealPlanButton.addEventListener('click', () => {
+        this.loadPage('mealplan');
+      });
+    }
+
+    const shoppingListButton = mainElement.querySelector('.shopping-list-btn');
+    if (shoppingListButton) {
+      shoppingListButton.addEventListener('click', () => {
+        this.loadPage('shopping');
+      });
     }
   },
   addMenuEventListeners() {
@@ -210,13 +255,69 @@ export const site = {
 
     const mainElement = document.querySelector('.main');
     const titleElement = mainElement.querySelector('h2');
-    const contentElement = mainElement.querySelector('p');
+    const contentElement = mainElement.querySelector('.content-wrapper');
 
     if (titleElement) {
       titleElement.textContent = page.title;
     }
     if (contentElement) {
       contentElement.innerHTML = page.content;
+      if (pageName === 'home') {
+        this.loadRecipeCards();
+      }
+    }
+  },
+  async loadRecipeCards(searchTerm = '') {
+    const recipeCardContainer = document.querySelector('.recipe-cards');
+    const template = document.getElementById('recipeCardTemplate');
+
+    if (!recipeCardContainer || !template) return;
+
+    recipeCardContainer.innerHTML = ''; // Clear existing cards
+
+    try {
+      const response = await fetch('./data/mock-recipes.json');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      let recipes = await response.json();
+
+      // Filter recipes if a search term is provided
+      if (searchTerm) {
+        recipes = recipes.filter(
+          (recipe) =>
+            recipe.title.toLowerCase().includes(searchTerm) ||
+            recipe.description.toLowerCase().includes(searchTerm),
+        );
+      }
+
+      if (recipes.length === 0) {
+        recipeCardContainer.innerHTML = '<p>No recipes found.</p>';
+        return;
+      }
+
+      recipes.forEach((recipe) => {
+        const cardClone = template.content.cloneNode(true);
+        const img = cardClone.querySelector('img');
+        const title = cardClone.querySelector('h4');
+        const description = cardClone.querySelector('p');
+
+        if (img) {
+          img.src = recipe.image;
+          img.alt = recipe.title;
+        }
+        if (title) {
+          title.textContent = recipe.title;
+        }
+        if (description) {
+          description.textContent = recipe.description;
+        }
+        recipeCardContainer.appendChild(cardClone);
+      });
+    } catch (error) {
+      console.error('Error loading recipe cards:', error);
+      recipeCardContainer.innerHTML =
+        '<p>Could not load recipes. Please try again later.</p>';
     }
   },
 };
