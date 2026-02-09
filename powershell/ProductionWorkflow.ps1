@@ -29,4 +29,4 @@ Run-Step "Commit.ps1" "Committing changes"
 Run-Step "Push.ps1" "Pushing to GitHub"
 Run-Step "ShowRepo.ps1" "Opening GitHub repository page"
 Run-Step "ShowSite.ps1" "Opening GitHub Pages site"
-Run-Step "ShowValidator.ps1" "Opening HTML, CSS, and Accessibility Validators" @("-HTML", "-CSS", "-Accessibility")
+Run-Step "ShowValidator.ps1" "Opening HTML, CSS, and Accessibility Validators" "-HTML" "-CSS" "-Accessibility"
