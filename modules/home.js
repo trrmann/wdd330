@@ -121,22 +121,22 @@ const main = {
     let page;
     switch (pageName) {
       case 'home':
-        page = homePage;
+        page = homePage.init();
         break;
       case 'recipes':
-        page = recipesPage;
+        page = recipesPage.init();
         break;
       case 'mealplan':
-        page = mealPlanPage;
+        page = mealPlanPage.init();
         break;
       case 'shopping':
-        page = shoppingPage;
+        page = shoppingPage.init();
         break;
       case 'more':
-        page = morePage;
+        page = morePage.init();
         break;
       default:
-        page = homePage;
+        page = homePage.init();
     }
 
     const mainElement = document.querySelector('.main');
@@ -199,7 +199,7 @@ export const site = {
         menuTemplateId,
         menuClassName,
       );
-      this.main.init(mainId, mainTemplateId, mainClassName, homePage);
+      this.main.init(mainId, mainTemplateId, mainClassName, homePage.init());
       this.footer.init(footerId, footerTemplateId, footerClassName);
       // Append elements to body with specified class
       const body = document.querySelector(`body.${bodyClass}`);
