@@ -1,0 +1,23 @@
+/* Mobile styles (up to 600px) */
+body {
+  padding: 1rem;
+}
+
+.header,
+.footer {
+  text-align: center;
+}
+
+.main {
+  font-size: 1rem;
+}
+table {
+  width: 100%;
+  font-size: 0.95rem;
+  border-collapse: collapse;
+}
+th,
+td {
+  padding: 0.5rem 0.5rem;
+  text-align: left;
+}

@@ -1,0 +1,41 @@
+:root {
+  --primary-color: #4b5320; /* army green */
+  --secondary-color: #c2b280; /* khaki */
+  --neutral-color: #f5f5dc; /* beige */
+  --neutral-secondary-color: #2d2d2d; /* charcoal */
+  --heading-font: 'Oswald', Arial, sans-serif;
+  --body-font: 'Source Sans 3', Arial, sans-serif;
+  --site-color: var(--primary-color);
+  --site-background: var(--neutral-color);
+  --site-header: var(--secondary-color);
+  --site-header-background: var(--neutral-secondary-color);
+  --table-header-bg: var(--site-header-background);
+  --table-header-color: var(--site-header);
+  --table-row-alt-bg: var(--neutral-color);
+}
+
+body {
+  font-family: var(--body-font);
+  color: var(--site-color);
+  background-color: var(--site-background);
+}
+
+header,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--heading-font);
+  color: var(--site-header);
+  background-color: var(--site-header-background);
+}
+
+th {
+  background-color: var(--table-header-bg);
+  color: var(--table-header-color);
+}
+tr:nth-child(even) {
+  background-color: var(--table-row-alt-bg);
+}

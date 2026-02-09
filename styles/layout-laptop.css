@@ -1,0 +1,28 @@
+@media (min-width: 1025px) {
+  body {
+    padding: 3rem 10vw;
+  }
+  .header,
+  .footer {
+    text-align: left;
+  }
+  .main {
+    font-size: 1.2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  table {
+    font-size: 1.1rem;
+  }
+  th,
+  td {
+    padding: 1rem 1.25rem;
+  }
+  th {
+    background-color: var(--table-header-bg);
+    color: var(--table-header-color);
+  }
+  tr:nth-child(even) {
+    background-color: var(--table-row-alt-bg);
+  }
+}
