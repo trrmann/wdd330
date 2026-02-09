@@ -5,25 +5,38 @@
 param(
     [switch]$HTML,
     [switch]$CSS,
-    [switch]$Accessibility
+    [switch]$Accessibility,
+    [string]$Url = ""
 )
 
 if ($HTML) {
-    $url = "https://validator.w3.org/"
+    if ($Url) {
+        $validateUrl = "https://validator.w3.org/?uri=$Url"
+    } else {
+        $validateUrl = "https://validator.w3.org/"
+    }
     Write-Host "Opening W3C HTML Validator..."
-    Start-Process $url
+    Start-Process $validateUrl
 }
 
 if ($CSS) {
-    $url = "https://jigsaw.w3.org/css-validator/"
+    if ($Url) {
+        $validateUrl = "https://jigsaw.w3.org/css-validator/validator?uri=$Url"
+    } else {
+        $validateUrl = "https://jigsaw.w3.org/css-validator/"
+    }
     Write-Host "Opening W3C CSS Validator..."
-    Start-Process $url
+    Start-Process $validateUrl
 }
 
 if ($Accessibility) {
-    $url = "https://wave.webaim.org/"
+    if ($Url) {
+        $validateUrl = "https://wave.webaim.org/report#/$Url"
+    } else {
+        $validateUrl = "https://wave.webaim.org/"
+    }
     Write-Host "Opening WAVE Accessibility Checker..."
-    Start-Process $url
+    Start-Process $validateUrl
 }
 
 if (-not ($HTML -or $CSS -or $Accessibility)) {

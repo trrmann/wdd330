@@ -35,8 +35,21 @@ Run-Step "ShowRepo.ps1" "Opening GitHub repository page"
 Run-Step "ShowSite.ps1" "Opening GitHub Pages site"
 Write-Host "\n=== Opening HTML, CSS, and Accessibility Validators ==="
 $validatorScript = Join-Path $scriptDir "ShowValidator.ps1"
+$siteUrl = ""
+# Replicate ShowSite.ps1 logic for prod site
+$gitRemote = git config --get remote.origin.url
+if ($gitRemote -match "^git@github.com:(.+)\.git$") {
+    $repoPath = $Matches[1]
+} elseif ($gitRemote -match "^https://github.com/(.+)\.git$") {
+    $repoPath = $Matches[1]
+}
+if ($repoPath -match "^([^/]+)/(.+)$") {
+    $user = $Matches[1]
+    $repo = $Matches[2]
+    $siteUrl = "https://$user.github.io/$repo/"
+}
 if (Test-Path $validatorScript) {
-    & $validatorScript -HTML -CSS -Accessibility
+    & $validatorScript -HTML -CSS -Accessibility -Url $siteUrl
     if ($LASTEXITCODE -ne 0) {
         Write-Host "ShowValidator.ps1 failed. Exiting workflow."
         exit $LASTEXITCODE
