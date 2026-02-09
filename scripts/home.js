@@ -1,36 +1,52 @@
-// home.js script
-// Purpose: Entry point for site layout and navigation logic.
-
 import { site } from '../modules/home.js';
 import './getDates.js';
 
-// Pass body class and header id to site.init()
-const bodyClass = document.body.className;
-const headerId = 'mainHeader';
-const headerTemplateId = 'headerTemplate';
-const headerClassName = 'header';
-const menuId = 'mainMenu';
-const menuTemplateId = 'menuTemplate';
-const menuClassName = 'menu';
-const mainId = 'mainContent';
-const mainTemplateId = 'mainTemplate';
-const mainClassName = 'main';
-const footerId = 'mainFooter';
-const footerTemplateId = 'footerTemplate';
-const footerClassName = 'footer';
+const siteConfig = {
+  // Body
+  bodyClass: 'body',
 
-site.init(
-  bodyClass,
-  headerId,
-  headerTemplateId,
-  headerClassName,
-  menuId,
-  menuTemplateId,
-  menuClassName,
-  mainId,
-  mainTemplateId,
-  mainClassName,
-  footerId,
-  footerTemplateId,
-  footerClassName,
-);
+  // Header
+  headerId: 'header',
+  headerTemplateId: 'headerTemplate',
+  headerClassName: 'header',
+  hamburgerSelector: '.header-hamburger',
+  hamburgerIconSelector: '.hamburger-icon',
+
+  // Menu
+  menuId: 'menu',
+  menuTemplateId: 'menuTemplate',
+  menuClassName: 'menu',
+  menuListSelector: '.menu-list',
+  menuItemSelector: '.menu-item a',
+
+  // Main
+  mainId: 'main',
+  mainClassName: 'main',
+  mainTemplateId: 'mainTemplate',
+  mainContentWrapperSelector: '.content-wrapper',
+  mainTitleSelector: 'h2',
+
+  // Page Templates
+  homePageTemplateId: 'homePageTemplate',
+  recipesPageTemplateId: 'recipesPageTemplate',
+  mealPlanPageTemplateId: 'mealPlanPageTemplate',
+  shoppingPageTemplateId: 'shoppingPageTemplate',
+  morePageTemplateId: 'morePageTemplate',
+
+  // Home Page
+  searchBarSelector: '.search-bar input',
+  searchButtonSelector: '.search-bar button',
+  mealPlanButtonSelector: '.meal-plan-summary',
+  shoppingListButtonSelector: '.shopping-list-btn',
+  recipeCardsSelector: '.recipe-cards',
+  recipeCardTemplateId: 'recipeCardTemplate',
+
+  // Footer
+  footerId: 'footer',
+  footerTemplateId: 'footerTemplate',
+  footerClassName: 'footer',
+};
+
+site.init(siteConfig);
+
+

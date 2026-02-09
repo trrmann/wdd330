@@ -6,40 +6,31 @@ import {
   mealPlanPage,
   shoppingPage,
   morePage,
-  loadRecipeCards,
 } from './responsiveLayout.js';
 
 // Header object
 const header = {
   element: null,
-  init(
-    headerId,
-    headerTemplateId,
-    headerClassName,
-    menuId,
-    menuTemplateId,
-    menuClassName,
-  ) {
+  init(config) {
     // Use header template from DOM
-    const templateId = headerTemplateId || 'headerTemplate';
-    const template = document.getElementById(templateId);
+    const template = document.getElementById(config.headerTemplateId);
     if (!template) return;
     let headerElem = template.content.firstElementChild.cloneNode(true);
     // Set header class name if provided
-    if (headerClassName) headerElem.className = headerClassName;
+    if (config.headerClassName) headerElem.className = config.headerClassName;
     // Set header id if provided
-    if (headerId) headerElem.id = headerId;
+    if (config.headerId) headerElem.id = config.headerId;
     // Initialize and append menu
-    menu.init(menuId, menuTemplateId, menuClassName);
+    menu.init(config);
     if (menu.element) headerElem.appendChild(menu.element);
 
     // Hamburger menu toggle logic
-    const hamburgerBtn = headerElem.querySelector('.header-hamburger');
+    const hamburgerBtn = headerElem.querySelector(config.hamburgerSelector);
     const hamburgerIcon = hamburgerBtn
-      ? hamburgerBtn.querySelector('.hamburger-icon')
+      ? hamburgerBtn.querySelector(config.hamburgerIconSelector)
       : null;
     const menuList = menu.element
-      ? menu.element.querySelector('.menu-list')
+      ? menu.element.querySelector(config.menuListSelector)
       : null;
     if (hamburgerBtn && menuList && hamburgerIcon) {
       // Restore original hamburger icon markup
@@ -82,13 +73,22 @@ const header = {
 // Menu object
 const menu = {
   element: null,
-  init(menuId, menuTemplateId, menuClassName) {
-    const templateId = menuTemplateId || 'menuTemplate';
-    const template = document.getElementById(templateId);
+  init(config) {
+    const template = document.getElementById(config.menuTemplateId);
     if (!template) return;
     let menuElem = template.content.firstElementChild.cloneNode(true);
-    if (menuClassName) menuElem.className = menuClassName;
-    if (menuId) menuElem.id = menuId;
+    if (config.menuClassName) menuElem.className = config.menuClassName;
+    if (config.menuId) menuElem.id = config.menuId;
+
+    const menuItems = menuElem.querySelectorAll(config.menuItemSelector);
+    menuItems.forEach((item) => {
+      item.addEventListener('click', (event) => {
+        event.preventDefault();
+        const pageName = event.target.hash.substring(1);
+        main.loadPage(pageName, config);
+      });
+    });
+
     this.element = menuElem;
   },
 };
@@ -96,20 +96,22 @@ const menu = {
 // Main object
 const main = {
   element: null,
-  init(mainId, mainTemplateId, mainClassName, page) {
-    const templateId = mainTemplateId || 'mainTemplate';
-    const template = document.getElementById(templateId);
+  init(config) {
+    const template = document.getElementById(config.mainTemplateId);
     if (!template) return;
     let mainElem = template.content.firstElementChild.cloneNode(true);
-    if (mainClassName) mainElem.className = mainClassName;
-    if (mainId) mainElem.id = mainId;
+    if (config.mainClassName) mainElem.className = config.mainClassName;
+    if (config.mainId) mainElem.id = config.mainId;
 
+    const page = homePage.init(config);
     if (page) {
-      const titleElement = mainElem.querySelector('h2');
+      const titleElement = mainElem.querySelector(config.mainTitleSelector);
       if (titleElement) {
         titleElement.textContent = page.title;
       }
-      const contentElement = mainElem.querySelector('.content-wrapper');
+      const contentElement = mainElem.querySelector(
+        config.mainContentWrapperSelector,
+      );
       if (contentElement) {
         contentElement.innerHTML = page.content;
       }
@@ -117,40 +119,39 @@ const main = {
 
     this.element = mainElem;
   },
-  loadPage(pageName) {
+  loadPage(pageName, config) {
     let page;
     switch (pageName) {
       case 'home':
-        page = homePage.init();
+        page = homePage.init(config);
         break;
       case 'recipes':
-        page = recipesPage.init();
+        page = recipesPage.init(config);
         break;
       case 'mealplan':
-        page = mealPlanPage.init();
+        page = mealPlanPage.init(config);
         break;
       case 'shopping':
-        page = shoppingPage.init();
+        page = shoppingPage.init(config);
         break;
       case 'more':
-        page = morePage.init();
+        page = morePage.init(config);
         break;
       default:
-        page = homePage.init();
+        page = homePage.init(config);
     }
 
-    const mainElement = document.querySelector('.main');
-    const titleElement = mainElement.querySelector('h2');
-    const contentElement = mainElement.querySelector('.content-wrapper');
+    const mainElement = document.querySelector(`.${config.mainClassName}`);
+    const titleElement = mainElement.querySelector(config.mainTitleSelector);
+    const contentElement = mainElement.querySelector(
+      config.mainContentWrapperSelector,
+    );
 
     if (titleElement) {
       titleElement.textContent = page.title;
     }
     if (contentElement) {
       contentElement.innerHTML = page.content;
-      if (pageName === 'home') {
-        loadRecipeCards();
-      }
     }
   },
 };
@@ -158,13 +159,12 @@ const main = {
 // Footer object
 const footer = {
   element: null,
-  init(footerId, footerTemplateId, footerClassName) {
-    const templateId = footerTemplateId || 'footerTemplate';
-    const template = document.getElementById(templateId);
+  init(config) {
+    const template = document.getElementById(config.footerTemplateId);
     if (!template) return;
     let footerElem = template.content.firstElementChild.cloneNode(true);
-    if (footerClassName) footerElem.className = footerClassName;
-    if (footerId) footerElem.id = footerId;
+    if (config.footerClassName) footerElem.className = config.footerClassName;
+    if (config.footerId) footerElem.id = config.footerId;
     this.element = footerElem;
   },
 };
@@ -175,97 +175,22 @@ export const site = {
   main,
   footer,
   initialized: false,
-  init(
-    bodyClass,
-    headerId,
-    headerTemplateId,
-    headerClassName,
-    menuId,
-    menuTemplateId,
-    menuClassName,
-    mainId,
-    mainTemplateId,
-    mainClassName,
-    footerId,
-    footerTemplateId,
-    footerClassName,
-  ) {
+  init(config) {
     if (!this.initialized) {
-      this.header.init(
-        headerId,
-        headerTemplateId,
-        headerClassName,
-        menuId,
-        menuTemplateId,
-        menuClassName,
-      );
-      this.main.init(mainId, mainTemplateId, mainClassName, homePage.init());
-      this.footer.init(footerId, footerTemplateId, footerClassName);
+      this.header.init(config);
+      this.main.init(config);
+      this.footer.init(config);
       // Append elements to body with specified class
-      const body = document.querySelector(`body.${bodyClass}`);
+      const body = document.querySelector(`body.${config.bodyClass}`);
       if (body) {
         if (this.header.element) body.appendChild(this.header.element);
         if (this.main.element) {
           body.appendChild(this.main.element);
-          // If the initial page is home, load the recipe cards
-          if (this.main.element.querySelector('.recipe-cards')) {
-            loadRecipeCards();
-          }
         }
         if (this.footer.element) body.appendChild(this.footer.element);
       }
       this.initialized = true;
-      this.addMenuEventListeners();
-      this.addHomePageEventListeners();
     }
-  },
-  addHomePageEventListeners() {
-    const mainElement = this.main.element;
-    if (!mainElement) return;
-
-    const searchInput = mainElement.querySelector('.search-bar input');
-    const searchButton = mainElement.querySelector('.search-bar button');
-
-    const triggerSearch = () => {
-      const searchTerm = searchInput.value.toLowerCase();
-      loadRecipeCards(searchTerm);
-    };
-
-    if (searchButton) {
-      searchButton.addEventListener('click', triggerSearch);
-    }
-
-    if (searchInput) {
-      searchInput.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-          triggerSearch();
-        }
-      });
-    }
-
-    const mealPlanButton = mainElement.querySelector('.meal-plan-summary');
-    if (mealPlanButton) {
-      mealPlanButton.addEventListener('click', () => {
-        this.main.loadPage('mealplan');
-      });
-    }
-
-    const shoppingListButton = mainElement.querySelector('.shopping-list-btn');
-    if (shoppingListButton) {
-      shoppingListButton.addEventListener('click', () => {
-        this.main.loadPage('shopping');
-      });
-    }
-  },
-  addMenuEventListeners() {
-    const menuItems = document.querySelectorAll('.menu-item a');
-    menuItems.forEach((item) => {
-      item.addEventListener('click', (event) => {
-        event.preventDefault();
-        const pageName = event.target.hash.substring(1);
-        this.main.loadPage(pageName);
-      });
-    });
   },
 };
 
