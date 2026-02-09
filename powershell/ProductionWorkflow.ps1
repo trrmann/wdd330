@@ -8,13 +8,13 @@ function Run-Step {
     param(
         [string]$ScriptName,
         [string]$Description,
-        [string[]]$Args = @()
+        [string[]]$StepArgs = @()
     )
     Write-Host "\n=== $Description ==="
     $scriptPath = Join-Path $scriptDir $ScriptName
     if (Test-Path $scriptPath) {
-        if ($Args.Count -gt 0) {
-            & $scriptPath @Args
+        if ($StepArgs.Count -gt 0) {
+            & $scriptPath @StepArgs
         } else {
             & $scriptPath
         }
