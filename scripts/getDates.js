@@ -10,9 +10,9 @@ const lastModElement = document.querySelector('.lastModified');
 
 // update the html element with the data
 if (currentYearElement) {
-    currentYearElement.innerHTML = `&copy; ${currentYear}`;
+  currentYearElement.innerHTML = `&copy; ${currentYear}`;
 }
 // update the html element with the data
 if (lastModElement) {
-    lastModElement.innerHTML = `Last modification:  ${lastModDate}`;
+  lastModElement.innerHTML = `Last modification:  ${lastModDate}`;
 }

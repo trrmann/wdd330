@@ -1,65 +1,66 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-</head>
-<body>
+  </head>
+  <body>
     <button id="location-button">Location</button>
     <h1 class="location"></h1>
     <script>
-        const button = document.querySelector("#location-button");
-        // Use a unique variable name to avoid confusion with window.location
-        const locationHeading = document.querySelector(".location");
-        
-        button.addEventListener("click", function () {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function (position) {
-                        const latitude = position.coords.latitude;
-                        const longitude = position.coords.longitude;
-                        // Output the coordinates and region, with a line break for clarity
-                        locationHeading.innerHTML = `Latitude: ${latitude} 🧭 Longitude: ${longitude}<br>Region: ${getRegion(latitude, longitude)}`;
-                    },
-                    function (error) {
-                        locationHeading.textContent = `Error: ${error.message}`;
-                    }
-                );  
-            } else {
-                locationHeading.textContent = "Geolocation is not supported by this browser.";
-            }
-        });
+      const button = document.querySelector('#location-button');
+      // Use a unique variable name to avoid confusion with window.location
+      const locationHeading = document.querySelector('.location');
 
-        function getRegion(lat, lon) {
-            if (lon > 180) lon -= 360; //normalize to -180..180
-
-            switch (true) {
-                // North America (excl. Mexico/Central America)
-                case lat >= 24 && lat <= 83 && lon >= -172 && lon <= -52:
-                    return "North America" ;
-                // Mexico and Central America
-                case lat >= 7 && lat < 24 && lon >= -118 && lon <= -77:
-                    return "Mexico and Central America";
-                // South America
-                case lat >= -56 && lat <= 13 && lon >= -82 && lon <= -34:
-                    return "South America";
-                // Europe
-                case lat>= 35 && lat <= 71 && lon >= -25 && lon <= 45:
-                    return "Europe";
-                // Africa
-                case lat >= -35 && lat <= 37 && lon >= -17 && lon <= 52:
-                    return "Africa";
-                // Asia
-                case lat >= 5 && lat <= 80 && lon >= 45 && lon <= 180:
-                    return "Asia";
-                // Oceania
-                case lat >= -50 && lat <= 0 && lon >= 110 && lon <= 180:
-                    return "Oceania";
-                default:
-                    return "Not mapped";
-            }
+      button.addEventListener('click', function () {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            function (position) {
+              const latitude = position.coords.latitude;
+              const longitude = position.coords.longitude;
+              // Output the coordinates and region, with a line break for clarity
+              locationHeading.innerHTML = `Latitude: ${latitude} 🧭 Longitude: ${longitude}<br>Region: ${getRegion(latitude, longitude)}`;
+            },
+            function (error) {
+              locationHeading.textContent = `Error: ${error.message}`;
+            },
+          );
+        } else {
+          locationHeading.textContent =
+            'Geolocation is not supported by this browser.';
         }
+      });
+
+      function getRegion(lat, lon) {
+        if (lon > 180) lon -= 360; //normalize to -180..180
+
+        switch (true) {
+          // North America (excl. Mexico/Central America)
+          case lat >= 24 && lat <= 83 && lon >= -172 && lon <= -52:
+            return 'North America';
+          // Mexico and Central America
+          case lat >= 7 && lat < 24 && lon >= -118 && lon <= -77:
+            return 'Mexico and Central America';
+          // South America
+          case lat >= -56 && lat <= 13 && lon >= -82 && lon <= -34:
+            return 'South America';
+          // Europe
+          case lat >= 35 && lat <= 71 && lon >= -25 && lon <= 45:
+            return 'Europe';
+          // Africa
+          case lat >= -35 && lat <= 37 && lon >= -17 && lon <= 52:
+            return 'Africa';
+          // Asia
+          case lat >= 5 && lat <= 80 && lon >= 45 && lon <= 180:
+            return 'Asia';
+          // Oceania
+          case lat >= -50 && lat <= 0 && lon >= 110 && lon <= 180:
+            return 'Oceania';
+          default:
+            return 'Not mapped';
+        }
+      }
     </script>
-</body>
+  </body>
 </html>

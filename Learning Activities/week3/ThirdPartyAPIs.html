@@ -1,58 +1,57 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-</head>
-<body>
-    <div id="todo-output">
-    </div>
-    <div id="todo-output-string">
-    </div>
-    <div id="users">
-    </div>
+  </head>
+  <body>
+    <div id="todo-output"></div>
+    <div id="todo-output-string"></div>
+    <div id="users"></div>
     <script>
-        const url = "https://jsonplaceholder.typicode.com/posts";
-        const todo_url = "https://jsonplaceholder.typicode.com/todos";
-        const users_url = "https://jsonplaceholder.typicode.com/users";
-        const todo = document.getElementById("todo-output");
-        const todoString = document.getElementById("todo-output-string");
-        const users = document.getElementById("users");
+      const url = 'https://jsonplaceholder.typicode.com/posts';
+      const todo_url = 'https://jsonplaceholder.typicode.com/todos';
+      const users_url = 'https://jsonplaceholder.typicode.com/users';
+      const todo = document.getElementById('todo-output');
+      const todoString = document.getElementById('todo-output-string');
+      const users = document.getElementById('users');
 
-        async function getToDo() {
-            try {
-                const response = await fetch(`${todo_url}/77`)
-                if(!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                const json = await response.json();
-                todo.textContent = json;
-                todoString.textContent = JSON.stringify(json);
-                console.log(json);
-            } catch (error) {
-                console.error('There was a problem fetching the data:',error);
-            }
+      async function getToDo() {
+        try {
+          const response = await fetch(`${todo_url}/77`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          const json = await response.json();
+          todo.textContent = json;
+          todoString.textContent = JSON.stringify(json);
+          console.log(json);
+        } catch (error) {
+          console.error('There was a problem fetching the data:', error);
         }
-        todo.textContent = 'Loading...';
-        getToDo();
-        async function getUsers() {
-            try {
-                const response = await fetch(`${users_url}`)
-                if(!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                const json = await response.json();
-                users.innerHTML = `<ul>${json.map(user => {
-                    return `<li><span>${user.name}</span><span>${user.email}</span></li>`;
-                }).join('')}</ul>`;
-                console.log(json);
-            } catch (error) {
-                console.error('There was a problem fetching the data:',error);
-            }
+      }
+      todo.textContent = 'Loading...';
+      getToDo();
+      async function getUsers() {
+        try {
+          const response = await fetch(`${users_url}`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          const json = await response.json();
+          users.innerHTML = `<ul>${json
+            .map((user) => {
+              return `<li><span>${user.name}</span><span>${user.email}</span></li>`;
+            })
+            .join('')}</ul>`;
+          console.log(json);
+        } catch (error) {
+          console.error('There was a problem fetching the data:', error);
         }
-        users.textContent = 'Loading...';
-        getUsers();
+      }
+      users.textContent = 'Loading...';
+      getUsers();
     </script>
-</body>
+  </body>
 </html>

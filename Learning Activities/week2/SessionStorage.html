@@ -1,97 +1,109 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <style>
-        * {
-            box-sizing: border-box;
-        }
+      * {
+        box-sizing: border-box;
+      }
 
-        body {
-            height: 100vh;
-            display: flex;
-            place-items: center;
-            justify-content: center;
-            font-family: Roboto, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
+      body {
+        height: 100vh;
+        display: flex;
+        place-items: center;
+        justify-content: center;
+        font-family: Roboto, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
 
-        main {
-            border: 1px solid rgb(0 0 0 / 10%);
-            padding: 1rem;
-            width: 760px;
-            background-color: rgb(225 225 255 / 20%);
-        }
+      main {
+        border: 1px solid rgb(0 0 0 / 10%);
+        padding: 1rem;
+        width: 760px;
+        background-color: rgb(225 225 255 / 20%);
+      }
 
-        p {
-            margin: 1rem;
-        }
+      p {
+        margin: 1rem;
+      }
 
-        input, button {
-            padding: .5rem;
+      input,
+      button {
+        padding: 0.5rem;
         font-weight: 700;
-        }
+      }
 
-        mark {
-            display: block;
-            background-color: #ddd;
-            padding: .25rem;
-            margin: .5rem;
-        }
+      mark {
+        display: block;
+        background-color: #ddd;
+        padding: 0.25rem;
+        margin: 0.5rem;
+      }
 
-        #name, #message {
-            color: navy;
-            font-weight: bolder;
-            font-size: larger;
-        }
+      #name,
+      #message {
+        color: navy;
+        font-weight: bolder;
+        font-size: larger;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <main>
-        <h1>⚙️ Using sessionStorage</h1>
-        <p>This JavaScript code is designed to capture a user's name from an input field and store it temporarily using the browser's <strong>sessionStorage API</strong>. It then uses the stored name to display a personalized greeting upon subsequent page visits within the same browsing session.</p>
+      <h1>⚙️ Using sessionStorage</h1>
+      <p>
+        This JavaScript code is designed to capture a user's name from an input
+        field and store it temporarily using the browser's
+        <strong>sessionStorage API</strong>. It then uses the stored name to
+        display a personalized greeting upon subsequent page visits within the
+        same browsing session.
+      </p>
 
-        <p>
-            <label for="name">Enter Your Name: </label>
-            <input type="text" id="name"> <button type="button">Store Name</button>
-        </p>
-        <p id="message"></p>
-        <ol>
-            <li>Enter your name</li>
-            <li>Click "Store Name"</li>
-            <li>Refresh the page<br> <mark>A welcome message should be visible</mark></li>
+      <p>
+        <label for="name">Enter Your Name: </label>
+        <input type="text" id="name" />
+        <button type="button">Store Name</button>
+      </p>
+      <p id="message"></p>
+      <ol>
+        <li>Enter your name</li>
+        <li>Click "Store Name"</li>
+        <li>
+          Refresh the page<br />
+          <mark>A welcome message should be visible</mark>
+        </li>
 
-            <li>Copy this CodePen URL from the URL address bar</li>
-            <li>Open a new tab and paste the URl and press enter
-                <mark>There will be no welcome message.</mark>
-            </li>
-        </ol>
-
+        <li>Copy this CodePen URL from the URL address bar</li>
+        <li>
+          Open a new tab and paste the URl and press enter
+          <mark>There will be no welcome message.</mark>
+        </li>
+      </ol>
     </main>
     <script>
-        // Initialize elements
-        const inputname = document.querySelector("#name");
-        const button = document.querySelector("button");
-        const message = document.querySelector('#message');
+      // Initialize elements
+      const inputname = document.querySelector('#name');
+      const button = document.querySelector('button');
+      const message = document.querySelector('#message');
 
-        // Add event listener on click to store name in input
-        button.addEventListener("click", storeName);
+      // Add event listener on click to store name in input
+      button.addEventListener('click', storeName);
 
-        function storeName() {
-            if (inputname.value) {
-                sessionStorage.setItem("visitor", inputname.value) || "";
-                inputname.value = "";
-                button.textContent = "Name Stored. Thank you!";
-            }
+      function storeName() {
+        if (inputname.value) {
+          sessionStorage.setItem('visitor', inputname.value) || '';
+          inputname.value = '';
+          button.textContent = 'Name Stored. Thank you!';
         }
+      }
 
-        // Determine if there is a stored name and display message if true
-        if (sessionStorage.getItem("visitor") !== null) {
-            message.innerHTML = `Welcome Back ${sessionStorage.getItem("visitor")}❗`;
-        }
+      // Determine if there is a stored name and display message if true
+      if (sessionStorage.getItem('visitor') !== null) {
+        message.innerHTML = `Welcome Back ${sessionStorage.getItem('visitor')}❗`;
+      }
     </script>
-</body>
+  </body>
 </html>

@@ -32,5 +32,6 @@ yarn-debug.log*
 yarn-error.log*
 *.log
 
-# Ignore lockfiles only if you intentionally don't want them tracked
-# package-lock.json
+
+# Exclude wdd231 and all its children
+wdd231/

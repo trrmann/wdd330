@@ -1,173 +1,193 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <style>
-        header {
-	        margin: 1rem auto;
-	        display: flex;
-        	align-items: center;
-        	border-bottom: 1px solid #ccc;
-	        max-width: 1200px;
-        }
+      header {
+        margin: 1rem auto;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #ccc;
+        max-width: 1200px;
+      }
 
-        header img {
-            margin: 0 0.25rem 0 1rem;
-            width: 48px;
-            height: auto;
-        }
+      header img {
+        margin: 0 0.25rem 0 1rem;
+        width: 48px;
+        height: auto;
+      }
 
+      .logotext {
+        font-family: 'Cedarville Cursive', cursive;
+        font-size: 0.9rem;
+      }
+
+      .🍔 {
+        text-decoration: none;
+        font-size: 1.4rem;
+      }
+
+      nav {
+        flex: 1 1 25%;
+        text-align: right;
+        margin-right: 1.5rem;
+      }
+
+      .navigation {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+      }
+
+      .navigation li {
+        display: none;
+      }
+
+      .navigation a {
+        display: block;
+        color: #000;
+        font-weight: 700;
+        padding: 0.5rem 1rem;
+        text-decoration: none;
+      }
+
+      .navigation a:hover {
+        color: black;
+        font-weight: 700;
+        text-shadow: 0 0 0.5rem #333;
+      }
+
+      .responsive {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgb(128 216 255 / 100%);
+        clip-path: polygon(0 0, 0 85%, 50% 100%, 100% 85%, 100% 0);
+      }
+
+      .responsive li {
+        display: block;
+        width: 200px;
+        text-align: center;
+      }
+
+      .responsive a {
+        font-size: 1.1rem;
+      }
+
+      .responsive a:hover {
+        background-color: #eee;
+      }
+
+      main {
+        text-align: center;
+      }
+
+      h1 {
+        font-size: 1.1rem;
+        font-family: 'Open Sans', sans-serif;
+      }
+
+      aside {
+        margin: 1rem auto;
+        border: 1px solid rgb(0 0 0 / 10%);
+        padding: 1rem;
+        background-color: rgb(128 216 255 / 25%);
+        max-width: 85%;
+      }
+
+      /********************************************************/
+      /* Media Query for medium+ views */
+      @media only screen and (min-width: 760px) {
         .logotext {
-            font-family: "Cedarville Cursive", cursive;
-            font-size: 0.9rem;
+          font-size: 1.4rem;
         }
 
         .🍔 {
-            text-decoration: none;
-            font-size: 1.4rem;
-        }
-
-        nav {
-            flex: 1 1 25%;
-            text-align: right;
-            margin-right: 1.5rem;
+          display: none;
         }
 
         .navigation {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            overflow: hidden;
+          display: flex;
         }
 
         .navigation li {
-            display: none;
+          display: block; /* needed because of state in small view */
+          flex: 1 1 100%;
         }
 
         .navigation a {
-            display: block;
-            color: #000;
-            font-weight: 700;
-            padding: 0.5rem 1rem;
-            text-decoration: none;
+          text-align: center;
         }
 
-        .navigation a:hover {
-            color: black;
-            font-weight: 700;
-            text-shadow: 0 0 .5rem #333;
+        .navigation li:first-child {
+          display: none;
         }
-
-        .responsive {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgb(128 216 255 /  100%);
-            clip-path: polygon(0 0, 0 85%, 50% 100%, 100% 85%, 100% 0);
-
-        }
-
-        .responsive li {
-            display: block;
-            width: 200px;
-            text-align: center;
-        }
-
-        .responsive a {
-            font-size: 1.1rem;
-        }
-
-        .responsive a:hover {
-            background-color: #eee;
-        }
-
-        main {
-            text-align: center;
-        }
-
-        h1 {
-            font-size: 1.1rem;
-            font-family: "Open Sans", sans-serif;
-        }
-
-        aside {
-            margin: 1rem auto;
-            border: 1px solid rgb(0 0 0 / 10%);
-            padding: 1rem;
-            background-color: rgb(128 216 255 /  25%);
-            max-width: 85%;
-        }
-
-        /********************************************************/
-        /* Media Query for medium+ views */
-        @media only screen and (min-width: 760px) {
-            .logotext {
-                font-size: 1.4rem;
-            }
-
-            .🍔 {
-                display: none;
-            }
-            
-            .navigation {
-                display: flex;
-            }
-            
-            .navigation li {
-                display: block; /* needed because of state in small view */
-                flex: 1 1 100%;
-            }
-            
-            .navigation a {
-                text-align: center;
-            }
-            
-            .navigation li:first-child {
-                display: none;
-            }
-        }
-
+      }
     </style>
-</head>
-<body>
-<header>
-	<img src="https://cdn0.iconfinder.com/data/icons/web-development-79/32/development_setting_gear_cogwheel-71-512.png" alt="Gear Logo">
-	<div class="logotext">Wasatch Accusystems</div>
-	<nav>
-		<a class="🍔" title="Menu" href="#">
-			<svg height="32px" id="Layer_1" style="enable-background:new 0 0 32 32;" version="1.1" viewBox="0 0 32 32" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-				<path d="M4,10h24c1.104,0,2-0.896,2-2s-0.896-2-2-2H4C2.896,6,2,6.896,2,8S2.896,10,4,10z M28,14H4c-1.104,0-2,0.896-2,2  s0.896,2,2,2h24c1.104,0,2-0.896,2-2S29.104,14,28,14z M28,22H4c-1.104,0-2,0.896-2,2s0.896,2,2,2h24c1.104,0,2-0.896,2-2  S29.104,22,28,22z" />
-			</svg></a>
-		<ul class="navigation">
-			<li><a href="#">Service</a></li>
-			<li><a href="#">Products</a></li>
-			<li><a href="#">Feedback</a></li>
-			<li><a href="#">History</a></li>
-			<li><a href="#">Contact</a></li>
-			<li><a class="nohover" href="#">🔍</a></li>
-		</ul>
-	</nav>
-</header>
-<main>
-	<h1>Welcome to Wasatch Accusystems</h1>
-	<aside>Aside Placeholder</aside>
-</main>
-<script>    
-    const hambutton = document.querySelector('.🍔');
-    const mainnav = document.querySelector('.navigation');
-    const aside = document.querySelector('aside');
-    hambutton.addEventListener('click', () => {mainnav.classList.toggle('responsive')}, false);
+  </head>
+  <body>
+    <header>
+      <img
+        src="https://cdn0.iconfinder.com/data/icons/web-development-79/32/development_setting_gear_cogwheel-71-512.png"
+        alt="Gear Logo"
+      />
+      <div class="logotext">Wasatch Accusystems</div>
+      <nav>
+        <a class="🍔" title="Menu" href="#">
+          <svg
+            height="32px"
+            id="Layer_1"
+            style="enable-background: new 0 0 32 32"
+            version="1.1"
+            viewBox="0 0 32 32"
+            width="32px"
+            xml:space="preserve"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+          >
+            <path
+              d="M4,10h24c1.104,0,2-0.896,2-2s-0.896-2-2-2H4C2.896,6,2,6.896,2,8S2.896,10,4,10z M28,14H4c-1.104,0-2,0.896-2,2  s0.896,2,2,2h24c1.104,0,2-0.896,2-2S29.104,14,28,14z M28,22H4c-1.104,0-2,0.896-2,2s0.896,2,2,2h24c1.104,0,2-0.896,2-2  S29.104,22,28,22z"
+            /></svg
+        ></a>
+        <ul class="navigation">
+          <li><a href="#">Service</a></li>
+          <li><a href="#">Products</a></li>
+          <li><a href="#">Feedback</a></li>
+          <li><a href="#">History</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a class="nohover" href="#">🔍</a></li>
+        </ul>
+      </nav>
+    </header>
+    <main>
+      <h1>Welcome to Wasatch Accusystems</h1>
+      <aside>Aside Placeholder</aside>
+    </main>
+    <script>
+      const hambutton = document.querySelector('.🍔');
+      const mainnav = document.querySelector('.navigation');
+      const aside = document.querySelector('aside');
+      hambutton.addEventListener(
+        'click',
+        () => {
+          mainnav.classList.toggle('responsive');
+        },
+        false,
+      );
 
-    // To solve the mid resizing issue with responsive class [window.onresize]
-    window.addEventListener('resize', () => {
-        if (window.innerWidth > 760) { // window.innerWidth includes the scrollbar (if any), document.documentElement.clientWidth does not
-            mainnav.classList.remove('responsive');
+      // To solve the mid resizing issue with responsive class [window.onresize]
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 760) {
+          // window.innerWidth includes the scrollbar (if any), document.documentElement.clientWidth does not
+          mainnav.classList.remove('responsive');
         }
         aside.innerText = `innerWidth:  ${innerWidth}  innerHeight:  ${innerHeight}`;
-    });
-</script>    
-</body>
+      });
+    </script>
+  </body>
 </html>

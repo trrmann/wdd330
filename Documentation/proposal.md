@@ -24,7 +24,6 @@ CSS Animations: Smooth transitions, loading indicators, and interactive UI eleme
 Wireframes
 Mobile view
 
-
 Designed for small screens (e.g., smartphones).
 Features a compact, vertically stacked layout for easy thumb navigation.
 Header and menu are full-width, with a hamburger icon for expandable navigation.
@@ -33,14 +32,12 @@ Search bar, meal plan summary, recipe cards, and shopping list button are arrang
 Footer navigation is simple and easily accessible at the bottom.
 Tablet View
 
-
 Optimized for medium-sized screens (e.g., tablets).
 Layout is more spacious, with a horizontal header and menu row.
 Menu items are split into two columns for better use of screen width.
 Action buttons (meal plan, shopping list) are placed side by side.
 Recipe cards are displayed in a 2x2 grid, balancing content and whitespace.
 Laptop View
-
 
 Tailored for large screens (e.g., laptops and desktops).
 Uses a wide, horizontal layout with a prominent header and menu bar.

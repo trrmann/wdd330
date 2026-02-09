@@ -1,54 +1,59 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-</head>
-<body>
+  </head>
+  <body>
     <h1 id="output"></h1>
     <label for="input">Value:</label>
-    <input type="text" id="input" name="input" value="Enter some value or text.">
+    <input
+      type="text"
+      id="input"
+      name="input"
+      value="Enter some value or text."
+    />
     <button id="saveButton">Save</button>
     <button id="loadButton">Load</button>
     <button id="deleteButton">Delete</button>
     <button id="clearButton">Clear</button>
     <button id="existsButton">Exists</button>
     <script>
-        const outputElement = document.getElementById("output");
-        const input = document.getElementById("input");
-        const saveButton = document.getElementById("saveButton");
-        const loadButton = document.getElementById("loadButton");
-        const deleteButton = document.getElementById("deleteButton");
-        const clearButton = document.getElementById("clearButton");
-        const existsButton = document.getElementById("existsButton");
-        var value;
-        saveButton.addEventListener('click', () => {
-            value = input.value;
-            sessionStorage.setItem('data',value);
-            outputElement.innerText = `Saved:  ${inputValue}`;
-        });
-        loadButton.addEventListener('click', () => {
-            value = sessionStorage.getItem('data',value);
-            outputElement.innerText = `Loaded:  ${value}`;
-        });
-        deleteButton.addEventListener('click', () => {
-            value = sessionStorage.getItem('data',value);
-            sessionStorage.removeItem('data');
-            outputElement.innerText = `Deleted:  ${value}`;
-        });
-        clearButton.addEventListener('click', () => {
-            sessionStorage.clear();
-            outputElement.innerText = `Cleared!`;
-        });
-        existsButton.addEventListener('click', () => {
-            if(sessionStorage.getItem('data') !== null) {
-                outputElement.innerText = `Exists!`;
-            } else {
-                outputElement.innerText = `Does not Exist!`;
-            }
-        });
-        console.log('Inline script loaded!');
+      const outputElement = document.getElementById('output');
+      const input = document.getElementById('input');
+      const saveButton = document.getElementById('saveButton');
+      const loadButton = document.getElementById('loadButton');
+      const deleteButton = document.getElementById('deleteButton');
+      const clearButton = document.getElementById('clearButton');
+      const existsButton = document.getElementById('existsButton');
+      var value;
+      saveButton.addEventListener('click', () => {
+        value = input.value;
+        sessionStorage.setItem('data', value);
+        outputElement.innerText = `Saved:  ${inputValue}`;
+      });
+      loadButton.addEventListener('click', () => {
+        value = sessionStorage.getItem('data', value);
+        outputElement.innerText = `Loaded:  ${value}`;
+      });
+      deleteButton.addEventListener('click', () => {
+        value = sessionStorage.getItem('data', value);
+        sessionStorage.removeItem('data');
+        outputElement.innerText = `Deleted:  ${value}`;
+      });
+      clearButton.addEventListener('click', () => {
+        sessionStorage.clear();
+        outputElement.innerText = `Cleared!`;
+      });
+      existsButton.addEventListener('click', () => {
+        if (sessionStorage.getItem('data') !== null) {
+          outputElement.innerText = `Exists!`;
+        } else {
+          outputElement.innerText = `Does not Exist!`;
+        }
+      });
+      console.log('Inline script loaded!');
     </script>
-</body>
+  </body>
 </html>

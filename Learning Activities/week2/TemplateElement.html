@@ -1,88 +1,89 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <style>
-        body {
+      body {
         font-family: Arial, sans-serif;
 
         h2 {
-            font-size: 1.1rem;
+          font-size: 1.1rem;
         }
-        }
+      }
 
-        #product-list {
+      #product-list {
         display: grid;
         grid-template-columns: 1fr 1fr;
         width: 500px;
 
         .card {
-            border: 1px solid #ccc;
-            padding: 1em;
-            margin: 1em;
-            max-width: 200px;
-            border-radius: 10px;
-            background-color: #cee;
+          border: 1px solid #ccc;
+          padding: 1em;
+          margin: 1em;
+          max-width: 200px;
+          border-radius: 10px;
+          background-color: #cee;
 
-            .tn {
+          .tn {
             display: block;
             margin-top: 1em;
             max-width: 100%;
-            }
+          }
         }
-        }        
+      }
     </style>
-</head>
-    <body>
+  </head>
+  <body>
     <h1>HTML Template Element</h1>
     <div id="product-list"></div>
     <template id="product-card">
-    <section class="card">
+      <section class="card">
         <h2></h2>
         <p></p>
         <p></p>
-        <img class="tn" src="" alt="" loading="lazy" width="200" height="100">
-    </section>
+        <img class="tn" src="" alt="" loading="lazy" width="200" height="100" />
+      </section>
     </template>
     <script>
-        const products = [
+      const products = [
         {
-            name: "Wireless Headphones",
-            description: "Noise-cancelling, over-ear Bluetooth headphones.",
-            price: "$99.99",
-            image: "https://placehold.co/200x100?text=Headphones"
+          name: 'Wireless Headphones',
+          description: 'Noise-cancelling, over-ear Bluetooth headphones.',
+          price: '$99.99',
+          image: 'https://placehold.co/200x100?text=Headphones',
         },
         {
-            name: "Smart Watch",
-            description: "Track your fitness and stay connected.",
-            price: "$149.99",
-            image: "https://placehold.co/200x100?text=Smart Watch"
+          name: 'Smart Watch',
+          description: 'Track your fitness and stay connected.',
+          price: '$149.99',
+          image: 'https://placehold.co/200x100?text=Smart Watch',
         },
         {
-            name: "Portable Charger",
-            description: "10,000mAh power bank with fast charging.",
-            price: "$29.99",
-            image: "https://placehold.co/200x100?text=Charger"
-        }
-        ];
+          name: 'Portable Charger',
+          description: '10,000mAh power bank with fast charging.',
+          price: '$29.99',
+          image: 'https://placehold.co/200x100?text=Charger',
+        },
+      ];
 
-        const template = document.getElementById("product-card");
-        const productList = document.getElementById("product-list");
+      const template = document.getElementById('product-card');
+      const productList = document.getElementById('product-list');
 
-        products.forEach((product) => {
-            const clone = template.content.cloneNode(true);
-            const [title, desc, price, img] = clone.querySelectorAll("h2, p, p, img");
+      products.forEach((product) => {
+        const clone = template.content.cloneNode(true);
+        const [title, desc, price, img] =
+          clone.querySelectorAll('h2, p, p, img');
 
-            title.textContent = product.name;
-            desc.textContent = product.description;
-            price.textContent = product.price;
-            img.src = product.image;
-            img.alt = product.name;
+        title.textContent = product.name;
+        desc.textContent = product.description;
+        price.textContent = product.price;
+        img.src = product.image;
+        img.alt = product.name;
 
-            productList.appendChild(clone);
-        });
+        productList.appendChild(clone);
+      });
     </script>
-</body>
+  </body>
 </html>
