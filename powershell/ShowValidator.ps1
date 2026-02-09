@@ -11,7 +11,7 @@ param(
 
 if ($HTML) {
     if ($Url) {
-        $validateUrl = "https://validator.w3.org/?uri=$Url"
+        $validateUrl = "https://validator.w3.org/nu/?doc=$Url"
     } else {
         $validateUrl = "https://validator.w3.org/"
     }
