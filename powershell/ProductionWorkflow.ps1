@@ -14,7 +14,7 @@ function Run-Step {
     $scriptPath = Join-Path $scriptDir $ScriptName
     if (Test-Path $scriptPath) {
         if ($StepArgs.Count -gt 0) {
-            & $scriptPath $StepArgs
+            & $scriptPath @StepArgs
         } else {
             & $scriptPath
         }
