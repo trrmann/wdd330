@@ -33,6 +33,14 @@ const siteConfig = {
   shoppingPageTemplateId: 'shoppingPageTemplate',
   morePageTemplateId: 'morePageTemplate',
 
+  // Page Titles
+  homePageTitle: 'Welcome to Chow Planner',
+  recipesPageTitle: 'Recipes',
+  mealPlanPageTitle: 'Meal Plan',
+  shoppingPageTitle: 'Shopping List',
+  morePageTitle: 'More',
+  errorPageTitle: 'Error',
+
   // Home Page
   searchBarSelector: '.search-bar input',
   searchButtonSelector: '.search-bar button',

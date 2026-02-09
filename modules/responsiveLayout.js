@@ -4,14 +4,14 @@
 export const homePage = {
   init(config) {
     const template = document.getElementById(config.homePageTemplateId);
-    if (!template) return { title: 'Error', content: '' };
+    if (!template) return { title: config.errorPageTitle, content: '' };
     const content = template.innerHTML;
     // The loadRecipeCards function will be called after this content is injected
     // which will populate the .recipe-cards div.
     loadRecipeCards(config);
     this.addEventListeners(config);
     return {
-      title: 'Welcome to Chow Planner',
+      title: config.homePageTitle,
       content: content,
     };
   },
@@ -66,9 +66,9 @@ export const homePage = {
 export const recipesPage = {
   init(config) {
     const template = document.getElementById(config.recipesPageTemplateId);
-    if (!template) return { title: 'Error', content: '' };
+    if (!template) return { title: config.errorPageTitle, content: '' };
     return {
-      title: 'Recipes',
+      title: config.recipesPageTitle,
       content: template.innerHTML,
     };
   },
@@ -77,9 +77,9 @@ export const recipesPage = {
 export const mealPlanPage = {
   init(config) {
     const template = document.getElementById(config.mealPlanPageTemplateId);
-    if (!template) return { title: 'Error', content: '' };
+    if (!template) return { title: config.errorPageTitle, content: '' };
     return {
-      title: 'Meal Plan',
+      title: config.mealPlanPageTitle,
       content: template.innerHTML,
     };
   },
@@ -88,9 +88,9 @@ export const mealPlanPage = {
 export const shoppingPage = {
   init(config) {
     const template = document.getElementById(config.shoppingPageTemplateId);
-    if (!template) return { title: 'Error', content: '' };
+    if (!template) return { title: config.errorPageTitle, content: '' };
     return {
-      title: 'Shopping List',
+      title: config.shoppingPageTitle,
       content: template.innerHTML,
     };
   },
@@ -99,9 +99,9 @@ export const shoppingPage = {
 export const morePage = {
   init(config) {
     const template = document.getElementById(config.morePageTemplateId);
-    if (!template) return { title: 'Error', content: '' };
+    if (!template) return { title: config.errorPageTitle, content: '' };
     return {
-      title: 'More',
+      title: config.morePageTitle,
       content: template.innerHTML,
     };
   },
