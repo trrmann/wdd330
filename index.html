@@ -28,13 +28,19 @@
     <script type="module" src="scripts/home.js"></script>
   </head>
   <body class="body">
+    <span id="home" class="visually-hidden">Home section</span>
+    <span id="recipes" class="visually-hidden">Recipes section</span>
+    <span id="mealplan" class="visually-hidden">Meal plan section</span>
+    <span id="shopping" class="visually-hidden">Shopping section</span>
+    <span id="more" class="visually-hidden">More section</span>
     <template id="headerTemplate">
       <header class="header">
         <div class="header-row">
-          <span class="header-logo" aria-label="Chow Tray Logo">
+          <span class="header-logo">
             <img
               src="images/Chow Tray.svg"
-              alt="Chow Tray Logo"
+              alt=""
+              aria-hidden="true"
               width="32"
               height="24"
             >
@@ -76,8 +82,11 @@
     </template>
     <template id="homePageTemplate">
       <div class="search-bar">
-        <input type="search" placeholder="SEARCH BAR" >
-        <button>Search</button>
+        <label class="visually-hidden" for="home-search-input"
+          >Search recipes</label
+        >
+        <input id="home-search-input" type="search" placeholder="SEARCH BAR" >
+        <button type="button">Search</button>
       </div>
       <div class="home-actions">
         <button class="meal-plan-summary" type="button">
@@ -104,15 +113,15 @@
       </button>
 
       <template id="recipeCardTemplate">
-        <img src="" alt="Recipe image placeholder" >
-        <h4></h4>
+        <img src="" alt="" >
+        <h3></h3>
         <p></p>
       </template>
       <template id="recipeDetailTemplate">
         <section class="recipe-detail">
           <button class="recipe-detail-close" type="button">Close</button>
           <div class="recipe-detail-header">
-            <img class="recipe-detail-image" src="" alt="Recipe image" >
+            <img class="recipe-detail-image" src="" alt="" >
             <div class="recipe-detail-summary">
               <h3 class="recipe-detail-title"></h3>
               <p class="recipe-detail-meta"></p>
@@ -139,11 +148,7 @@
         <section class="ingredient-detail">
           <button class="ingredient-detail-close" type="button">Close</button>
           <div class="ingredient-detail-header">
-            <img
-              class="ingredient-detail-image"
-              src=""
-              alt="Ingredient image"
-            >
+            <img class="ingredient-detail-image" src="" alt="" >
             <div class="ingredient-detail-summary">
               <h3 class="ingredient-detail-title"></h3>
               <p class="ingredient-detail-meta"></p>
@@ -206,14 +211,22 @@
         </div>
         <div class="recipes-search-inputs">
           <div class="recipes-search-input-name">
+            <label class="visually-hidden" for="recipes-search-name-input"
+              >Search recipes by name</label
+            >
             <input
+              id="recipes-search-name-input"
               type="search"
               class="recipes-search-name-input"
               placeholder="Search by name"
             >
           </div>
           <div class="recipes-search-input-ingredient" hidden>
+            <label class="visually-hidden" for="recipes-search-ingredient-input"
+              >Search recipes by ingredient</label
+            >
             <input
+              id="recipes-search-ingredient-input"
               type="search"
               class="recipes-search-ingredient-input"
               placeholder="Search by ingredient"
@@ -281,15 +294,15 @@
       </div>
 
       <template id="recipeCardTemplate">
-        <img src="" alt="Recipe image placeholder" >
-        <h4></h4>
+        <img src="" alt="" >
+        <h3></h3>
         <p></p>
       </template>
       <template id="recipeDetailTemplate">
         <section class="recipe-detail">
           <button class="recipe-detail-close" type="button">Close</button>
           <div class="recipe-detail-header">
-            <img class="recipe-detail-image" src="" alt="Recipe image" >
+            <img class="recipe-detail-image" src="" alt="" >
             <div class="recipe-detail-summary">
               <h3 class="recipe-detail-title"></h3>
               <p class="recipe-detail-meta"></p>
@@ -316,11 +329,7 @@
         <section class="ingredient-detail">
           <button class="ingredient-detail-close" type="button">Close</button>
           <div class="ingredient-detail-header">
-            <img
-              class="ingredient-detail-image"
-              src=""
-              alt="Ingredient image"
-            >
+            <img class="ingredient-detail-image" src="" alt="" >
             <div class="ingredient-detail-summary">
               <h3 class="ingredient-detail-title"></h3>
               <p class="ingredient-detail-meta"></p>
