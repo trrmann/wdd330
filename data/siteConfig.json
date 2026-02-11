@@ -46,7 +46,7 @@
   "shoppingPageTemplateId": "shoppingPageTemplate",
   "shoppingPageTitle": "Shopping List",
   "morePageTemplateId": "morePageTemplate",
-  "morePageTitle": "More",
+  "morePageTitle": "Chow Tools",
   "errorPageTitle": "Error",
   "mockDataPath": "./data/mock-recipes.json",
   "footerId": "footer",

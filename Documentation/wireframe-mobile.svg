@@ -21,7 +21,7 @@
   <text x="175" y="136" font-size="15" text-anchor="middle" fill="#F5F5DC" font-family="Oswald, Arial Black, Impact, sans-serif" font-weight="bold">Recipes</text>
   <text x="175" y="152" font-size="15" text-anchor="middle" fill="#F5F5DC" font-family="Oswald, Arial Black, Impact, sans-serif" font-weight="bold">Meal Plan</text>
   <text x="175" y="168" font-size="15" text-anchor="middle" fill="#F5F5DC" font-family="Oswald, Arial Black, Impact, sans-serif" font-weight="bold">Shopping</text>
-  <text x="175" y="184" font-size="15" text-anchor="middle" fill="#F5F5DC" font-family="Oswald, Arial Black, Impact, sans-serif" font-weight="bold">More</text>
+  <text x="175" y="184" font-size="15" text-anchor="middle" fill="#F5F5DC" font-family="Oswald, Arial Black, Impact, sans-serif" font-weight="bold">Chow Tools</text>
   <!-- Search bar below header and menu, clear separation -->
   <rect x="65" y="208" width="220" height="28" rx="8" fill="#FFF" stroke="#38421f" stroke-width="1"/>
   <text x="175" y="227" font-size="13" text-anchor="middle" fill="#38421f" font-family="Oswald, Arial Black, Impact, sans-serif">SEARCH BAR</text>
