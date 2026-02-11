@@ -73,25 +73,40 @@
         <div class="content-wrapper"></div>
       </main>
     </template>
-    <template id="recipeCardTemplate">
-      <div class="recipe-card">
-        <img src="" alt="Recipe image placeholder" >
-        <h4></h4>
-        <p></p>
-      </div>
-    </template>
     <template id="homePageTemplate">
       <div class="search-bar">
         <input type="search" placeholder="SEARCH BAR" >
         <button>Search</button>
       </div>
       <div class="home-actions">
-        <div class="meal-plan-summary">MEAL PLAN SUMMARY</div>
-        <button class="shopping-list-btn">SHOPPING LIST</button>
+        <button class="meal-plan-summary" type="button">
+          MEAL PLAN SUMMARY
+        </button>
+        <button
+          class="shopping-list-btn"
+          id="shopping-list-btn-top"
+          type="button"
+        >
+          SHOPPING LIST
+        </button>
       </div>
       <div class="recipe-cards">
         <!-- Recipe cards will be dynamically inserted here -->
       </div>
+
+      <button
+        class="shopping-list-btn"
+        id="shopping-list-btn-bottom"
+        type="button"
+      >
+        SHOPPING LIST
+      </button>
+
+      <template id="recipeCardTemplate">
+        <img src="" alt="Recipe image placeholder" >
+        <h4></h4>
+        <p></p>
+      </template>
     </template>
     <template id="recipesPageTemplate">
       <p>Here you can find and manage your recipes.</p>

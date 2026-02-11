@@ -1,3 +1,12 @@
+import { bootLogger } from '../modules/bootLogger.js';
+
+bootLogger.moduleLoadStarted(import.meta.url);
+
+bootLogger.moduleInfo(
+  import.meta.url,
+  'Registers footer date DOMContentLoaded handler',
+);
+
 document.addEventListener('DOMContentLoaded', () => {
   // Get the current date
   const currentYear = new Date().getFullYear();
@@ -18,3 +27,5 @@ document.addEventListener('DOMContentLoaded', () => {
     lastModElement.innerHTML = `Last modification:  ${lastModDate}`;
   }
 });
+
+bootLogger.moduleLoadCompleted(import.meta.url);

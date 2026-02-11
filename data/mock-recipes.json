@@ -1,47 +1,47 @@
 [
   {
     "title": "Classic Tomato Bruschetta",
-    "image": "images/recipe-placeholder.webp",
+    "image": "images/recipe-placeholder.svg",
     "description": "A refreshing and simple appetizer with fresh tomatoes, basil, garlic, and olive oil on toasted bread."
   },
   {
     "title": "Creamy Mushroom Pasta",
-    "image": "images/recipe-placeholder.webp",
+    "image": "images/recipe-placeholder.svg",
     "description": "A rich and savory pasta dish with a creamy mushroom sauce, perfect for a comforting weeknight dinner."
   },
   {
     "title": "Spicy Chicken Tacos",
-    "image": "images/recipe-placeholder.webp",
+    "image": "images/recipe-placeholder.svg",
     "description": "Flavorful shredded chicken with a kick of spice, served in warm tortillas with your favorite toppings."
   },
   {
     "title": "Lemon Herb Roasted Salmon",
-    "image": "images/recipe-placeholder.webp",
+    "image": "images/recipe-placeholder.svg",
     "description": "A healthy and delicious salmon fillet roasted with lemon, herbs, and a hint of garlic."
   },
   {
     "title": "Hearty Beef Stew",
-    "image": "images/recipe-placeholder.webp",
+    "image": "images/recipe-placeholder.svg",
     "description": "A classic, slow-cooked beef stew with tender meat, potatoes, carrots, and a rich gravy."
   },
   {
     "title": "Quinoa Salad with Avocado",
-    "image": "images/recipe-placeholder.webp",
+    "image": "images/recipe-placeholder.svg",
     "description": "A light and nutritious salad featuring quinoa, creamy avocado, black beans, and a lime vinaigrette."
   },
   {
     "title": "Garlic Shrimp Scampi",
-    "image": "images/recipe-placeholder.webp",
+    "image": "images/recipe-placeholder.svg",
     "description": "Juicy shrimp sautéed in a garlic butter and white wine sauce, served over linguine."
   },
   {
     "title": "Vegetable Stir-Fry",
-    "image": "images/recipe-placeholder.webp",
+    "image": "images/recipe-placeholder.svg",
     "description": "A quick and easy stir-fry packed with colorful vegetables in a savory soy-ginger sauce."
   },
   {
     "title": "Chocolate Lava Cakes",
-    "image": "images/recipe-placeholder.webp",
+    "image": "images/recipe-placeholder.svg",
     "description": "An indulgent dessert with a molten chocolate center that flows out when you cut into it."
   }
 ]

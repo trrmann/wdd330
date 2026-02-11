@@ -41,29 +41,44 @@
     font-size: 1.1rem;
     text-align: center;
   }
-  .content-wrapper {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
 
-  .search-bar {
-    grid-column: 1 / -1;
-  }
-
+  /* Home actions for laptop */
   .home-actions {
-    grid-column: 1 / 3;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
   }
 
-  .recipe-cards {
-    grid-column: 1 / -1;
+  main.home .content-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-areas:
+      'search search search'
+      'actions actions actions'
+      'recipes recipes recipes';
+    gap: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem;
+  }
+  main.home .home-actions {
+    grid-area: actions;
+  }
+  main.home .search-bar {
+    grid-area: search;
+  }
+  main.home .recipe-cards {
+    grid-area: recipes;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
+  }
+
+  main.home #shopping-list-btn-bottom {
+    display: none;
+  }
+
+  .shopping-list-btn-mobile {
+    display: none;
   }
 }

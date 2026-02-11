@@ -88,6 +88,25 @@ tr:nth-child(even) {
   color: var(--primary-color);
 }
 
+/* Home page action buttons */
+.home-actions {
+  display: grid;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.meal-plan-summary {
+  padding: 1rem;
+  text-align: center;
+  font-weight: bold;
+  border-radius: 8px;
+}
+
+.meal-plan-summary {
+  background-color: var(--secondary-color);
+  color: var(--neutral-secondary-color);
+}
+
 /* Header base styles */
 .header-row {
   display: flex;
@@ -193,8 +212,8 @@ tr:nth-child(even) {
 }
 
 .recipe-cards {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 1rem;
   background-color: #fff;
   border: 1px solid var(--primary-color);
@@ -242,4 +261,9 @@ tr:nth-child(even) {
   text-align: center;
   cursor: pointer;
   margin-bottom: 1rem;
+}
+
+.shopping-list-btn:hover {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
 }

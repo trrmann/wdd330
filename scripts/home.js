@@ -1,60 +1,82 @@
-import { site } from '../modules/home.js';
+import { bootLogger } from '../modules/bootLogger.js';
+
+import { Site } from '../modules/home.js';
+import { Logger } from '../modules/logger.js';
 import './getDates.js';
 
-const siteConfig = {
-  // Body
-  bodyClass: 'body',
+bootLogger.moduleLoadStarted(import.meta.url);
 
-  // Header
-  headerId: 'header',
-  headerTemplateId: 'headerTemplate',
-  headerClassName: 'header',
-  hamburgerSelector: '.header-hamburger',
-  hamburgerIconSelector: '.hamburger-icon',
+bootLogger.moduleInfo(
+  import.meta.url,
+  'Loads siteConfig JSON and bootstraps Site',
+);
 
-  // Menu
-  menuId: 'menu',
-  menuTemplateId: 'menuTemplate',
-  menuClassName: 'menu',
-  menuListSelector: '.menu-list',
-  menuItemSelector: '.menu-item a',
+async function loadSiteConfig() {
+  const logger = new Logger(null);
+  logger.deferFunctionLog(
+    'functionStart',
+    'HomeScript',
+    'loadSiteConfig',
+    'HomeScript.loadSiteConfig: Starting',
+  );
 
-  // Main
-  mainId: 'main',
-  mainClassName: 'main',
-  mainTemplateId: 'mainTemplate',
-  mainContentWrapperSelector: '.content-wrapper',
-  mainTitleSelector: 'h2',
+  const configUrl = new URL('../data/siteConfig.json', import.meta.url);
+  bootLogger.moduleInfo(
+    import.meta.url,
+    `Loading siteConfig from ${configUrl.href}`,
+  );
 
-  // Page Templates
-  homePageTemplateId: 'homePageTemplate',
-  recipesPageTemplateId: 'recipesPageTemplate',
-  mealPlanPageTemplateId: 'mealPlanPageTemplate',
-  shoppingPageTemplateId: 'shoppingPageTemplate',
-  morePageTemplateId: 'morePageTemplate',
+  const response = await fetch(configUrl);
+  if (!response.ok) {
+    throw new Error(
+      `Failed to load siteConfig.json (${response.status} ${response.statusText})`,
+    );
+  }
 
-  // Page Titles
-  homePageTitle: 'Welcome to Chow Planner',
-  recipesPageTitle: 'Recipes',
-  mealPlanPageTitle: 'Meal Plan',
-  shoppingPageTitle: 'Shopping List',
-  morePageTitle: 'More',
-  errorPageTitle: 'Error',
+  const siteConfig = await response.json();
 
-  // Home Page
-  searchBarSelector: '.search-bar input',
-  searchButtonSelector: '.search-bar button',
-  mealPlanButtonSelector: '.meal-plan-summary',
-  shoppingListButtonSelector: '.shopping-list-btn',
-  recipeCardsSelector: '.recipe-cards',
-  recipeCardTemplateId: 'recipeCardTemplate',
+  logger.setConfig(siteConfig);
 
-  // Footer
-  footerId: 'footer',
-  footerTemplateId: 'footerTemplate',
-  footerClassName: 'footer',
-};
+  const keyCount =
+    siteConfig && typeof siteConfig === 'object'
+      ? Object.keys(siteConfig).length
+      : 0;
+  bootLogger.moduleInfo(
+    import.meta.url,
+    `Loaded siteConfig.json (${keyCount} keys)`,
+  );
 
-site.init(siteConfig);
+  return logger.passthroughFunction(
+    'HomeScript',
+    'loadSiteConfig',
+    siteConfig,
+    {
+      canLogValue: true,
+      message: 'HomeScript.loadSiteConfig return',
+      completeMessage: 'HomeScript.loadSiteConfig: Completed',
+    },
+  );
+}
 
+document.addEventListener('DOMContentLoaded', () => {
+  (async () => {
+    try {
+      const siteConfig = await loadSiteConfig();
+      bootLogger.moduleInfo(
+        import.meta.url,
+        `siteConfig (full): ${JSON.stringify(siteConfig, null, 2)}`,
+      );
+      bootLogger.moduleInfo(import.meta.url, `Site initializing.`);
+      new Site(siteConfig);
+      bootLogger.moduleInfo(import.meta.url, `Site initialized.`);
+    } catch (error) {
+      bootLogger.moduleInfo(
+        import.meta.url,
+        `ERROR: Failed to bootstrap Site from siteConfig.json (${error?.message || error})`,
+      );
+      console.error('Error bootstrapping site from JSON config:', error);
+    }
+  })();
+});
 
+bootLogger.moduleLoadCompleted(import.meta.url);

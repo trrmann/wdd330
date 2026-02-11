@@ -15,17 +15,18 @@ if ($Dev) {
     $siteUrl = "http://localhost:$Port/"
     try {
         $response = Invoke-WebRequest -Uri $siteUrl -UseBasicParsing -TimeoutSec 2
-        Write-Host "returned "+$response.StatusCode
         if ($response.StatusCode -eq 200) {
             Write-Host "Opening $siteUrl in your default browser..."
             Start-Process $siteUrl
         } else {
-            Write-Host "Please start Live Server in VS Code for index.html."
+            Write-Host "Live Server doesn't appear to be running for index.html."
+            Write-Host "VS Code: open index.html, then click 'Go Live' (or right-click -> Open with Live Server)."
+            Write-Host "Then re-run: .\\powershell\\ShowSite.ps1 -Dev -Port $Port"
         }
     } catch {
-        Write-Host "Could not connect to $siteUrl."
-        Write-Host "\nPlease start Live Server in VS Code for index.html, then re-run this script."
-        Start-Sleep -Seconds 3
+        Write-Host "Live Server doesn't appear to be running for index.html."
+        Write-Host "VS Code: open index.html, then click 'Go Live' (or right-click -> Open with Live Server)."
+        Write-Host "Then re-run: .\\powershell\\ShowSite.ps1 -Dev -Port $Port"
     }
 } else {
     # Otherwise, open GitHub Pages site
