@@ -261,7 +261,7 @@ class HomePage {
 
         if (img) {
           img.src = recipe.image;
-          img.alt = recipe.title;
+          // Decorative card image: keep template alt="" to avoid redundant text
         }
         if (title) {
           title.textContent = recipe.title;
@@ -1162,7 +1162,7 @@ class RecipesPage {
 
         if (img) {
           img.src = recipe.image;
-          img.alt = recipe.title;
+          // Decorative card image: keep template alt="" to avoid redundant text
         }
         if (title) {
           title.textContent = recipe.title;
