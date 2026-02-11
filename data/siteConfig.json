@@ -32,7 +32,7 @@
   "recipeCardClassName": "recipe-card",
   "noRecipesFoundMessage": "<p>No recipes found.</p>",
   "recipeCardImageSelector": "img",
-  "recipeCardTitleSelector": "h4",
+  "recipeCardTitleSelector": "h3",
   "recipeCardDescriptionSelector": "p",
   "recipeDetailTemplateId": "recipeDetailTemplate",
   "ingredientDetailTemplateId": "ingredientDetailTemplate",
