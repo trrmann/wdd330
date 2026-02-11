@@ -9,6 +9,7 @@
       content="Home page for the WDD 330 - Web Frontend Development II class as authored by Tracy Robert Mann."
     >
     <meta name="author" content="Tracy Robert Mann" >
+    <link rel="icon" href="images/Chow Tray.svg" type="image/svg+xml" >
     <link rel="stylesheet" href="styles/responsive.css" >
     <link rel="preconnect" href="https://fonts.googleapis.com" >
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin >
@@ -107,9 +108,246 @@
         <h4></h4>
         <p></p>
       </template>
+      <template id="recipeDetailTemplate">
+        <section class="recipe-detail">
+          <button class="recipe-detail-close" type="button">Close</button>
+          <div class="recipe-detail-header">
+            <img class="recipe-detail-image" src="" alt="Recipe image" >
+            <div class="recipe-detail-summary">
+              <h3 class="recipe-detail-title"></h3>
+              <p class="recipe-detail-meta"></p>
+            </div>
+          </div>
+          <div class="recipe-detail-body">
+            <section class="recipe-detail-ingredients">
+              <h4>Ingredients</h4>
+              <ul class="recipe-detail-ingredients-list"></ul>
+            </section>
+            <section class="recipe-detail-instructions">
+              <h4>Instructions</h4>
+              <p class="recipe-detail-instructions-text"></p>
+            </section>
+            <section class="recipe-detail-actions">
+              <button class="recipe-detail-nutrition-btn" type="button">
+                View Nutrition
+              </button>
+            </section>
+          </div>
+        </section>
+      </template>
+      <template id="ingredientDetailTemplate">
+        <section class="ingredient-detail">
+          <button class="ingredient-detail-close" type="button">Close</button>
+          <div class="ingredient-detail-header">
+            <img
+              class="ingredient-detail-image"
+              src=""
+              alt="Ingredient image"
+            >
+            <div class="ingredient-detail-summary">
+              <h3 class="ingredient-detail-title"></h3>
+              <p class="ingredient-detail-meta"></p>
+            </div>
+          </div>
+          <div class="ingredient-detail-body">
+            <p class="ingredient-detail-original"></p>
+            <p class="ingredient-detail-amount"></p>
+            <p class="ingredient-detail-aisle"></p>
+            <p class="ingredient-detail-meta-info"></p>
+          </div>
+        </section>
+      </template>
+      <template id="nutritionDetailTemplate">
+        <section class="nutrition-detail">
+          <button class="nutrition-detail-close" type="button">Close</button>
+          <div class="nutrition-detail-header">
+            <div class="nutrition-detail-summary">
+              <h3 class="nutrition-detail-title"></h3>
+              <p class="nutrition-detail-meta"></p>
+            </div>
+          </div>
+          <div class="nutrition-detail-body">
+            <ul class="nutrition-detail-list"></ul>
+          </div>
+        </section>
+      </template>
     </template>
     <template id="recipesPageTemplate">
-      <p>Here you can find and manage your recipes.</p>
+      <div class="search-bar">
+        <div class="recipes-search-controls">
+          <fieldset class="recipes-search-type-group">
+            <legend>Search By</legend>
+            <label>
+              <input
+                type="checkbox"
+                name="recipes-search-type"
+                value="name"
+                checked
+              >
+              Name
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                name="recipes-search-type"
+                value="ingredient"
+              >
+              Ingredient
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                name="recipes-search-type"
+                value="nutrition"
+              >
+              Nutrition
+            </label>
+          </fieldset>
+        </div>
+        <div class="recipes-search-inputs">
+          <div class="recipes-search-input-name">
+            <input
+              type="search"
+              class="recipes-search-name-input"
+              placeholder="Search by name"
+            >
+          </div>
+          <div class="recipes-search-input-ingredient" hidden>
+            <input
+              type="search"
+              class="recipes-search-ingredient-input"
+              placeholder="Search by ingredient"
+            >
+          </div>
+          <div class="recipes-search-input-nutrition" hidden>
+            <div class="recipes-nutrition-row">
+              <label>
+                Nutrient
+                <input
+                  type="text"
+                  class="recipes-nutrition-name"
+                  placeholder="e.g. Calories, Protein"
+                >
+              </label>
+            </div>
+            <div class="recipes-nutrition-row recipes-nutrition-mode">
+              <span class="recipes-nutrition-mode-label">Use</span>
+              <label>
+                <input
+                  type="radio"
+                  name="recipes-nutrition-mode"
+                  value="min"
+                  checked
+                >
+                Min
+              </label>
+              <label>
+                <input type="radio" name="recipes-nutrition-mode" value="max" >
+                Max
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="recipes-nutrition-mode"
+                  value="range"
+                >
+                Min and Max
+              </label>
+            </div>
+            <div class="recipes-nutrition-values">
+              <label class="recipes-nutrition-min">
+                Min
+                <input
+                  type="number"
+                  class="recipes-nutrition-min-value"
+                  step="any"
+                >
+              </label>
+              <label class="recipes-nutrition-max" hidden>
+                Max
+                <input
+                  type="number"
+                  class="recipes-nutrition-max-value"
+                  step="any"
+                >
+              </label>
+            </div>
+          </div>
+        </div>
+        <button class="recipes-search-submit" type="button">Search</button>
+      </div>
+      <div class="recipe-cards">
+        <!-- Recipe cards will be dynamically inserted here -->
+      </div>
+
+      <template id="recipeCardTemplate">
+        <img src="" alt="Recipe image placeholder" >
+        <h4></h4>
+        <p></p>
+      </template>
+      <template id="recipeDetailTemplate">
+        <section class="recipe-detail">
+          <button class="recipe-detail-close" type="button">Close</button>
+          <div class="recipe-detail-header">
+            <img class="recipe-detail-image" src="" alt="Recipe image" >
+            <div class="recipe-detail-summary">
+              <h3 class="recipe-detail-title"></h3>
+              <p class="recipe-detail-meta"></p>
+            </div>
+          </div>
+          <div class="recipe-detail-body">
+            <section class="recipe-detail-ingredients">
+              <h4>Ingredients</h4>
+              <ul class="recipe-detail-ingredients-list"></ul>
+            </section>
+            <section class="recipe-detail-instructions">
+              <h4>Instructions</h4>
+              <p class="recipe-detail-instructions-text"></p>
+            </section>
+            <section class="recipe-detail-actions">
+              <button class="recipe-detail-nutrition-btn" type="button">
+                View Nutrition
+              </button>
+            </section>
+          </div>
+        </section>
+      </template>
+      <template id="ingredientDetailTemplate">
+        <section class="ingredient-detail">
+          <button class="ingredient-detail-close" type="button">Close</button>
+          <div class="ingredient-detail-header">
+            <img
+              class="ingredient-detail-image"
+              src=""
+              alt="Ingredient image"
+            >
+            <div class="ingredient-detail-summary">
+              <h3 class="ingredient-detail-title"></h3>
+              <p class="ingredient-detail-meta"></p>
+            </div>
+          </div>
+          <div class="ingredient-detail-body">
+            <p class="ingredient-detail-original"></p>
+            <p class="ingredient-detail-amount"></p>
+            <p class="ingredient-detail-aisle"></p>
+            <p class="ingredient-detail-meta-info"></p>
+          </div>
+        </section>
+      </template>
+      <template id="nutritionDetailTemplate">
+        <section class="nutrition-detail">
+          <button class="nutrition-detail-close" type="button">Close</button>
+          <div class="nutrition-detail-header">
+            <div class="nutrition-detail-summary">
+              <h3 class="nutrition-detail-title"></h3>
+              <p class="nutrition-detail-meta"></p>
+            </div>
+          </div>
+          <div class="nutrition-detail-body">
+            <ul class="nutrition-detail-list"></ul>
+          </div>
+        </section>
+      </template>
     </template>
     <template id="mealPlanPageTemplate">
       <p>Plan your meals for the week here.</p>

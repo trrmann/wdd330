@@ -906,6 +906,7 @@ class Site {
         break;
       case 'recipes':
         page = this.pages.recipes.init(this.config);
+        mainContainer.classList.add('recipes');
         this.log(
           'loadPage',
           'info',
@@ -973,6 +974,16 @@ class Site {
           'loadPage',
           'info',
           "State change: Ran home page's afterRender hook",
+        );
+      } else if (
+        pageName === 'recipes' &&
+        typeof this.pages.recipes.afterRender === 'function'
+      ) {
+        this.pages.recipes.afterRender(this.config);
+        this.log(
+          'loadPage',
+          'info',
+          "State change: Ran recipes page's afterRender hook",
         );
       }
     }

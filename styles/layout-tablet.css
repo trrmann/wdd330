@@ -16,6 +16,9 @@
     display: block;
     z-index: 1001;
   }
+  .header-row {
+    padding: 0 1.5rem;
+  }
   .footer.wdd330 {
     font-size: 1rem;
   }
@@ -27,7 +30,8 @@
     gap: 1rem;
   }
 
-  main.home .content-wrapper {
+  main.home .content-wrapper,
+  main.recipes .content-wrapper {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
@@ -40,10 +44,12 @@
   main.home .home-actions {
     grid-area: actions;
   }
-  main.home .search-bar {
+  main.home .search-bar,
+  main.recipes .search-bar {
     grid-area: search;
   }
-  main.home .recipe-cards {
+  main.home .recipe-cards,
+  main.recipes .recipe-cards {
     grid-area: recipes;
     display: grid;
     grid-template-columns: 1fr 1fr;

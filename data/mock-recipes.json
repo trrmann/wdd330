@@ -1,47 +1,754 @@
-[
-  {
-    "title": "Classic Tomato Bruschetta",
-    "image": "images/recipe-placeholder.svg",
-    "description": "A refreshing and simple appetizer with fresh tomatoes, basil, garlic, and olive oil on toasted bread."
-  },
-  {
-    "title": "Creamy Mushroom Pasta",
-    "image": "images/recipe-placeholder.svg",
-    "description": "A rich and savory pasta dish with a creamy mushroom sauce, perfect for a comforting weeknight dinner."
-  },
-  {
-    "title": "Spicy Chicken Tacos",
-    "image": "images/recipe-placeholder.svg",
-    "description": "Flavorful shredded chicken with a kick of spice, served in warm tortillas with your favorite toppings."
-  },
-  {
-    "title": "Lemon Herb Roasted Salmon",
-    "image": "images/recipe-placeholder.svg",
-    "description": "A healthy and delicious salmon fillet roasted with lemon, herbs, and a hint of garlic."
-  },
-  {
-    "title": "Hearty Beef Stew",
-    "image": "images/recipe-placeholder.svg",
-    "description": "A classic, slow-cooked beef stew with tender meat, potatoes, carrots, and a rich gravy."
-  },
-  {
-    "title": "Quinoa Salad with Avocado",
-    "image": "images/recipe-placeholder.svg",
-    "description": "A light and nutritious salad featuring quinoa, creamy avocado, black beans, and a lime vinaigrette."
-  },
-  {
-    "title": "Garlic Shrimp Scampi",
-    "image": "images/recipe-placeholder.svg",
-    "description": "Juicy shrimp sautéed in a garlic butter and white wine sauce, served over linguine."
-  },
-  {
-    "title": "Vegetable Stir-Fry",
-    "image": "images/recipe-placeholder.svg",
-    "description": "A quick and easy stir-fry packed with colorful vegetables in a savory soy-ginger sauce."
-  },
-  {
-    "title": "Chocolate Lava Cakes",
-    "image": "images/recipe-placeholder.svg",
-    "description": "An indulgent dessert with a molten chocolate center that flows out when you cut into it."
-  }
-]
+{
+  "results": [
+    {
+      "id": 1,
+      "title": "Classic Tomato Bruschetta",
+      "image": "images/recipe-placeholder.svg",
+      "imageType": "svg",
+      "usedIngredientCount": 2,
+      "missedIngredientCount": 3,
+      "likes": 12,
+      "readyInMinutes": 15,
+      "servings": 4,
+      "summary": "A simple and fresh tomato bruschetta with garlic and basil.",
+      "instructions": "Toast baguette slices until golden. Rub with cut garlic. Top with diced tomatoes mixed with olive oil, basil, salt, and pepper.",
+      "nutrition": {
+        "nutrients": [
+          { "title": "Calories", "amount": 180, "unit": "kcal" },
+          { "title": "Fat", "amount": 7, "unit": "g" },
+          { "title": "Carbohydrates", "amount": 24, "unit": "g" },
+          { "title": "Protein", "amount": 4, "unit": "g" }
+        ]
+      },
+      "extendedIngredients": [
+        {
+          "id": 1001,
+          "aisle": "Bakery",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/baguette.jpg",
+          "name": "baguette",
+          "amount": 1,
+          "unit": "loaf",
+          "unitShort": "loaf",
+          "unitLong": "loaf",
+          "originalString": "1 baguette, sliced",
+          "metaInformation": ["sliced"]
+        },
+        {
+          "id": 1002,
+          "aisle": "Produce",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/tomato.jpg",
+          "name": "tomatoes",
+          "amount": 3,
+          "unit": "",
+          "unitShort": "",
+          "unitLong": "",
+          "originalString": "3 ripe tomatoes, diced",
+          "metaInformation": ["ripe", "diced"]
+        },
+        {
+          "id": 1003,
+          "aisle": "Produce",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/garlic.jpg",
+          "name": "garlic cloves",
+          "amount": 2,
+          "unit": "cloves",
+          "unitShort": "clove",
+          "unitLong": "cloves",
+          "originalString": "2 cloves garlic",
+          "metaInformation": []
+        },
+        {
+          "id": 1004,
+          "aisle": "Oil, Vinegar, Salad Dressing",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/olive-oil.jpg",
+          "name": "olive oil",
+          "amount": 2,
+          "unit": "tablespoons",
+          "unitShort": "T",
+          "unitLong": "tablespoons",
+          "originalString": "2 tbsp olive oil",
+          "metaInformation": []
+        },
+        {
+          "id": 1005,
+          "aisle": "Produce",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/basil.jpg",
+          "name": "basil, salt, and pepper",
+          "amount": 1,
+          "unit": "serving",
+          "unitShort": "serving",
+          "unitLong": "serving",
+          "originalString": "Fresh basil, salt, and pepper to taste",
+          "metaInformation": ["fresh", "to taste"]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Creamy Mushroom Pasta",
+      "image": "images/recipe-placeholder.svg",
+      "imageType": "svg",
+      "usedIngredientCount": 3,
+      "missedIngredientCount": 2,
+      "likes": 25,
+      "readyInMinutes": 30,
+      "servings": 2,
+      "summary": "Tender pasta in a rich, garlicky mushroom cream sauce.",
+      "instructions": "Cook pasta until al dente. Sauté mushrooms and garlic in butter, add cream and parmesan, then toss with pasta.",
+      "nutrition": {
+        "nutrients": [
+          { "title": "Calories", "amount": 620, "unit": "kcal" },
+          { "title": "Fat", "amount": 32, "unit": "g" },
+          { "title": "Carbohydrates", "amount": 62, "unit": "g" },
+          { "title": "Protein", "amount": 18, "unit": "g" }
+        ]
+      },
+      "extendedIngredients": [
+        {
+          "id": 2001,
+          "aisle": "Pasta and Rice",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/spaghetti.jpg",
+          "name": "pasta",
+          "amount": 8,
+          "unit": "oz",
+          "unitShort": "oz",
+          "unitLong": "ounces",
+          "originalString": "8 oz pasta",
+          "metaInformation": []
+        },
+        {
+          "id": 2002,
+          "aisle": "Produce",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/mushrooms.jpg",
+          "name": "mushrooms",
+          "amount": 2,
+          "unit": "cups",
+          "unitShort": "c",
+          "unitLong": "cups",
+          "originalString": "2 cups sliced mushrooms",
+          "metaInformation": ["sliced"]
+        },
+        {
+          "id": 2003,
+          "aisle": "Produce",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/garlic.jpg",
+          "name": "garlic",
+          "amount": 2,
+          "unit": "cloves",
+          "unitShort": "clove",
+          "unitLong": "cloves",
+          "originalString": "2 cloves garlic, minced",
+          "metaInformation": ["minced"]
+        },
+        {
+          "id": 2004,
+          "aisle": "Milk, Eggs, Other Dairy",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/fluid-cream.jpg",
+          "name": "heavy cream",
+          "amount": 1,
+          "unit": "cup",
+          "unitShort": "c",
+          "unitLong": "cup",
+          "originalString": "1 cup heavy cream",
+          "metaInformation": []
+        },
+        {
+          "id": 2005,
+          "aisle": "Cheese",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/parmesan.jpg",
+          "name": "parmesan cheese",
+          "amount": 0.5,
+          "unit": "cup",
+          "unitShort": "c",
+          "unitLong": "cup",
+          "originalString": "1/2 cup grated parmesan",
+          "metaInformation": ["grated"]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Spicy Chicken Tacos",
+      "image": "images/recipe-placeholder.svg",
+      "imageType": "svg",
+      "usedIngredientCount": 4,
+      "missedIngredientCount": 1,
+      "likes": 40,
+      "readyInMinutes": 25,
+      "servings": 4,
+      "summary": "Quick weeknight tacos with spicy chicken and fresh toppings.",
+      "instructions": "Season chicken with taco spices and cook in a skillet. Serve in warm tortillas with lettuce, salsa, and cheese.",
+      "nutrition": {
+        "nutrients": [
+          { "title": "Calories", "amount": 450, "unit": "kcal" },
+          { "title": "Fat", "amount": 18, "unit": "g" },
+          { "title": "Carbohydrates", "amount": 40, "unit": "g" },
+          { "title": "Protein", "amount": 32, "unit": "g" }
+        ]
+      },
+      "extendedIngredients": [
+        {
+          "id": 3001,
+          "aisle": "Meat",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/chicken-breasts.png",
+          "name": "chicken breast",
+          "amount": 1,
+          "unit": "lb",
+          "unitShort": "lb",
+          "unitLong": "pound",
+          "originalString": "1 lb chicken breast, sliced",
+          "metaInformation": ["sliced"]
+        },
+        {
+          "id": 3002,
+          "aisle": "Spices and Seasonings",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/chili-powder.jpg",
+          "name": "taco seasoning",
+          "amount": 2,
+          "unit": "tablespoons",
+          "unitShort": "T",
+          "unitLong": "tablespoons",
+          "originalString": "2 tbsp taco seasoning",
+          "metaInformation": []
+        },
+        {
+          "id": 3003,
+          "aisle": "Bakery",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/flour-tortilla.jpg",
+          "name": "tortillas",
+          "amount": 8,
+          "unit": "",
+          "unitShort": "",
+          "unitLong": "",
+          "originalString": "8 small tortillas",
+          "metaInformation": ["small"]
+        },
+        {
+          "id": 3004,
+          "aisle": "Produce",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/iceberg-lettuce.jpg",
+          "name": "lettuce",
+          "amount": 1,
+          "unit": "cup",
+          "unitShort": "c",
+          "unitLong": "cup",
+          "originalString": "1 cup shredded lettuce",
+          "metaInformation": ["shredded"]
+        },
+        {
+          "id": 3005,
+          "aisle": "Pasta and Rice",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/salsa.jpg",
+          "name": "salsa",
+          "amount": 0.5,
+          "unit": "cup",
+          "unitShort": "c",
+          "unitLong": "cup",
+          "originalString": "1/2 cup salsa",
+          "metaInformation": []
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Lemon Herb Roasted Salmon",
+      "image": "images/recipe-placeholder.svg",
+      "imageType": "svg",
+      "usedIngredientCount": 3,
+      "missedIngredientCount": 2,
+      "likes": 18,
+      "readyInMinutes": 20,
+      "servings": 2,
+      "summary": "Oven-roasted salmon with bright lemon and fresh herbs.",
+      "instructions": "Place salmon on a lined baking sheet, top with lemon slices and herbs, drizzle with olive oil, and bake until flaky.",
+      "nutrition": {
+        "nutrients": [
+          { "title": "Calories", "amount": 520, "unit": "kcal" },
+          { "title": "Fat", "amount": 34, "unit": "g" },
+          { "title": "Carbohydrates", "amount": 4, "unit": "g" },
+          { "title": "Protein", "amount": 46, "unit": "g" }
+        ]
+      },
+      "extendedIngredients": [
+        {
+          "id": 4001,
+          "aisle": "Seafood",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/salmon.png",
+          "name": "salmon fillets",
+          "amount": 2,
+          "unit": "fillets",
+          "unitShort": "fillets",
+          "unitLong": "fillets",
+          "originalString": "2 salmon fillets",
+          "metaInformation": []
+        },
+        {
+          "id": 4002,
+          "aisle": "Produce",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/lemon.png",
+          "name": "lemon",
+          "amount": 1,
+          "unit": "",
+          "unitShort": "",
+          "unitLong": "",
+          "originalString": "1 lemon, sliced",
+          "metaInformation": ["sliced"]
+        },
+        {
+          "id": 4003,
+          "aisle": "Oil, Vinegar, Salad Dressing",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/olive-oil.jpg",
+          "name": "olive oil",
+          "amount": 2,
+          "unit": "tablespoons",
+          "unitShort": "T",
+          "unitLong": "tablespoons",
+          "originalString": "2 tbsp olive oil",
+          "metaInformation": []
+        },
+        {
+          "id": 4004,
+          "aisle": "Produce",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/dill.jpg",
+          "name": "fresh dill or parsley",
+          "amount": 1,
+          "unit": "serving",
+          "unitShort": "serving",
+          "unitLong": "serving",
+          "originalString": "Fresh dill or parsley",
+          "metaInformation": ["fresh"]
+        },
+        {
+          "id": 4005,
+          "aisle": "Spices and Seasonings",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/salt.jpg",
+          "name": "salt and pepper",
+          "amount": 1,
+          "unit": "serving",
+          "unitShort": "serving",
+          "unitLong": "serving",
+          "originalString": "Salt and pepper",
+          "metaInformation": []
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Hearty Beef Stew",
+      "image": "images/recipe-placeholder.svg",
+      "imageType": "svg",
+      "usedIngredientCount": 5,
+      "missedIngredientCount": 0,
+      "likes": 33,
+      "readyInMinutes": 90,
+      "servings": 6,
+      "summary": "Slow-simmered beef stew loaded with potatoes and carrots.",
+      "instructions": "Brown beef, then simmer with broth, potatoes, carrots, and herbs until tender.",
+      "nutrition": {
+        "nutrients": [
+          { "title": "Calories", "amount": 380, "unit": "kcal" },
+          { "title": "Fat", "amount": 18, "unit": "g" },
+          { "title": "Carbohydrates", "amount": 26, "unit": "g" },
+          { "title": "Protein", "amount": 28, "unit": "g" }
+        ]
+      },
+      "extendedIngredients": [
+        {
+          "id": 5001,
+          "aisle": "Meat",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/beef-cubes-raw.png",
+          "name": "beef stew meat",
+          "amount": 2,
+          "unit": "lb",
+          "unitShort": "lb",
+          "unitLong": "pounds",
+          "originalString": "2 lb beef stew meat",
+          "metaInformation": []
+        },
+        {
+          "id": 5002,
+          "aisle": "Canned and Jarred",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/beef-broth.png",
+          "name": "beef broth",
+          "amount": 4,
+          "unit": "cups",
+          "unitShort": "c",
+          "unitLong": "cups",
+          "originalString": "4 cups beef broth",
+          "metaInformation": []
+        },
+        {
+          "id": 5003,
+          "aisle": "Produce",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/red-potatoes.jpg",
+          "name": "potatoes",
+          "amount": 3,
+          "unit": "",
+          "unitShort": "",
+          "unitLong": "",
+          "originalString": "3 potatoes, cubed",
+          "metaInformation": ["cubed"]
+        },
+        {
+          "id": 5004,
+          "aisle": "Produce",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/carrots.jpg",
+          "name": "carrots",
+          "amount": 3,
+          "unit": "",
+          "unitShort": "",
+          "unitLong": "",
+          "originalString": "3 carrots, sliced",
+          "metaInformation": ["sliced"]
+        },
+        {
+          "id": 5005,
+          "aisle": "Produce",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/brown-onion.png",
+          "name": "onion",
+          "amount": 1,
+          "unit": "",
+          "unitShort": "",
+          "unitLong": "",
+          "originalString": "1 onion, chopped",
+          "metaInformation": ["chopped"]
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Quinoa Salad with Avocado",
+      "image": "images/recipe-placeholder.svg",
+      "imageType": "svg",
+      "usedIngredientCount": 3,
+      "missedIngredientCount": 1,
+      "likes": 22,
+      "readyInMinutes": 25,
+      "servings": 4,
+      "summary": "A light and refreshing quinoa salad with creamy avocado.",
+      "instructions": "Cook quinoa, then toss with diced avocado, cucumber, tomatoes, and a lemon vinaigrette.",
+      "nutrition": {
+        "nutrients": [
+          { "title": "Calories", "amount": 320, "unit": "kcal" },
+          { "title": "Fat", "amount": 14, "unit": "g" },
+          { "title": "Carbohydrates", "amount": 38, "unit": "g" },
+          { "title": "Protein", "amount": 9, "unit": "g" }
+        ]
+      },
+      "extendedIngredients": [
+        {
+          "id": 6001,
+          "aisle": "Pasta and Rice",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/quinoa.png",
+          "name": "quinoa",
+          "amount": 1,
+          "unit": "cup",
+          "unitShort": "c",
+          "unitLong": "cup",
+          "originalString": "1 cup quinoa",
+          "metaInformation": []
+        },
+        {
+          "id": 6002,
+          "aisle": "Produce",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/avocado.jpg",
+          "name": "avocado",
+          "amount": 1,
+          "unit": "",
+          "unitShort": "",
+          "unitLong": "",
+          "originalString": "1 avocado, diced",
+          "metaInformation": ["diced"]
+        },
+        {
+          "id": 6003,
+          "aisle": "Produce",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/cucumber.jpg",
+          "name": "cucumber",
+          "amount": 1,
+          "unit": "",
+          "unitShort": "",
+          "unitLong": "",
+          "originalString": "1 cucumber, chopped",
+          "metaInformation": ["chopped"]
+        },
+        {
+          "id": 6004,
+          "aisle": "Produce",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/cherry-tomatoes.png",
+          "name": "cherry tomatoes",
+          "amount": 1,
+          "unit": "cup",
+          "unitShort": "c",
+          "unitLong": "cup",
+          "originalString": "1 cup cherry tomatoes, halved",
+          "metaInformation": ["halved"]
+        },
+        {
+          "id": 6005,
+          "aisle": "Produce",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/lemon-juice.jpg",
+          "name": "lemon juice",
+          "amount": 2,
+          "unit": "tablespoons",
+          "unitShort": "T",
+          "unitLong": "tablespoons",
+          "originalString": "2 tbsp lemon juice",
+          "metaInformation": []
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Garlic Shrimp Scampi",
+      "image": "images/recipe-placeholder.svg",
+      "imageType": "svg",
+      "usedIngredientCount": 2,
+      "missedIngredientCount": 2,
+      "likes": 29,
+      "readyInMinutes": 20,
+      "servings": 3,
+      "summary": "Buttery garlic shrimp served over pasta or crusty bread.",
+      "instructions": "Sauté shrimp in butter, garlic, and white wine, then finish with lemon juice and parsley.",
+      "nutrition": {
+        "nutrients": [
+          { "title": "Calories", "amount": 410, "unit": "kcal" },
+          { "title": "Fat", "amount": 24, "unit": "g" },
+          { "title": "Carbohydrates", "amount": 6, "unit": "g" },
+          { "title": "Protein", "amount": 38, "unit": "g" }
+        ]
+      },
+      "extendedIngredients": [
+        {
+          "id": 7001,
+          "aisle": "Seafood",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/shrimp.png",
+          "name": "shrimp",
+          "amount": 1,
+          "unit": "lb",
+          "unitShort": "lb",
+          "unitLong": "pound",
+          "originalString": "1 lb shrimp, peeled and deveined",
+          "metaInformation": ["peeled", "deveined"]
+        },
+        {
+          "id": 7002,
+          "aisle": "Milk, Eggs, Other Dairy",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/butter-sliced.jpg",
+          "name": "butter",
+          "amount": 3,
+          "unit": "tablespoons",
+          "unitShort": "T",
+          "unitLong": "tablespoons",
+          "originalString": "3 tbsp butter",
+          "metaInformation": []
+        },
+        {
+          "id": 7003,
+          "aisle": "Produce",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/garlic.jpg",
+          "name": "garlic",
+          "amount": 3,
+          "unit": "cloves",
+          "unitShort": "clove",
+          "unitLong": "cloves",
+          "originalString": "3 cloves garlic, minced",
+          "metaInformation": ["minced"]
+        },
+        {
+          "id": 7004,
+          "aisle": "Alcoholic Beverages",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/white-wine.jpg",
+          "name": "white wine",
+          "amount": 0.25,
+          "unit": "cup",
+          "unitShort": "c",
+          "unitLong": "cup",
+          "originalString": "1/4 cup white wine",
+          "metaInformation": []
+        },
+        {
+          "id": 7005,
+          "aisle": "Produce",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/lemon-juice.jpg",
+          "name": "lemon juice",
+          "amount": 2,
+          "unit": "tablespoons",
+          "unitShort": "T",
+          "unitLong": "tablespoons",
+          "originalString": "2 tbsp lemon juice",
+          "metaInformation": []
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Vegetable Stir-Fry",
+      "image": "images/recipe-placeholder.svg",
+      "imageType": "svg",
+      "usedIngredientCount": 4,
+      "missedIngredientCount": 0,
+      "likes": 19,
+      "readyInMinutes": 15,
+      "servings": 3,
+      "summary": "Colorful mixed vegetables quickly stir-fried in a savory sauce.",
+      "instructions": "Stir-fry mixed vegetables in oil, then add soy sauce, ginger, and garlic. Serve over rice.",
+      "nutrition": {
+        "nutrients": [
+          { "title": "Calories", "amount": 210, "unit": "kcal" },
+          { "title": "Fat", "amount": 10, "unit": "g" },
+          { "title": "Carbohydrates", "amount": 24, "unit": "g" },
+          { "title": "Protein", "amount": 5, "unit": "g" }
+        ]
+      },
+      "extendedIngredients": [
+        {
+          "id": 8001,
+          "aisle": "Produce",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/mixed-vegetables.png",
+          "name": "mixed vegetables",
+          "amount": 2,
+          "unit": "cups",
+          "unitShort": "c",
+          "unitLong": "cups",
+          "originalString": "2 cups mixed vegetables",
+          "metaInformation": []
+        },
+        {
+          "id": 8002,
+          "aisle": "Ethnic Foods",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/soy-sauce.jpg",
+          "name": "soy sauce",
+          "amount": 2,
+          "unit": "tablespoons",
+          "unitShort": "T",
+          "unitLong": "tablespoons",
+          "originalString": "2 tbsp soy sauce",
+          "metaInformation": []
+        },
+        {
+          "id": 8003,
+          "aisle": "Produce",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/ginger.png",
+          "name": "ginger",
+          "amount": 1,
+          "unit": "teaspoon",
+          "unitShort": "t",
+          "unitLong": "teaspoon",
+          "originalString": "1 tsp grated ginger",
+          "metaInformation": ["grated"]
+        },
+        {
+          "id": 8004,
+          "aisle": "Produce",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/garlic.jpg",
+          "name": "garlic",
+          "amount": 1,
+          "unit": "clove",
+          "unitShort": "clove",
+          "unitLong": "clove",
+          "originalString": "1 clove garlic, minced",
+          "metaInformation": ["minced"]
+        },
+        {
+          "id": 8005,
+          "aisle": "Oil, Vinegar, Salad Dressing",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/vegetable-oil.jpg",
+          "name": "vegetable oil",
+          "amount": 1,
+          "unit": "tablespoon",
+          "unitShort": "T",
+          "unitLong": "tablespoon",
+          "originalString": "1 tbsp vegetable oil",
+          "metaInformation": []
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Chocolate Lava Cakes",
+      "image": "images/recipe-placeholder.svg",
+      "imageType": "svg",
+      "usedIngredientCount": 1,
+      "missedIngredientCount": 4,
+      "likes": 47,
+      "readyInMinutes": 35,
+      "servings": 4,
+      "summary": "Individual chocolate cakes with a warm, gooey center.",
+      "instructions": "Prepare chocolate batter, bake in ramekins until edges are set but centers are still soft.",
+      "nutrition": {
+        "nutrients": [
+          { "title": "Calories", "amount": 520, "unit": "kcal" },
+          { "title": "Fat", "amount": 32, "unit": "g" },
+          { "title": "Carbohydrates", "amount": 56, "unit": "g" },
+          { "title": "Protein", "amount": 7, "unit": "g" }
+        ]
+      },
+      "extendedIngredients": [
+        {
+          "id": 9001,
+          "aisle": "Baking",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/dark-chocolate-pieces.jpg",
+          "name": "dark chocolate",
+          "amount": 4,
+          "unit": "oz",
+          "unitShort": "oz",
+          "unitLong": "ounces",
+          "originalString": "4 oz dark chocolate",
+          "metaInformation": []
+        },
+        {
+          "id": 9002,
+          "aisle": "Milk, Eggs, Other Dairy",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/butter-sliced.jpg",
+          "name": "butter",
+          "amount": 0.5,
+          "unit": "cup",
+          "unitShort": "c",
+          "unitLong": "cup",
+          "originalString": "1/2 cup butter",
+          "metaInformation": []
+        },
+        {
+          "id": 9003,
+          "aisle": "Milk, Eggs, Other Dairy",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/egg.png",
+          "name": "eggs",
+          "amount": 2,
+          "unit": "",
+          "unitShort": "",
+          "unitLong": "",
+          "originalString": "2 eggs",
+          "metaInformation": []
+        },
+        {
+          "id": 9004,
+          "aisle": "Baking",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/white-sugar.jpg",
+          "name": "sugar",
+          "amount": 0.5,
+          "unit": "cup",
+          "unitShort": "c",
+          "unitLong": "cup",
+          "originalString": "1/2 cup sugar",
+          "metaInformation": []
+        },
+        {
+          "id": 9005,
+          "aisle": "Baking",
+          "image": "https://spoonacular.com/cdn/ingredients_100x100/flour.png",
+          "name": "flour",
+          "amount": 0.25,
+          "unit": "cup",
+          "unitShort": "c",
+          "unitLong": "cup",
+          "originalString": "1/4 cup flour",
+          "metaInformation": []
+        }
+      ]
+    }
+  ],
+  "offset": 0,
+  "number": 9,
+  "totalResults": 9
+}
