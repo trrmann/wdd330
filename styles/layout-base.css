@@ -173,6 +173,8 @@ tr:nth-child(even) {
 .nutrition-detail {
   background: #fff;
   color: var(--neutral-secondary-color);
+  display: flex;
+  flex-direction: column;
   max-width: 700px;
   width: 90%;
   max-height: 90vh;
@@ -256,7 +258,7 @@ tr:nth-child(even) {
 .recipe-detail-close,
 .ingredient-detail-close,
 .nutrition-detail-close {
-  float: right;
+  align-self: flex-end;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -266,6 +268,7 @@ tr:nth-child(even) {
   color: var(--neutral-secondary-color);
   border: 1px solid var(--secondary-color);
   border-radius: 999px;
+  margin-bottom: 0.5rem;
   padding: 0;
   cursor: pointer;
   font-family: var(--heading-font);

@@ -3,6 +3,9 @@
   .header-hamburger {
     display: none;
   }
+  .menu {
+    margin: 0 auto 1.5rem auto;
+  }
   .menu-list {
     display: flex;
     flex-direction: row;

@@ -261,7 +261,14 @@ class HomePage {
 
         if (img) {
           img.src = recipe.image;
-          // Decorative card image: keep template alt="" to avoid redundant text
+          if (recipe.title) {
+            img.alt = recipe.title;
+          } else if (recipe.image && typeof recipe.image === 'string') {
+            const fileName = recipe.image.split('/').pop() || 'Recipe image';
+            img.alt = fileName;
+          } else {
+            img.alt = 'Recipe image';
+          }
         }
         if (title) {
           title.textContent = recipe.title;
@@ -1162,7 +1169,14 @@ class RecipesPage {
 
         if (img) {
           img.src = recipe.image;
-          // Decorative card image: keep template alt="" to avoid redundant text
+          if (recipe.title) {
+            img.alt = recipe.title;
+          } else if (recipe.image && typeof recipe.image === 'string') {
+            const fileName = recipe.image.split('/').pop() || 'Recipe image';
+            img.alt = fileName;
+          } else {
+            img.alt = 'Recipe image';
+          }
         }
         if (title) {
           title.textContent = recipe.title;
