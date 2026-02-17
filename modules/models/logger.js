@@ -2,12 +2,59 @@ import { bootLogger } from './bootLogger.js';
 
 bootLogger.moduleLoadStarted(import.meta.url);
 
-bootLogger.moduleInfo(
-  import.meta.url,
-  'Defines app Logger (siteConfig.debugLevels)',
-);
+bootLogger.moduleInfo(import.meta.url, 'Defines app Logger (siteConfig.debug)');
 
+// Logger Module
+// Purpose: Central application logger which honors siteConfig.debug levels and
+// targets, including deferred logging before configuration is applied.
+// Usage: import { Logger } from './logger.js';
+//        const logger = new Logger(config); logger.classMethodLog('info', 'MyClass', 'myMethod', 'message');
 class Logger {
+  constructor(config = null) {
+    Object.defineProperties(this, Logger.descriptors);
+    this.config = config;
+
+    this.classMethodLog(
+      'objectCreateStart',
+      'Logger',
+      'constructor',
+      'Logger.constructor: Starting',
+    );
+    this.classMethodLog(
+      'info',
+      'Logger',
+      'constructor',
+      'Logger.constructor: Logger configured',
+    );
+    this.classMethodLog(
+      'objectCreateComplete',
+      'Logger',
+      'constructor',
+      'Logger.constructor: Completed',
+    );
+
+    if (config) {
+      Logger.flushStatic(this);
+    }
+  }
+
+  static get descriptors() {
+    return {
+      config: {
+        value: null,
+        writable: true,
+        enumerable: false,
+        configurable: false,
+      },
+      deferredEntries: {
+        value: [],
+        writable: true,
+        enumerable: false,
+        configurable: false,
+      },
+    };
+  }
+
   isSignatureLevel(level) {
     if (typeof level !== 'string') return false;
 
@@ -58,178 +105,6 @@ class Logger {
   deferFunctionLog(level, ownerName, functionName, ...args) {
     this.deferClassMethodLog(level, ownerName, functionName, ...args);
   }
-
-  static get staticDeferredEntries() {
-    if (!this._staticDeferredEntries) {
-      this._staticDeferredEntries = [];
-    }
-    return this._staticDeferredEntries;
-  }
-
-  static staticClassLog(level, className, ...args) {
-    Logger.staticDeferredEntries.push({
-      kind: 'staticClassLog',
-      level,
-      className,
-      args,
-    });
-  }
-
-  static staticClassMethodLog(level, className, methodName, ...args) {
-    Logger.staticDeferredEntries.push({
-      kind: 'staticClassMethodLog',
-      level,
-      className,
-      methodName,
-      args,
-    });
-  }
-
-  static staticFunctionLog(level, ownerName, functionName, ...args) {
-    Logger.staticDeferredEntries.push({
-      kind: 'staticFunctionLog',
-      level,
-      ownerName,
-      functionName,
-      args,
-    });
-  }
-
-  static staticClassMethodPassthrough(
-    level,
-    className,
-    methodName,
-    returnValue,
-    options = {},
-  ) {
-    Logger.staticDeferredEntries.push({
-      kind: 'staticClassMethodPassthrough',
-      level,
-      className,
-      methodName,
-      returnValue,
-      options,
-    });
-
-    return returnValue;
-  }
-
-  static staticFunctionPassthrough(
-    level,
-    ownerName,
-    functionName,
-    returnValue,
-    options = {},
-  ) {
-    Logger.staticDeferredEntries.push({
-      kind: 'staticFunctionPassthrough',
-      level,
-      ownerName,
-      functionName,
-      returnValue,
-      options,
-    });
-
-    return returnValue;
-  }
-
-  static flushStatic(logger) {
-    if (!logger) return;
-    const entries = Logger.staticDeferredEntries;
-    if (!entries || entries.length === 0) return;
-
-    const toFlush = entries.slice();
-    entries.length = 0;
-    toFlush.forEach((entry) => {
-      switch (entry.kind) {
-        case 'staticClassLog':
-          logger.classLog(entry.level, entry.className, ...(entry.args || []));
-          break;
-        case 'staticClassMethodLog':
-          logger.classMethodLog(
-            entry.level,
-            entry.className,
-            entry.methodName,
-            ...(entry.args || []),
-          );
-          break;
-        case 'staticFunctionLog':
-          logger.functionLog(
-            entry.level,
-            entry.ownerName,
-            entry.functionName,
-            ...(entry.args || []),
-          );
-          break;
-        case 'staticClassMethodPassthrough':
-          logger.passthrough(
-            entry.level,
-            entry.className,
-            entry.methodName,
-            entry.returnValue,
-            entry.options,
-          );
-          break;
-        case 'staticFunctionPassthrough':
-          logger.passthrough(
-            entry.level,
-            entry.ownerName,
-            entry.functionName,
-            entry.returnValue,
-            entry.options,
-          );
-          break;
-        default:
-          break;
-      }
-    });
-  }
-
-  static get descriptors() {
-    return {
-      config: {
-        value: null,
-        writable: true,
-        enumerable: false,
-        configurable: false,
-      },
-      deferredEntries: {
-        value: [],
-        writable: true,
-        enumerable: false,
-        configurable: false,
-      },
-    };
-  }
-
-  constructor(config = null) {
-    Object.defineProperties(this, Logger.descriptors);
-    this.config = config;
-
-    this.classMethodLog(
-      'objectCreateStart',
-      'Logger',
-      'constructor',
-      'Logger.constructor: Starting',
-    );
-    this.classMethodLog(
-      'info',
-      'Logger',
-      'constructor',
-      'Logger.constructor: Logger configured',
-    );
-    this.classMethodLog(
-      'objectCreateComplete',
-      'Logger',
-      'constructor',
-      'Logger.constructor: Completed',
-    );
-
-    if (config) {
-      Logger.flushStatic(this);
-    }
-  }
-
   setConfig(config, options = {}) {
     const { flushDeferred = true } = options;
     this.config = config;
@@ -254,16 +129,16 @@ class Logger {
   }
 
   isEnabled(level) {
-    return !!(
-      this.config &&
-      this.config.debug &&
-      this.config.debugLevels &&
-      this.config.debugLevels[level]
-    );
+    const debugConfig = this.config && this.config.debug;
+    if (!debugConfig || !debugConfig.active) return false;
+
+    const levels = debugConfig.levels || {};
+    return !!levels[level];
   }
 
   isTargetEnabled(context) {
-    const targets = this.config && this.config.debugTargets;
+    const debugConfig = this.config && this.config.debug;
+    const targets = debugConfig && debugConfig.targets;
     if (!targets) return true;
 
     const defaultEnabled = targets.defaultEnabled !== false;
@@ -393,6 +268,132 @@ class Logger {
       returnValue,
       options,
     );
+  }
+
+  static get staticDeferredEntries() {
+    if (!this._staticDeferredEntries) {
+      this._staticDeferredEntries = [];
+    }
+    return this._staticDeferredEntries;
+  }
+
+  static flushStatic(logger) {
+    if (!logger) return;
+    const entries = Logger.staticDeferredEntries;
+    if (!entries || entries.length === 0) return;
+
+    const toFlush = entries.slice();
+    entries.length = 0;
+    toFlush.forEach((entry) => {
+      switch (entry.kind) {
+        case 'staticClassLog':
+          logger.classLog(entry.level, entry.className, ...(entry.args || []));
+          break;
+        case 'staticClassMethodLog':
+          logger.classMethodLog(
+            entry.level,
+            entry.className,
+            entry.methodName,
+            ...(entry.args || []),
+          );
+          break;
+        case 'staticFunctionLog':
+          logger.functionLog(
+            entry.level,
+            entry.ownerName,
+            entry.functionName,
+            ...(entry.args || []),
+          );
+          break;
+        case 'staticClassMethodPassthrough':
+          logger.passthrough(
+            entry.level,
+            entry.className,
+            entry.methodName,
+            entry.returnValue,
+            entry.options,
+          );
+          break;
+        case 'staticFunctionPassthrough':
+          logger.passthrough(
+            entry.level,
+            entry.ownerName,
+            entry.functionName,
+            entry.returnValue,
+            entry.options,
+          );
+          break;
+        default:
+          break;
+      }
+    });
+  }
+
+  static staticClassLog(level, className, ...args) {
+    Logger.staticDeferredEntries.push({
+      kind: 'staticClassLog',
+      level,
+      className,
+      args,
+    });
+  }
+
+  static staticClassMethodLog(level, className, methodName, ...args) {
+    Logger.staticDeferredEntries.push({
+      kind: 'staticClassMethodLog',
+      level,
+      className,
+      methodName,
+      args,
+    });
+  }
+
+  static staticClassMethodPassthrough(
+    level,
+    className,
+    methodName,
+    returnValue,
+    options = {},
+  ) {
+    Logger.staticDeferredEntries.push({
+      kind: 'staticClassMethodPassthrough',
+      level,
+      className,
+      methodName,
+      returnValue,
+      options,
+    });
+
+    return returnValue;
+  }
+
+  static staticFunctionLog(level, ownerName, functionName, ...args) {
+    Logger.staticDeferredEntries.push({
+      kind: 'staticFunctionLog',
+      level,
+      ownerName,
+      functionName,
+      args,
+    });
+  }
+
+  static staticFunctionPassthrough(
+    level,
+    ownerName,
+    functionName,
+    returnValue,
+    options = {},
+  ) {
+    Logger.staticDeferredEntries.push({
+      kind: 'staticFunctionPassthrough',
+      level,
+      ownerName,
+      functionName,
+      returnValue,
+      options,
+    });
+
+    return returnValue;
   }
 
   static instrumentClass(ClassCtor, className, toLogValueMap = {}) {

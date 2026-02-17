@@ -1,14 +1,12 @@
-// Recipe Search Module
-// Purpose: Legacy helpers for recipe search; most callers should prefer
-// Recipes.filter in recipes.js.
-// Usage: import { Recipes } from './recipeSearch.js';
-//        const filtered = Recipes.filter(collection, { nameTerm: 'soup' });
+// Recipes Module
+// Purpose: Encapsulates recipe models, nutrition, and search/filter behavior.
+// Usage: import { recipes, Recipes } from './recipes.js';
+//        const filtered = Recipes.filter(recipes, { nameTerm: 'pasta' });
 
 import { bootLogger } from './bootLogger.js';
-import { Logger } from './logger.js';
-import { Ingredient, ingredients } from './shoppingList.js';
 import { Nutrition } from './nutrition.js';
 import { Recipe } from './recipe.js';
+import { Ingredient, ingredients } from './shoppingList.js';
 
 bootLogger.moduleLoadStarted(import.meta.url);
 
@@ -20,9 +18,34 @@ bootLogger.moduleInfo(
 // Shared recipes collection for search and views
 const recipes = [];
 
-// Provides static helpers to filter recipe collections by name,
-// ingredients, and nutrition; used by home and recipes views.
 class Recipes {
+  static filter(collection, filters = {}) {
+    const safeFilters = filters || {};
+
+    // Support both home-page and recipes-page naming conventions
+    const nameTerm = safeFilters.nameTerm || safeFilters.name || '';
+    const ingredientTerm =
+      safeFilters.ingredientTerm || safeFilters.ingredient || '';
+    const nutritionFilters =
+      safeFilters.nutritionFilters || safeFilters.nutrition || null;
+
+    let result = Array.isArray(collection) ? [...collection] : [];
+
+    if (nameTerm) {
+      result = Recipes.filterByName(result, nameTerm);
+    }
+
+    if (ingredientTerm) {
+      result = Recipes.filterByIngredient(result, ingredientTerm);
+    }
+
+    if (nutritionFilters) {
+      result = Recipes.filterByNutrition(result, nutritionFilters);
+    }
+
+    return result;
+  }
+
   static filterByName(collection, nameTerm) {
     if (!nameTerm) return collection;
     const term = nameTerm.toLowerCase();
@@ -89,34 +112,7 @@ class Recipes {
     });
   }
 
-  static filter(collection, filters = {}) {
-    const safeFilters = filters || {};
-
-    // Support both home-page and recipes-page naming conventions
-    const nameTerm = safeFilters.nameTerm || safeFilters.name || '';
-    const ingredientTerm =
-      safeFilters.ingredientTerm || safeFilters.ingredient || '';
-    const nutritionFilters =
-      safeFilters.nutritionFilters || safeFilters.nutrition || null;
-
-    let result = Array.isArray(collection) ? [...collection] : [];
-
-    if (nameTerm) {
-      result = Recipes.filterByName(result, nameTerm);
-    }
-
-    if (ingredientTerm) {
-      result = Recipes.filterByIngredient(result, ingredientTerm);
-    }
-
-    if (nutritionFilters) {
-      result = Recipes.filterByNutrition(result, nutritionFilters);
-    }
-
-    return result;
-  }
-
-  static populateFromMockRecipes(root) {
+  static populateRecipes(root) {
     const recipeModels = Recipe.fromMockResults(root);
 
     recipes.splice(0, recipes.length, ...recipeModels);
@@ -133,12 +129,10 @@ class Recipes {
         });
       }
     });
+
     ingredients.splice(0, ingredients.length, ...allIngredients);
   }
 }
-bootLogger.moduleClassLoaded(import.meta.url, 'Recipes');
-
-Logger.instrumentClass(Recipes, 'Recipes');
 
 export { recipes, Recipes, Recipe, Nutrition };
 

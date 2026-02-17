@@ -3,13 +3,13 @@
   <head>
     <meta charset="UTF-8" >
     <meta name="viewport" content="width=device-width, initial-scale=1.0" >
-    <title>WDD 330 - Web Frontend Development II - Tracy Robert Mann</title>
+    <title></title>
     <meta
       name="description"
       content="Home page for the WDD 330 - Web Frontend Development II class as authored by Tracy Robert Mann."
     >
     <meta name="author" content="Tracy Robert Mann" >
-    <link rel="icon" href="images/Chow%20Tray.svg" type="image/svg+xml" >
+    <link rel="icon" href="images/recipePlaceholder.svg" type="image/svg+xml" >
     <link rel="stylesheet" href="styles/responsive.css" >
     <link rel="preconnect" href="https://fonts.googleapis.com" >
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin >
@@ -25,178 +25,64 @@
       href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap"
       rel="stylesheet"
     >
-    <script type="module" src="scripts/home.js"></script>
+    <script type="module" src="scripts/index.js"></script>
   </head>
-  <body class="body">
-    <span id="home" class="visually-hidden">Home section</span>
-    <span id="recipes" class="visually-hidden">Recipes section</span>
-    <span id="mealplan" class="visually-hidden">Meal plan section</span>
-    <span id="shopping" class="visually-hidden">Shopping section</span>
-    <span id="more" class="visually-hidden">Chow Tools section</span>
+  <body id="body">
+    <span id="home"></span>
+    <span id="recipes"></span>
+    <span id="mealplan"></span>
+    <span id="shopping"></span>
+    <span id="tools"></span>
     <template id="headerTemplate">
-      <header class="header">
-        <div class="header-row">
-          <span class="header-logo">
-            <img
-              src="images/Chow%20Tray.svg"
-              alt=""
-              aria-hidden="true"
-              width="32"
-              height="24"
-            >
+      <header>
+        <div id="header-row">
+          <span id="header-logo">
+            <img >
           </span>
-          <h1 class="header-title">CHOW PLANNER</h1>
-          <button class="header-hamburger" aria-label="Open menu" tabindex="0">
-            <svg
-              class="hamburger-icon"
-              width="28"
-              height="20"
-              viewBox="0 0 28 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <rect y="2" width="28" height="4" rx="2" fill="currentColor" />
-              <rect y="8" width="28" height="4" rx="2" fill="currentColor" />
-              <rect y="14" width="28" height="4" rx="2" fill="currentColor" />
-            </svg>
+          <h1 id="header-title"></h1>
+          <button id="header-hamburger">
+            <img id="hamburger-icon" >
           </button>
         </div>
       </header>
     </template>
     <template id="menuTemplate">
-      <nav class="menu">
-        <ul class="menu-list">
-          <li class="menu-item"><a href="#home">Home</a></li>
-          <li class="menu-item"><a href="#recipes">Recipes</a></li>
-          <li class="menu-item"><a href="#mealplan">Meal Plan</a></li>
-          <li class="menu-item"><a href="#shopping">Shopping</a></li>
-          <li class="menu-item"><a href="#more">Chow Tools</a></li>
-        </ul>
+      <nav>
+        <ul></ul>
       </nav>
     </template>
+    <template id="menuItemTemplate">
+      <li>
+        <a></a>
+      </li>
+    </template>
     <template id="mainTemplate">
-      <main class="main">
-        <h2>Page title</h2>
-        <div class="content-wrapper"></div>
+      <main>
+        <h2></h2>
+        <div></div>
       </main>
     </template>
     <template id="homePageTemplate">
-      <div class="search-bar">
-        <label class="visually-hidden" for="home-search-input"
-          >Search recipes</label
-        >
-        <input id="home-search-input" type="search" placeholder="SEARCH BAR" >
-        <button type="button">Search</button>
+      <div id="home-search-bar">
+        <label for="home-search-input"></label>
+        <input id="home-search-input" type="search" >
+        <button id="home-search-button"></button>
       </div>
-      <div class="home-actions">
-        <button class="meal-plan-summary" type="button">
-          MEAL PLAN SUMMARY
-        </button>
-        <button
-          class="shopping-list-btn"
-          id="shopping-list-btn-top"
-          type="button"
-        >
-          SHOPPING LIST
-        </button>
+      <div id="home-actions">
+        <button id="home-meal-plan-summary" type="button"></button>
+        <button id="shopping-list-btn-top" type="button"></button>
       </div>
-      <div class="recipe-cards">
+      <div id="home-recipe-cards">
         <!-- Recipe cards will be dynamically inserted here -->
       </div>
 
-      <button
-        class="shopping-list-btn"
-        id="shopping-list-btn-bottom"
-        type="button"
-      >
-        SHOPPING LIST
-      </button>
-
-      <template id="recipeCardTemplate">
-        <img src="" alt="" >
-        <h3>Recipe title</h3>
-        <p></p>
-      </template>
-      <template id="recipeDetailTemplate">
-        <section class="recipe-detail">
-          <button
-            class="recipe-detail-close"
-            type="button"
-            aria-label="Close recipe details"
-          ></button>
-          <div class="recipe-detail-header">
-            <img class="recipe-detail-image" src="" alt="" >
-            <div class="recipe-detail-summary">
-              <h3 class="recipe-detail-title">Recipe title</h3>
-              <p class="recipe-detail-meta"></p>
-            </div>
-          </div>
-          <div class="recipe-detail-body">
-            <section class="recipe-detail-ingredients">
-              <h4>Ingredients</h4>
-              <p class="recipe-detail-ingredients-hint">
-                Tap an ingredient to view details.
-              </p>
-              <ul class="recipe-detail-ingredients-list"></ul>
-            </section>
-            <section class="recipe-detail-instructions">
-              <h4>Instructions</h4>
-              <p class="recipe-detail-instructions-text"></p>
-            </section>
-            <section class="recipe-detail-actions">
-              <button class="recipe-detail-nutrition-btn" type="button">
-                View Nutrition
-              </button>
-            </section>
-          </div>
-        </section>
-      </template>
-      <template id="ingredientDetailTemplate">
-        <section class="ingredient-detail">
-          <button
-            class="ingredient-detail-close"
-            type="button"
-            aria-label="Close ingredient details"
-          ></button>
-          <div class="ingredient-detail-header">
-            <img class="ingredient-detail-image" src="" alt="" >
-            <div class="ingredient-detail-summary">
-              <h3 class="ingredient-detail-title">Ingredient details</h3>
-              <p class="ingredient-detail-meta"></p>
-            </div>
-          </div>
-          <div class="ingredient-detail-body">
-            <p class="ingredient-detail-original"></p>
-            <p class="ingredient-detail-amount"></p>
-            <p class="ingredient-detail-aisle"></p>
-            <p class="ingredient-detail-meta-info"></p>
-          </div>
-        </section>
-      </template>
-      <template id="nutritionDetailTemplate">
-        <section class="nutrition-detail">
-          <button
-            class="nutrition-detail-close"
-            type="button"
-            aria-label="Close nutrition details"
-          ></button>
-          <div class="nutrition-detail-header">
-            <div class="nutrition-detail-summary">
-              <h3 class="nutrition-detail-title">Nutrition</h3>
-              <p class="nutrition-detail-meta"></p>
-            </div>
-          </div>
-          <div class="nutrition-detail-body">
-            <ul class="nutrition-detail-list"></ul>
-          </div>
-        </section>
-      </template>
+      <button id="shopping-list-btn-bottom" type="button"></button>
     </template>
     <template id="recipesPageTemplate">
-      <div class="search-bar">
-        <div class="recipes-search-controls">
-          <fieldset class="recipes-search-type-group">
-            <legend>Search By</legend>
+      <div id="recipes-search-bar">
+        <div id="recipes-search-controls">
+          <fieldset id="recipes-search-type-group">
+            <legend></legend>
             <label>
               <input
                 type="checkbox"
@@ -204,7 +90,6 @@
                 value="name"
                 checked
               >
-              Name
             </label>
             <label>
               <input
@@ -212,7 +97,6 @@
                 name="recipes-search-type"
                 value="ingredient"
               >
-              Ingredient
             </label>
             <label>
               <input
@@ -220,46 +104,26 @@
                 name="recipes-search-type"
                 value="nutrition"
               >
-              Nutrition
             </label>
           </fieldset>
         </div>
-        <div class="recipes-search-inputs">
-          <div class="recipes-search-input-name">
-            <label class="visually-hidden" for="recipes-search-name-input"
-              >Search recipes by name</label
-            >
-            <input
-              id="recipes-search-name-input"
-              type="search"
-              class="recipes-search-name-input"
-              placeholder="Search by name"
-            >
+        <div id="recipes-search-inputs">
+          <div id="recipes-search-input-name">
+            <label for="recipes-search-name-input"></label>
+            <input id="recipes-search-name-input" type="search" >
           </div>
-          <div class="recipes-search-input-ingredient" hidden>
-            <label class="visually-hidden" for="recipes-search-ingredient-input"
-              >Search recipes by ingredient</label
-            >
-            <input
-              id="recipes-search-ingredient-input"
-              type="search"
-              class="recipes-search-ingredient-input"
-              placeholder="Search by ingredient"
-            >
+          <div id="recipes-search-input-ingredient" hidden>
+            <label for="recipes-search-ingredient-input"></label>
+            <input id="recipes-search-ingredient-input" type="search" >
           </div>
-          <div class="recipes-search-input-nutrition" hidden>
-            <div class="recipes-nutrition-row">
+          <div id="recipes-search-input-nutrition" hidden>
+            <div id="recipes-nutrition-name-row">
               <label>
-                Nutrient
-                <input
-                  type="text"
-                  class="recipes-nutrition-name"
-                  placeholder="e.g. Calories, Protein"
-                >
+                <input type="text" id="recipes-nutrition-name" >
               </label>
             </div>
-            <div class="recipes-nutrition-row recipes-nutrition-mode">
-              <span class="recipes-nutrition-mode-label">Use</span>
+            <div id="recipes-nutrition-mode-row">
+              <span></span>
               <label>
                 <input
                   type="radio"
@@ -267,11 +131,9 @@
                   value="min"
                   checked
                 >
-                Min
               </label>
               <label>
                 <input type="radio" name="recipes-nutrition-mode" value="max" >
-                Max
               </label>
               <label>
                 <input
@@ -279,129 +141,319 @@
                   name="recipes-nutrition-mode"
                   value="range"
                 >
-                Min and Max
               </label>
             </div>
-            <div class="recipes-nutrition-values">
-              <label class="recipes-nutrition-min">
-                Min
+            <div id="recipes-nutrition-values">
+              <label id="recipes-nutrition-min">
                 <input
                   type="number"
-                  class="recipes-nutrition-min-value"
+                  id="recipes-nutrition-min-value"
                   step="any"
                 >
               </label>
-              <label class="recipes-nutrition-max" hidden>
-                Max
+              <label id="recipes-nutrition-max" hidden>
                 <input
                   type="number"
-                  class="recipes-nutrition-max-value"
+                  id="recipes-nutrition-max-value"
                   step="any"
                 >
               </label>
             </div>
           </div>
         </div>
-        <button class="recipes-search-submit" type="button">Search</button>
+        <button id="recipes-search-submit-button"></button>
       </div>
-      <div class="recipe-cards">
+      <div id="recipes-recipe-cards">
         <!-- Recipe cards will be dynamically inserted here -->
       </div>
-
-      <template id="recipeCardTemplate">
-        <img src="" alt="" >
-        <h3>Recipe title</h3>
-        <p></p>
-      </template>
-      <template id="recipeDetailTemplate">
-        <section class="recipe-detail">
-          <button
-            class="recipe-detail-close"
-            type="button"
-            aria-label="Close recipe details"
-          ></button>
-          <div class="recipe-detail-header">
-            <img class="recipe-detail-image" src="" alt="" >
-            <div class="recipe-detail-summary">
-              <h3 class="recipe-detail-title">Recipe title</h3>
-              <p class="recipe-detail-meta"></p>
-            </div>
-          </div>
-          <div class="recipe-detail-body">
-            <section class="recipe-detail-ingredients">
-              <h4>Ingredients</h4>
-              <p class="recipe-detail-ingredients-hint">
-                Tap an ingredient to view details.
-              </p>
-              <ul class="recipe-detail-ingredients-list"></ul>
-            </section>
-            <section class="recipe-detail-instructions">
-              <h4>Instructions</h4>
-              <p class="recipe-detail-instructions-text"></p>
-            </section>
-            <section class="recipe-detail-actions">
-              <button class="recipe-detail-nutrition-btn" type="button">
-                View Nutrition
-              </button>
-            </section>
-          </div>
-        </section>
-      </template>
-      <template id="ingredientDetailTemplate">
-        <section class="ingredient-detail">
-          <button
-            class="ingredient-detail-close"
-            type="button"
-            aria-label="Close ingredient details"
-          ></button>
-          <div class="ingredient-detail-header">
-            <img class="ingredient-detail-image" src="" alt="" >
-            <div class="ingredient-detail-summary">
-              <h3 class="ingredient-detail-title">Ingredient details</h3>
-              <p class="ingredient-detail-meta"></p>
-            </div>
-          </div>
-          <div class="ingredient-detail-body">
-            <p class="ingredient-detail-original"></p>
-            <p class="ingredient-detail-amount"></p>
-            <p class="ingredient-detail-aisle"></p>
-            <p class="ingredient-detail-meta-info"></p>
-          </div>
-        </section>
-      </template>
-      <template id="nutritionDetailTemplate">
-        <section class="nutrition-detail">
-          <button
-            class="nutrition-detail-close"
-            type="button"
-            aria-label="Close nutrition details"
-          ></button>
-          <div class="nutrition-detail-header">
-            <div class="nutrition-detail-summary">
-              <h3 class="nutrition-detail-title">Nutrition</h3>
-              <p class="nutrition-detail-meta"></p>
-            </div>
-          </div>
-          <div class="nutrition-detail-body">
-            <ul class="nutrition-detail-list"></ul>
-          </div>
-        </section>
-      </template>
     </template>
     <template id="mealPlanPageTemplate">
-      <p>Plan your meals for the week here.</p>
+      <section id="meal-plan-page">
+        <header id="meal-plan-header">
+          <p></p>
+        </header>
+        <div id="meal-plan-controls">
+          <div>
+            <label for="meal-plan-days"></label>
+            <select id="meal-plan-days">
+              <option value="1"></option>
+              <option value="3"></option>
+              <option value="5"></option>
+              <option value="7" selected></option>
+            </select>
+          </div>
+          <div>
+            <span id="meal-plan-calories-label"></span>
+            <span id="meal-plan-calories" aria-live="polite"></span>
+          </div>
+          <div>
+            <label for="meal-plan-people"></label>
+            <div>
+              <button id="meal-plan-people-decrement">−</button>
+              <input
+                id="meal-plan-people"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                step="1"
+                value="1"
+              >
+              <button id="meal-plan-people-increment">+</button>
+            </div>
+          </div>
+          <div>
+            <label for="meal-plan-meals-per-day"></label>
+            <div>
+              <button id="meal-plan-meals-per-day-decrement">−</button>
+              <input
+                id="meal-plan-meals-per-day"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                step="1"
+                value="1"
+              >
+              <button id="meal-plan-meals-per-day-increment">+</button>
+            </div>
+          </div>
+          <div>
+            <div id="meal-plan-calorie-grid">
+              <div id="meal-plan-calorie-grid-header">
+                <span></span>
+              </div>
+              <div id="meal-plan-calorie-grid-rows"></div>
+              <div id="meal-plan-calorie-grid-controls"></div>
+            </div>
+          </div>
+          <button id="meal-plan-generate-button"></button>
+        </div>
+        <section id="meal-plan-summary-section">
+          <h3></h3>
+          <p id="meal-plan-summary-hint"></p>
+          <div id="meal-plan-grid"></div>
+        </section>
+        <section id="meal-plan-actions">
+          <button id="meal-plan-save-button"></button>
+          <button id="meal-plan-load-button"></button>
+          <button id="meal-plan-to-shopping-button"></button>
+          <button id="meal-plan-use-pantry-button"></button>
+        </section>
+      </section>
     </template>
     <template id="shoppingPageTemplate">
-      <p>Manage your shopping list here.</p>
+      <section id="shopping-page">
+        <div id="shopping-header">
+          <p></p>
+        </div>
+        <div id="shopping-add-item">
+          <label for="shopping-qty"></label>
+          <input id="shopping-qty" type="number" min="1" step="1" value="1" >
+          <label for="shopping-unit"></label>
+          <input id="shopping-unit" type="text" >
+          <label for="shopping-new-item"></label>
+          <div id="shopping-known-wrapper">
+            <input id="shopping-new-item" type="text" >
+            <button id="shopping-known-toggle">▼</button>
+            <ul id="shopping-known-menu" hidden></ul>
+          </div>
+          <button id="shopping-add-button"></button>
+        </div>
+        <section id="shopping-lists">
+          <section id="shopping-list-section-shopping">
+            <h3></h3>
+            <p></p>
+            <div id="shopping-list-actions-shopping">
+              <button id="shopping-move-to-pantry-button"></button>
+              <button id="shopping-buy-more-button"></button>
+              <button id="shopping-dont-buy-button"></button>
+            </div>
+            <ul id="shopping-list-items-shopping"></ul>
+          </section>
+
+          <section id="shopping-list-section-pantry">
+            <h3></h3>
+            <p></p>
+            <div id="shopping-list-actions-pantry">
+              <button id="shopping-move-to-shopping-button"></button>
+              <button id="shopping-discard-button"></button>
+            </div>
+            <ul id="shopping-list-items-pantry"></ul>
+          </section>
+        </section>
+      </section>
     </template>
-    <template id="morePageTemplate">
-      <p>Explore additional Chow Tools and resources.</p>
+    <template id="toolsPageTemplate">
+      <section id="chow-tools-page">
+        <header id="chow-tools-header">
+          <p></p>
+        </header>
+
+        <div id="chow-tools-grid">
+          <section>
+            <h3></h3>
+            <p></p>
+            <div>
+              <div>
+                <h4></h4>
+                <ul></ul>
+              </div>
+              <div>
+                <h4></h4>
+                <ul></ul>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <h3></h3>
+            <p></p>
+            <form>
+              <div>
+                <label for="diet-type"></label>
+                <select id="diet-type">
+                  <option value="" selected></option>
+                  <option value="vegetarian"></option>
+                  <option value="vegan"></option>
+                  <option value="pescetarian"></option>
+                  <option value="glutenFree"></option>
+                  <option value="dairyFree"></option>
+                </select>
+              </div>
+              <div>
+                <label for="diet-allergens"></label>
+                <input id="diet-allergens" type="text" >
+              </div>
+              <div>
+                <label for="diet-max-time"></label>
+                <input id="diet-max-time" type="number" min="0" step="5" >
+              </div>
+            </form>
+          </section>
+
+          <section>
+            <h3></h3>
+            <p></p>
+            <div>
+              <label>
+                <input id="nutrition-conflict-toggle" type="checkbox" >
+              </label>
+              <p></p>
+            </div>
+          </section>
+
+          <section>
+            <h3></h3>
+            <p></p>
+            <div>
+              <button id="export-mealplan-button"></button>
+              <button id="import-mealplan-button"></button>
+              <button id="export-shopping-button"></button>
+              <button id="import-shopping-button"></button>
+              <input
+                id="import-mealplan-file"
+                type="file"
+                accept="application/json,.json"
+                hidden
+              >
+              <input
+                id="import-shopping-file"
+                type="file"
+                accept="application/json,.json"
+                hidden
+              >
+            </div>
+          </section>
+
+          <section>
+            <h3></h3>
+            <p></p>
+            <div>
+              <button id="clear-favorites-button"></button>
+              <button id="clear-plans-button"></button>
+              <button id="clear-all-data-button"></button>
+            </div>
+          </section>
+        </div>
+      </section>
+    </template>
+    <template id="recipeCardWrapperTemplate">
+      <div></div>
+    </template>
+    <template id="recipeCardsMessageTemplate">
+      <p></p>
+    </template>
+    <template id="recipeCardTemplate">
+      <button></button>
+      <img src="" alt="" >
+      <h3></h3>
+      <p></p>
+    </template>
+    <template id="recipeDetailTemplate">
+      <section>
+        <button></button>
+        <div>
+          <img src="" alt="" >
+          <div>
+            <h3></h3>
+            <p></p>
+          </div>
+        </div>
+        <div>
+          <section>
+            <h4></h4>
+            <p></p>
+            <ul></ul>
+          </section>
+          <section>
+            <h4></h4>
+            <p></p>
+          </section>
+          <section>
+            <button></button>
+            <button type="button"></button>
+          </section>
+        </div>
+      </section>
+    </template>
+    <template id="ingredientDetailTemplate">
+      <section>
+        <button></button>
+        <div>
+          <img src="" alt="" >
+          <div>
+            <h3></h3>
+            <p></p>
+          </div>
+        </div>
+        <div>
+          <p></p>
+          <p></p>
+          <p></p>
+          <p></p>
+        </div>
+      </section>
+    </template>
+    <template id="nutritionDetailTemplate">
+      <section>
+        <button></button>
+        <div>
+          <div>
+            <h3></h3>
+            <p></p>
+          </div>
+        </div>
+        <div>
+          <ul></ul>
+        </div>
+      </section>
     </template>
     <template id="footerTemplate">
-      <footer class="footer wdd330">
-        <div class="footer-content">
-          <span class="footer-class">WDD330</span> &copy;
-          <span class="currentyear"></span> Tracy Robert Mann
+      <footer>
+        <div id="footer-content">
+          <span id="footer-course"></span>
+          <span aria-hidden="true">&copy;</span>
+          <span id="footer-year"></span>
+          <span id="footer-author"></span>
         </div>
       </footer>
     </template>

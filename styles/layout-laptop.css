@@ -80,4 +80,30 @@
   .shopping-list-btn-mobile {
     display: none;
   }
+
+  /* Shopping page for laptop: centered content with lists in two columns */
+  .shopping-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem;
+  }
+
+  .shopping-lists {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  /* Meal plan actions: buttons side by side on laptop */
+  .meal-plan-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .meal-plan-actions button {
+    flex: 0 1 auto;
+  }
 }

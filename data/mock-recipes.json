@@ -3,7 +3,7 @@
     {
       "id": 1,
       "title": "Classic Tomato Bruschetta",
-      "image": "images/recipe-placeholder.svg",
+      "image": "images/recipePlaceholder.svg",
       "imageType": "svg",
       "usedIngredientCount": 2,
       "missedIngredientCount": 3,
@@ -86,7 +86,7 @@
     {
       "id": 2,
       "title": "Creamy Mushroom Pasta",
-      "image": "images/recipe-placeholder.svg",
+      "image": "images/recipePlaceholder.svg",
       "imageType": "svg",
       "usedIngredientCount": 3,
       "missedIngredientCount": 2,
@@ -169,7 +169,7 @@
     {
       "id": 3,
       "title": "Spicy Chicken Tacos",
-      "image": "images/recipe-placeholder.svg",
+      "image": "images/recipePlaceholder.svg",
       "imageType": "svg",
       "usedIngredientCount": 4,
       "missedIngredientCount": 1,
@@ -252,7 +252,7 @@
     {
       "id": 4,
       "title": "Lemon Herb Roasted Salmon",
-      "image": "images/recipe-placeholder.svg",
+      "image": "images/recipePlaceholder.svg",
       "imageType": "svg",
       "usedIngredientCount": 3,
       "missedIngredientCount": 2,
@@ -335,7 +335,7 @@
     {
       "id": 5,
       "title": "Hearty Beef Stew",
-      "image": "images/recipe-placeholder.svg",
+      "image": "images/recipePlaceholder.svg",
       "imageType": "svg",
       "usedIngredientCount": 5,
       "missedIngredientCount": 0,
@@ -418,7 +418,7 @@
     {
       "id": 6,
       "title": "Quinoa Salad with Avocado",
-      "image": "images/recipe-placeholder.svg",
+      "image": "images/recipePlaceholder.svg",
       "imageType": "svg",
       "usedIngredientCount": 3,
       "missedIngredientCount": 1,
@@ -501,7 +501,7 @@
     {
       "id": 7,
       "title": "Garlic Shrimp Scampi",
-      "image": "images/recipe-placeholder.svg",
+      "image": "images/recipePlaceholder.svg",
       "imageType": "svg",
       "usedIngredientCount": 2,
       "missedIngredientCount": 2,
@@ -584,7 +584,7 @@
     {
       "id": 8,
       "title": "Vegetable Stir-Fry",
-      "image": "images/recipe-placeholder.svg",
+      "image": "images/recipePlaceholder.svg",
       "imageType": "svg",
       "usedIngredientCount": 4,
       "missedIngredientCount": 0,
@@ -667,7 +667,7 @@
     {
       "id": 9,
       "title": "Chocolate Lava Cakes",
-      "image": "images/recipe-placeholder.svg",
+      "image": "images/recipePlaceholder.svg",
       "imageType": "svg",
       "usedIngredientCount": 1,
       "missedIngredientCount": 4,

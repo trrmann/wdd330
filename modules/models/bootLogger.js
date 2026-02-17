@@ -1,5 +1,10 @@
 import { bootLogConfig } from './bootLogConfig.js';
 
+// Boot Logger Module
+// Purpose: Provides a minimal logger for module load-time diagnostics before
+// the main Logger is configured.
+// Usage: import { bootLogger } from './bootLogger.js';
+//        bootLogger.moduleInfo(import.meta.url, 'MyModule loaded');
 class BootLogger {
   static get descriptors() {
     return {
@@ -156,7 +161,16 @@ class BootLogger {
   }
 }
 
-const bootLogger = new BootLogger(bootLogConfig);
+BootLogger.instance = null;
+
+BootLogger.getInstance = function getInstance() {
+  if (!BootLogger.instance) {
+    BootLogger.instance = new BootLogger(bootLogConfig);
+  }
+  return BootLogger.instance;
+};
+
+const bootLogger = BootLogger.getInstance();
 
 bootLogger.moduleLoadStarted(import.meta.url);
 

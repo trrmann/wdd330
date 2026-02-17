@@ -92,14 +92,14 @@ tr:nth-child(even) {
   text-align: center;
   margin: 0;
 }
-.menu-item a {
+.menu-item-link {
   display: block;
   padding: 0.75rem 1.5rem;
   color: var(--neutral-color);
   text-decoration: none;
   font-size: 1rem;
 }
-.menu-item a:hover {
+.menu-item-link:hover {
   background: var(--secondary-color);
   color: var(--primary-color);
 }
@@ -109,18 +109,6 @@ tr:nth-child(even) {
   display: grid;
   gap: 1rem;
   margin: 1rem 0;
-}
-
-.meal-plan-summary {
-  padding: 1rem;
-  text-align: center;
-  font-weight: bold;
-  border-radius: 8px;
-}
-
-.meal-plan-summary {
-  background-color: var(--secondary-color);
-  color: var(--neutral-secondary-color);
 }
 
 /* Header base styles */
@@ -298,8 +286,8 @@ tr:nth-child(even) {
   cursor: pointer;
   padding: 0.5rem;
 }
-.hamburger-icon rect {
-  fill: var(--secondary-color);
+.hamburger-icon {
+  color: var(--secondary-color);
 }
 
 /* Footer base styles */
@@ -331,8 +319,7 @@ tr:nth-child(even) {
   max-width: 90%;
   margin: 0 auto;
 }
-
-.main > h2 {
+.main-title {
   margin: 0 0 1rem 0;
   padding: 0.5rem 1rem;
 }
@@ -354,17 +341,13 @@ main.recipes .search-bar {
   gap: 0.75rem;
   padding: 0.75rem;
 }
-
-.search-bar input,
-.recipes-search-input-name input,
-.recipes-search-input-ingredient input {
+.search-input {
   flex-grow: 1;
   border: none;
   padding: 0.5rem;
   font-family: var(--body-font);
 }
-
-.search-bar button {
+.search-button {
   background-color: var(--primary-color);
   color: var(--neutral-color);
   border: none;
@@ -463,6 +446,12 @@ main.recipes .search-bar {
   margin-bottom: 1rem;
 }
 
+.recipe-cards-empty-message {
+  margin: 0;
+  font-family: var(--body-font);
+  color: var(--neutral-secondary-color);
+}
+
 .recipe-cards-hidden {
   display: none;
 }
@@ -475,21 +464,214 @@ main.recipes .search-bar {
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
 }
-
-.recipe-card img {
+.recipe-card-image {
   width: 100%;
   max-width: 150px;
   height: auto;
   border-radius: 8px;
   margin-bottom: 0.5rem;
 }
-
-.recipe-card h3 {
+.recipe-card-title {
   margin: 0;
   font-family: var(--heading-font);
   color: var(--primary-color);
   background: none;
+}
+
+/* Meal plan summary recipe cards */
+.meal-plan-day {
+  margin-bottom: 1.5rem;
+}
+
+.meal-plan-meal {
+  margin-bottom: 0.75rem;
+}
+
+.meal-plan-meal-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.5rem;
+}
+
+.meal-plan-recipe-card-wrapper {
+  padding: 0.25rem;
+}
+
+.meal-plan-recipe-card {
+  padding: 0.5rem;
+}
+
+.meal-plan-recipe-card .recipe-card-image {
+  max-width: 100%;
+  max-height: 90px;
+  object-fit: cover;
+}
+
+.meal-plan-recipe-card .recipe-card-title {
+  font-size: 0.9rem;
+}
+
+.meal-plan-recipe-card .recipe-card-meta {
+  font-size: 0.8rem;
+}
+
+.recipe-favorite-toggle {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.recipe-favorite-toggle::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: var(--neutral-secondary-color);
+  -webkit-mask: var(--heart-icon-mask);
+  mask: var(--heart-icon-mask);
+  opacity: 0.4;
+}
+
+.recipe-favorite-toggle.is-favorite::before {
+  background-color: var(--secondary-color);
+  opacity: 1;
+  width: calc(100% - 4px);
+  height: calc(100% - 4px);
+  margin: 2px;
+}
+
+.recipe-favorite-toggle.is-favorite {
+  background-color: #ffffff;
+  border-radius: 999px;
+  border: 1px solid var(--neutral-secondary-color);
+}
+
+.recipe-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.recipe-detail-favorite-toggle {
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.recipe-detail-favorite-toggle::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: var(--neutral-secondary-color);
+  -webkit-mask: var(--heart-icon-mask);
+  mask: var(--heart-icon-mask);
+  opacity: 0.4;
+}
+
+.recipe-detail-favorite-toggle.is-favorite::before {
+  background-color: var(--secondary-color);
+  opacity: 1;
+  width: calc(100% - 4px);
+  height: calc(100% - 4px);
+  margin: 2px;
+}
+
+.recipe-detail-favorite-toggle.is-favorite {
+  background-color: #ffffff;
+  border-radius: 999px;
+  border: 1px solid var(--neutral-secondary-color);
+}
+
+.favorites-recipes-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.favorites-recipes-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.favorites-recipes-list li:last-child {
+  border-bottom: none;
+}
+
+.favorite-list-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: inline-block;
+  background-color: #ffffff;
+  border-radius: 999px;
+  border: 1px solid var(--neutral-secondary-color);
+  position: relative;
+}
+
+.favorite-list-icon::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  background-color: var(--secondary-color);
+  -webkit-mask: var(--heart-icon-mask);
+  mask: var(--heart-icon-mask);
+}
+
+.favorites-mealplans-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.favorites-mealplans-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.favorites-mealplans-list li:last-child {
+  border-bottom: none;
+}
+
+.favorites-mealplans-list .mealplan-name {
+  flex: 1 1 auto;
+  margin-right: 2rem;
+}
+
+.mealplan-remove-icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid var(--secondary-color);
+  background-color: #ffffff;
+  color: var(--secondary-color);
+  margin-left: 0;
+  cursor: pointer;
+}
+
+.mealplan-remove-icon::before {
+  content: '\00D7';
+  font-size: 1.1rem;
+  line-height: 1;
 }
 
 .shopping-list-btn {
@@ -511,4 +693,470 @@ main.recipes .search-bar {
 .shopping-list-btn:hover {
   background-color: var(--secondary-color);
   color: var(--neutral-secondary-color);
+}
+
+/* Shopping page content */
+.shopping-page {
+  display: grid;
+  gap: 1rem;
+}
+
+.shopping-header,
+.meal-plan-header,
+.chow-tools-header {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background-color: var(--site-header-background);
+  color: var(--site-header);
+}
+
+.shopping-header p,
+.meal-plan-header p,
+.chow-tools-header p {
+  margin: 0;
+  font-family: var(--heading-font);
+}
+
+.meal-plan-controls {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.meal-plan-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.meal-plan-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.meal-plan-counter input {
+  max-width: 4rem;
+  text-align: center;
+}
+
+.meal-plan-counter button {
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--primary-color);
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.meal-plan-calorie-grid {
+  margin-top: 0.25rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--secondary-color);
+  background-color: rgba(255, 255, 255, 0.7);
+  display: grid;
+  gap: 0.5rem;
+}
+
+.meal-plan-calorie-grid > .meal-plan-calorie-grid-header,
+.meal-plan-calorie-grid > .meal-plan-calorie-grid-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.meal-plan-calorie-grid > .meal-plan-calorie-grid-header {
+  font-weight: bold;
+}
+
+.meal-plan-calorie-grid-header-person {
+  display: block;
+  text-align: center;
+}
+
+.meal-plan-meal-name {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.meal-plan-calorie-grid-person-action-cell {
+  padding: 0.25rem 0;
+}
+
+.meal-plan-calorie-grid-person-action-controls {
+  display: inline-block;
+}
+
+/* Distinct separators for meal plan calorie grid */
+.meal-plan-calorie-grid-person-sum-row {
+  /* Sum row should not alternate; keep a solid white background.
+     Inner edge (top, toward meals/value area) grey, outer edge (bottom) charcoal. */
+  background-color: #fff;
+  border-top: 2px solid var(--border-color-strong, #ccc);
+  border-bottom: 2px solid var(--neutral-secondary-color);
+}
+
+/* Ensure the Sum row header cell matches the white sum row background. */
+.meal-plan-calorie-grid-person-sum-row th {
+  background-color: #fff;
+  color: var(--neutral-secondary-color);
+  /* Sum row header: charcoal border on the left edge in all cases */
+  border-left: 2px solid var(--neutral-secondary-color);
+}
+
+.meal-plan-calorie-grid-person-value-row {
+  border-bottom: 2px solid var(--border-color-strong, #ccc);
+}
+
+.meal-plan-calorie-grid-sum-column-header,
+.meal-plan-calorie-grid-sum-column-cell {
+  /* Outer edge (right) charcoal, inner edge (left, toward value/action) grey */
+  border-left: 2px solid var(--border-color-strong, #ccc);
+  border-right: 2px solid var(--neutral-secondary-color);
+  /* Sum column cells should not alternate; keep a solid white background. */
+  background-color: #fff;
+  color: var(--neutral-secondary-color);
+}
+
+/* Add a charcoal top border on the Sum column header cell only */
+.meal-plan-calorie-grid-sum-column-header {
+  border-top: 2px solid var(--neutral-secondary-color);
+}
+
+.meal-plan-calorie-grid-value-column-header,
+.meal-plan-calorie-grid-value-column-cell {
+  /* Invert header colors for Meal Value: background becomes header text color,
+     text becomes header background color, and do not alternate. */
+  background-color: var(--table-header-color);
+  color: var(--table-header-bg);
+}
+
+.meal-plan-calorie-grid-action-column-header,
+.meal-plan-calorie-grid-action-column-cell {
+  white-space: nowrap;
+  /* Invert header colors for Meal Action similarly. */
+  background-color: var(--table-header-color);
+  color: var(--table-header-bg);
+}
+
+/* In the Sum row, keep Meal Value and Meal Action cells white
+   instead of using the inverted header background. */
+.meal-plan-calorie-grid-person-sum-row
+  .meal-plan-calorie-grid-value-column-cell,
+.meal-plan-calorie-grid-person-sum-row
+  .meal-plan-calorie-grid-action-column-cell {
+  background-color: #fff;
+}
+
+/* Row headers for person value/action matching meal value/action style */
+.meal-plan-calorie-grid-value-row-header,
+.meal-plan-calorie-grid-action-row-header {
+  /* Person Value/Action row headers also use inverted colors to match columns. */
+  background-color: var(--table-header-color);
+  color: var(--table-header-bg);
+}
+.meal-plan-calories-meal,
+.meal-plan-calories-person-value,
+.meal-plan-calories-row-value {
+  width: 100%;
+  max-width: none;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.meal-plan-calories-person-sum {
+  font-weight: 600;
+}
+
+.meal-plan-calorie-grid-row-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  flex-wrap: nowrap;
+}
+
+/* Person Value row: khaki background for each person's cell (not sum/value/action columns) */
+.meal-plan-calorie-grid-person-value-row
+  td:not(.meal-plan-calorie-grid-sum-column-cell):not(
+    .meal-plan-calorie-grid-value-column-cell
+  ):not(.meal-plan-calorie-grid-action-column-cell) {
+  background-color: var(--secondary-color);
+}
+
+/* Person Action row: khaki background for each person's cell */
+.meal-plan-calorie-grid-person-action-row
+  td.meal-plan-calorie-grid-person-action-cell {
+  background-color: var(--secondary-color);
+}
+
+/* When there is no Sum row, the last meal row should have a
+  charcoal bottom edge on its person and sum cells only. This works
+   because if a Sum row exists, it comes after the meal rows
+   so they are not :last-of-type. */
+.meal-plan-calorie-meal-row:last-of-type td.meal-plan-calorie-grid-person-cell,
+.meal-plan-calorie-meal-row:last-of-type
+  td.meal-plan-calorie-grid-sum-column-cell {
+  border-bottom: 2px solid var(--neutral-secondary-color);
+}
+
+/* When there is no Sum column (single person), give the person
+   column a charcoal right edge on its meal and sum cells only. */
+.meal-plan-calorie-table-single-person td.meal-plan-calorie-grid-person-cell {
+  border-right: 2px solid var(--neutral-secondary-color);
+}
+
+.meal-plan-calorie-grid-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.meal-plan-calorie-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.meal-plan-calorie-grid-rows {
+  max-height: 60vh;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+.meal-plan-calorie-table th,
+.meal-plan-calorie-table td {
+  padding: 0.25rem;
+  text-align: center;
+}
+
+/* Charcoal borders only for the header cells that
+   actually use the charcoal background in the calorie
+   grid: the top-left Calories header, each person header,
+   and each meal row header. */
+.meal-plan-calorie-grid-primary-header-cell,
+.meal-plan-calorie-grid-meal-header-cell {
+  /* Match the existing strong charcoal grid lines so
+     these header cell edges visually line up with the
+     other charcoal borders in the table. */
+  border: 2px solid var(--neutral-secondary-color);
+}
+
+/* Ensure the Sum row header (in the body) only has a left
+   charcoal border. This header has a white background and
+   is not part of the primary charcoal-header group. */
+.meal-plan-calorie-grid-person-sum-row th {
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  border-left: 2px solid var(--neutral-secondary-color);
+}
+
+.shopping-add-item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.shopping-lists {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.shopping-list-section {
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--secondary-color);
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+.shopping-known-wrapper {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+}
+
+.shopping-new-item {
+  flex: 1 1 auto;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--primary-color);
+}
+
+.shopping-known-toggle {
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid var(--primary-color);
+  background-color: var(--neutral-color);
+  cursor: pointer;
+}
+
+.shopping-known-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.25rem 0;
+  list-style: none;
+  background-color: #fff;
+  border: 1px solid var(--secondary-color);
+  border-radius: 8px;
+  max-height: 10rem;
+  overflow-y: auto;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.shopping-known-menu-item {
+  display: block;
+  width: 100%;
+  padding: 0.25rem 0.75rem;
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.shopping-known-menu-item:hover {
+  background-color: rgba(75, 83, 32, 0.08);
+}
+
+.shopping-add-btn {
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid var(--primary-color);
+  background-color: var(--secondary-color);
+  color: var(--neutral-secondary-color);
+  font-family: var(--heading-font);
+  cursor: pointer;
+}
+
+.shopping-list-items {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.shopping-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background-color: var(--neutral-color);
+  border: 1px solid var(--secondary-color);
+}
+
+.shopping-list-item-checkbox {
+  margin-right: 0.5rem;
+}
+
+.shopping-list-item-text {
+  flex: 1 1 auto;
+}
+
+.shopping-list-item-toggle {
+  margin-left: 0.75rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--primary-color);
+  background: #fff;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.shopping-list-item-in-stock {
+  opacity: 0.7;
+}
+
+.shopping-list-item-in-stock .shopping-list-item-text {
+  text-decoration: line-through;
+}
+
+/* Chow Tools (More) page */
+.chow-tools-page {
+  display: block;
+}
+
+.chow-tools-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.tool-card {
+  border-radius: 10px;
+  border: 1px solid var(--secondary-color);
+  background: var(--neutral-color);
+  padding: 1rem;
+}
+
+.tool-card h3 {
+  margin: 0 0 0.25rem;
+  background: none;
+  color: var(--primary-color);
+}
+
+.tool-card-hint {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+}
+
+.tool-card-body {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.tool-card-column {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.tool-card-row {
+  margin-top: 0.5rem;
+}
+
+.dietary-profile-form label {
+  font-size: 0.9rem;
+}
+
+.dietary-profile-form input,
+.dietary-profile-form select {
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--primary-color);
+}
+
+.tool-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+}
+
+.nutrition-summary-placeholder {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.tool-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tool-card-actions button {
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid var(--primary-color);
+  background-color: var(--secondary-color);
+  color: var(--neutral-secondary-color);
+  font-family: var(--heading-font);
+  font-size: 0.85rem;
+  cursor: pointer;
 }
