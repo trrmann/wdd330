@@ -3,9 +3,7 @@ import { bootLogger } from '../models/bootLogger.js';
 import { Logger } from '../models/logger.js';
 import { Site } from './site.js';
 import { Main } from './main.js';
-import { recipes, Recipes } from '../models/recipes.js';
-import { Profile } from '../models/mealPlan.js';
-import { RecipeApi } from '../models/apiAccess.js';
+import { Recipes } from '../models/recipes.js';
 
 bootLogger.moduleLoadStarted(import.meta.url);
 
@@ -25,6 +23,8 @@ class RecipesPage {
       'RecipesPage.constructor: Starting',
     );
     this.config = config;
+    this.profile = options.profile || null;
+    this.recipeApi = options.recipeApi || null;
     this.log(
       'constructor',
       'objectCreateComplete',
@@ -35,8 +35,6 @@ class RecipesPage {
       'info',
       'RecipesPage.constructor: RecipesPage created',
     );
-    this.profile = Profile.getInstance();
-    this.recipeApi = RecipeApi.getInstance();
     // Immediately initialize after construction
     if (config) {
       this.init(config);
@@ -45,6 +43,11 @@ class RecipesPage {
 
   // init: Builds the initial Recipes page view model from the template.
   init(config) {
+    this.log('init', 'methodStart', 'RecipesPage.init: Starting', {
+      hasConfig: !!config,
+      alreadyInitialized: !!this.initialized,
+    });
+
     if (this.initialized && this.view) {
       // State: Reuse existing RecipesPage view model when already initialized.
       return this.log('init', 'passthroughMethodComplete', this.view, {
@@ -117,367 +120,34 @@ class RecipesPage {
     };
   }
 
-  // log: Delegates logging to the shared Logger using RecipesPage conventions.
-  log(methodName, level, ...args) {
-    if (!this.logger) return;
-
-    if (this.logger.isSignatureLevel(level)) {
-      if (typeof methodName === 'string') {
-        if (level.startsWith('passthrough')) {
-          return this.logger.passthroughMethod(
-            'RecipesPage',
-            methodName,
-            ...args,
-          );
-        }
-        this.logger.classMethodLog(level, 'RecipesPage', methodName, ...args);
-      } else if (typeof methodName === 'object' && methodName !== null) {
-        if (level.startsWith('function')) {
-          this.logger.functionLog(level, ...args);
-        } else {
-          this.logger.classLog(level, ...args);
-        }
-      }
-    } else {
-      this.logger.classMethodLog(level, 'RecipesPage', methodName, ...args);
-    }
-  }
-
-  applyRecipesClasses(config, rootElement) {
-    if (!config || !config.classes || !config.ids || !rootElement) return;
-
-    const { classes, ids } = config;
-
-    const mappings = [
-      [ids.recipesSearchBar, classes.homeSearchBar],
-      [ids.recipesSearchSubmitButton, classes.recipesSearchSubmit],
-      [ids.recipesSearchSubmitButton, classes.searchButton],
-      [ids.recipesSearchNameInput, classes.recipesSearchNameInput],
-      [ids.recipesSearchNameInput, classes.searchInput],
-      [ids.recipesSearchIngredientInput, classes.recipesSearchIngredientInput],
-      [ids.recipesSearchIngredientInput, classes.searchInput],
-      [ids.recipesNutritionName, classes.recipesNutritionName],
-      [ids.recipesNutritionMin, classes.recipesNutritionMin],
-      [ids.recipesNutritionMinValue, classes.recipesNutritionMinValue],
-      [ids.recipesNutritionMax, classes.recipesNutritionMax],
-      [ids.recipesNutritionMaxValue, classes.recipesNutritionMaxValue],
-      [ids.recipesSearchControls, classes.recipesSearchControls],
-      [ids.recipesSearchInputs, classes.recipesSearchInputs],
-      [ids.recipesSearchNameContainer, classes.recipesSearchInputName],
-      [
-        ids.recipesSearchIngredientContainer,
-        classes.recipesSearchInputIngredient,
-      ],
-      [
-        ids.recipesSearchNutritionContainer,
-        classes.recipesSearchInputNutrition,
-      ],
-      [ids.recipesNutritionNameRow, classes.recipesNutritionRow],
-      [ids.recipesNutritionModeRow, classes.recipesNutritionRow],
-      [ids.recipesNutritionModeRow, classes.recipesNutritionMode],
-      [ids.recipesNutritionValues, classes.recipesNutritionValues],
-      [ids.recipesRecipeCardsContainer, classes.recipeCards],
-    ];
-
-    mappings.forEach(([idValue, className]) => {
-      if (!idValue || !className) return;
-      const element = rootElement.querySelector(`#${CSS.escape(idValue)}`);
-      if (element && !element.classList.contains(className)) {
-        element.classList.add(className);
-      }
-    });
-
-    // Apply classes for elements that do not have dedicated ids but
-    // still need structural classes for messaging and layout.
-    const typeGroup = rootElement.querySelector(
-      `#${CSS.escape(ids.recipesSearchTypeGroup || 'recipes-search-type-group')}`,
-    );
-    if (typeGroup && classes.recipesSearchTypeGroup) {
-      typeGroup.classList.add(classes.recipesSearchTypeGroup);
-    }
-
-    // Nutrition mode label span inside the nutrition mode row.
-    if (ids.recipesNutritionModeRow && classes.recipesNutritionModeLabel) {
-      const modeRow = rootElement.querySelector(
-        `#${CSS.escape(ids.recipesNutritionModeRow)}`,
-      );
-      const modeLabelSpan = modeRow ? modeRow.querySelector('span') : null;
-      if (modeLabelSpan) {
-        modeLabelSpan.classList.add(classes.recipesNutritionModeLabel);
-      }
-    }
-  }
-
-  // afterRender: Wires Recipes page filters after content render.
-  afterRender(config) {
+  // addRecipesPageEventListeners: Attaches filter controls and search trigger.
+  addRecipesPageEventListeners(config) {
     this.log(
-      'afterRender',
-      'lifecycle',
-      'recipesPage.afterRender: Starting afterRender lifecycle hook',
+      'addRecipesPageEventListeners',
+      'methodStart',
+      'recipesPage.addRecipesPageEventListeners: Starting',
+      {
+        hasConfig: !!config,
+        hasClasses: !!(config && config.classes),
+      },
     );
-    const mainElement = document.querySelector(`.${config.classes.main}`);
-    if (mainElement) {
-      this.applyRecipesClasses(config, mainElement);
-    }
 
-    this.loadRecipeCards(config);
-    this.addRecipesPageEventListeners(config);
-    if (mainElement && config.classes && config.classes.visuallyHidden) {
-      ['recipes-search-name-input', 'recipes-search-ingredient-input'].forEach(
-        (id) => {
-          const label = mainElement.querySelector(`label[for="${id}"]`);
-          if (label) {
-            label.classList.add(config.classes.visuallyHidden);
-          }
+    const mainElement = document.querySelector(`.${config.classes.main}`);
+    if (!mainElement) {
+      return this.log(
+        'addRecipesPageEventListeners',
+        'passthroughMethodComplete',
+        undefined,
+        {
+          toLogValue: () => ({
+            reason:
+              'recipesPage.addRecipesPageEventListeners: Main element not found',
+            hasConfig: !!config,
+            hasClasses: !!(config && config.classes),
+          }),
         },
       );
     }
-    if (mainElement && config.messages) {
-      const recipesMessages = config.messages.recipes || null;
-      const sharedMessages = config.messages.shared || null;
-      const controlsMessages = config.messages.controls || null;
-
-      if (recipesMessages) {
-        const legend = mainElement.querySelector(
-          '.recipes-search-type-group legend',
-        );
-        if (legend && recipesMessages.searchByLegend) {
-          legend.textContent = recipesMessages.searchByLegend;
-        }
-
-        const nameLabel = mainElement.querySelector(
-          'label input[name="recipes-search-type"][value="name"]',
-        );
-        if (
-          nameLabel &&
-          nameLabel.parentElement &&
-          recipesMessages.searchTypeNameLabel
-        ) {
-          nameLabel.parentElement.lastChild.textContent =
-            recipesMessages.searchTypeNameLabel;
-        }
-
-        const ingredientLabel = mainElement.querySelector(
-          'label input[name="recipes-search-type"][value="ingredient"]',
-        );
-        if (
-          ingredientLabel &&
-          ingredientLabel.parentElement &&
-          recipesMessages.searchTypeIngredientLabel
-        ) {
-          ingredientLabel.parentElement.lastChild.textContent =
-            recipesMessages.searchTypeIngredientLabel;
-        }
-
-        const nutritionLabel = mainElement.querySelector(
-          'label input[name="recipes-search-type"][value="nutrition"]',
-        );
-        if (
-          nutritionLabel &&
-          nutritionLabel.parentElement &&
-          recipesMessages.searchTypeNutritionLabel
-        ) {
-          nutritionLabel.parentElement.lastChild.textContent =
-            recipesMessages.searchTypeNutritionLabel;
-        }
-
-        const nameInputLabel = mainElement.querySelector(
-          'label[for="recipes-search-name-input"]',
-        );
-        if (nameInputLabel && recipesMessages.searchByNameLabel) {
-          nameInputLabel.textContent = recipesMessages.searchByNameLabel;
-        }
-
-        const ingredientInputLabel = mainElement.querySelector(
-          'label[for="recipes-search-ingredient-input"]',
-        );
-        if (ingredientInputLabel && recipesMessages.searchByIngredientLabel) {
-          ingredientInputLabel.textContent =
-            recipesMessages.searchByIngredientLabel;
-        }
-
-        const nutrientLabel = mainElement.querySelector(
-          '.recipes-nutrition-row label',
-        );
-        if (nutrientLabel && recipesMessages.nutritionNutrientLabel) {
-          nutrientLabel.firstChild.textContent =
-            recipesMessages.nutritionNutrientLabel;
-        }
-
-        const useLabel = mainElement.querySelector(
-          '.recipes-nutrition-mode-label',
-        );
-        if (useLabel && recipesMessages.nutritionUseLabel) {
-          useLabel.textContent = recipesMessages.nutritionUseLabel;
-        }
-
-        const minModeLabel = mainElement.querySelector(
-          '.recipes-nutrition-mode label input[value="min"]',
-        );
-        if (minModeLabel && minModeLabel.parentElement) {
-          const minModeText =
-            controlsMessages && typeof controlsMessages.minLabel === 'string'
-              ? controlsMessages.minLabel
-              : '';
-          minModeLabel.parentElement.lastChild.textContent = minModeText;
-        }
-
-        const maxModeLabel = mainElement.querySelector(
-          '.recipes-nutrition-mode label input[value="max"]',
-        );
-        if (maxModeLabel && maxModeLabel.parentElement) {
-          const maxModeText =
-            controlsMessages && typeof controlsMessages.maxLabel === 'string'
-              ? controlsMessages.maxLabel
-              : '';
-          maxModeLabel.parentElement.lastChild.textContent = maxModeText;
-        }
-
-        const rangeModeLabel = mainElement.querySelector(
-          '.recipes-nutrition-mode label input[value="range"]',
-        );
-        if (
-          rangeModeLabel &&
-          rangeModeLabel.parentElement &&
-          recipesMessages.nutritionModeRangeLabel
-        ) {
-          rangeModeLabel.parentElement.lastChild.textContent =
-            recipesMessages.nutritionModeRangeLabel;
-        }
-
-        const minLabel = mainElement.querySelector('.recipes-nutrition-min');
-        if (minLabel) {
-          const minLabelText =
-            controlsMessages && typeof controlsMessages.minLabel === 'string'
-              ? controlsMessages.minLabel
-              : '';
-          minLabel.firstChild.textContent = minLabelText;
-        }
-
-        const maxLabel = mainElement.querySelector('.recipes-nutrition-max');
-        if (maxLabel) {
-          const maxLabelText =
-            controlsMessages && typeof controlsMessages.maxLabel === 'string'
-              ? controlsMessages.maxLabel
-              : '';
-          maxLabel.firstChild.textContent = maxLabelText;
-        }
-
-        const searchButton = mainElement.querySelector(
-          `#${CSS.escape(config.ids.recipesSearchSubmitButton)}`,
-        );
-        const searchLabelText =
-          controlsMessages && typeof controlsMessages.searchButton === 'string'
-            ? controlsMessages.searchButton
-            : '';
-        if (searchButton) {
-          searchButton.textContent = searchLabelText;
-        }
-      }
-
-      if (sharedMessages && config.ids && config.ids.templates) {
-        const detailTemplateId = config.ids.templates.recipeDetail;
-        const ingredientTemplateId = config.ids.templates.ingredientDetail;
-        const nutritionTemplateId = config.ids.templates.nutritionDetail;
-
-        if (detailTemplateId) {
-          const detailTemplate = mainElement.querySelector(
-            `#${CSS.escape(detailTemplateId)}`,
-          );
-          const detailRoot =
-            detailTemplate && detailTemplate.content
-              ? detailTemplate.content
-              : null;
-          if (detailRoot) {
-            const ingredientsHeading = detailRoot.querySelector(
-              '.recipe-detail-ingredients h4',
-            );
-            if (
-              ingredientsHeading &&
-              sharedMessages.recipeDetailIngredientsHeading
-            ) {
-              ingredientsHeading.textContent =
-                sharedMessages.recipeDetailIngredientsHeading;
-            }
-
-            const ingredientsHint = detailRoot.querySelector(
-              '.recipe-detail-ingredients-hint',
-            );
-            if (ingredientsHint && sharedMessages.recipeDetailIngredientsHint) {
-              ingredientsHint.textContent =
-                sharedMessages.recipeDetailIngredientsHint;
-            }
-
-            const instructionsHeading = detailRoot.querySelector(
-              '.recipe-detail-instructions h4',
-            );
-            if (
-              instructionsHeading &&
-              sharedMessages.recipeDetailInstructionsHeading
-            ) {
-              instructionsHeading.textContent =
-                sharedMessages.recipeDetailInstructionsHeading;
-            }
-
-            const nutritionButton = detailRoot.querySelector(
-              '.recipe-detail-nutrition-btn',
-            );
-            if (nutritionButton && sharedMessages.recipeDetailNutritionButton) {
-              nutritionButton.textContent =
-                sharedMessages.recipeDetailNutritionButton;
-            }
-          }
-        }
-
-        if (ingredientTemplateId) {
-          const ingredientTemplate = mainElement.querySelector(
-            `#${CSS.escape(ingredientTemplateId)}`,
-          );
-          const ingredientRoot =
-            ingredientTemplate && ingredientTemplate.content
-              ? ingredientTemplate.content
-              : null;
-          if (ingredientRoot && sharedMessages.ingredientDetailTitle) {
-            const title = ingredientRoot.querySelector(
-              '.ingredient-detail-title',
-            );
-            if (title) {
-              title.textContent = sharedMessages.ingredientDetailTitle;
-            }
-          }
-        }
-
-        if (nutritionTemplateId) {
-          const nutritionTemplate = mainElement.querySelector(
-            `#${CSS.escape(nutritionTemplateId)}`,
-          );
-          const nutritionRoot =
-            nutritionTemplate && nutritionTemplate.content
-              ? nutritionTemplate.content
-              : null;
-          if (nutritionRoot && sharedMessages.nutritionDetailTitle) {
-            const title = nutritionRoot.querySelector(
-              '.nutrition-detail-title',
-            );
-            if (title) {
-              title.textContent = sharedMessages.nutritionDetailTitle;
-            }
-          }
-        }
-      }
-    }
-    if (mainElement) {
-      const site = window.site instanceof Site ? window.site : null;
-      if (site && typeof site.applyConfiguredAttributesInRoot === 'function') {
-        site.applyConfiguredAttributesInRoot(mainElement, config);
-      }
-    }
-  }
-
-  // addRecipesPageEventListeners: Attaches filter controls and search trigger.
-  addRecipesPageEventListeners(config) {
-    const mainElement = document.querySelector(`.${config.classes.main}`);
-    if (!mainElement) return;
     const nameCheckbox = mainElement.querySelector(
       'input[name="recipes-search-type"][value="name"]',
     );
@@ -753,6 +423,423 @@ class RecipesPage {
     attachEnterKey(nutrientNameInput);
     attachEnterKey(nutritionMinInput);
     attachEnterKey(nutritionMaxInput);
+
+    this.log(
+      'addRecipesPageEventListeners',
+      'info',
+      'recipesPage.addRecipesPageEventListeners: Attached Recipes page event listeners',
+      {
+        hasNameCheckbox: !!nameCheckbox,
+        hasIngredientCheckbox: !!ingredientCheckbox,
+        hasNutritionCheckbox: !!nutritionCheckbox,
+        hasSearchButton: !!searchButton,
+      },
+    );
+
+    return this.log(
+      'addRecipesPageEventListeners',
+      'passthroughMethodComplete',
+      undefined,
+    );
+  }
+
+  // afterRender: Wires Recipes page filters after content render.
+  afterRender(config) {
+    this.log(
+      'afterRender',
+      'methodStart',
+      'recipesPage.afterRender: Starting',
+      {
+        hasConfig: !!config,
+      },
+    );
+    this.log(
+      'afterRender',
+      'lifecycle',
+      'recipesPage.afterRender: Starting afterRender lifecycle hook',
+    );
+    const mainElement = document.querySelector(`.${config.classes.main}`);
+    if (mainElement) {
+      this.applyRecipesClasses(config, mainElement);
+    }
+
+    this.loadRecipeCards(config);
+    this.addRecipesPageEventListeners(config);
+    if (mainElement && config.classes && config.classes.visuallyHidden) {
+      ['recipes-search-name-input', 'recipes-search-ingredient-input'].forEach(
+        (id) => {
+          const label = mainElement.querySelector(`label[for="${id}"]`);
+          if (label) {
+            label.classList.add(config.classes.visuallyHidden);
+          }
+        },
+      );
+    }
+    if (mainElement && config.messages) {
+      const recipesMessages = config.messages.recipes || null;
+      const sharedMessages = config.messages.shared || null;
+      const controlsMessages = config.messages.controls || null;
+
+      if (recipesMessages) {
+        const legend = mainElement.querySelector(
+          '.recipes-search-type-group legend',
+        );
+        if (legend && recipesMessages.searchByLegend) {
+          legend.textContent = recipesMessages.searchByLegend;
+        }
+
+        const nameLabel = mainElement.querySelector(
+          'label input[name="recipes-search-type"][value="name"]',
+        );
+        if (
+          nameLabel &&
+          nameLabel.parentElement &&
+          recipesMessages.searchTypeNameLabel
+        ) {
+          nameLabel.parentElement.lastChild.textContent =
+            recipesMessages.searchTypeNameLabel;
+        }
+
+        const ingredientLabel = mainElement.querySelector(
+          'label input[name="recipes-search-type"][value="ingredient"]',
+        );
+        if (
+          ingredientLabel &&
+          ingredientLabel.parentElement &&
+          recipesMessages.searchTypeIngredientLabel
+        ) {
+          ingredientLabel.parentElement.lastChild.textContent =
+            recipesMessages.searchTypeIngredientLabel;
+        }
+
+        const nutritionLabel = mainElement.querySelector(
+          'label input[name="recipes-search-type"][value="nutrition"]',
+        );
+        if (
+          nutritionLabel &&
+          nutritionLabel.parentElement &&
+          recipesMessages.searchTypeNutritionLabel
+        ) {
+          nutritionLabel.parentElement.lastChild.textContent =
+            recipesMessages.searchTypeNutritionLabel;
+        }
+
+        const nameInputLabel = mainElement.querySelector(
+          'label[for="recipes-search-name-input"]',
+        );
+        if (nameInputLabel && recipesMessages.searchByNameLabel) {
+          nameInputLabel.textContent = recipesMessages.searchByNameLabel;
+        }
+
+        const ingredientInputLabel = mainElement.querySelector(
+          'label[for="recipes-search-ingredient-input"]',
+        );
+        if (ingredientInputLabel && recipesMessages.searchByIngredientLabel) {
+          ingredientInputLabel.textContent =
+            recipesMessages.searchByIngredientLabel;
+        }
+
+        const nutrientLabel = mainElement.querySelector(
+          '.recipes-nutrition-row label',
+        );
+        if (nutrientLabel && recipesMessages.nutritionNutrientLabel) {
+          nutrientLabel.firstChild.textContent =
+            recipesMessages.nutritionNutrientLabel;
+        }
+
+        const useLabel = mainElement.querySelector(
+          '.recipes-nutrition-mode-label',
+        );
+        if (useLabel && recipesMessages.nutritionUseLabel) {
+          useLabel.textContent = recipesMessages.nutritionUseLabel;
+        }
+
+        const minModeLabel = mainElement.querySelector(
+          '.recipes-nutrition-mode label input[value="min"]',
+        );
+        if (minModeLabel && minModeLabel.parentElement) {
+          const minModeText =
+            controlsMessages && typeof controlsMessages.minLabel === 'string'
+              ? controlsMessages.minLabel
+              : '';
+          minModeLabel.parentElement.lastChild.textContent = minModeText;
+        }
+
+        const maxModeLabel = mainElement.querySelector(
+          '.recipes-nutrition-mode label input[value="max"]',
+        );
+        if (maxModeLabel && maxModeLabel.parentElement) {
+          const maxModeText =
+            controlsMessages && typeof controlsMessages.maxLabel === 'string'
+              ? controlsMessages.maxLabel
+              : '';
+          maxModeLabel.parentElement.lastChild.textContent = maxModeText;
+        }
+
+        const rangeModeLabel = mainElement.querySelector(
+          '.recipes-nutrition-mode label input[value="range"]',
+        );
+        if (
+          rangeModeLabel &&
+          rangeModeLabel.parentElement &&
+          recipesMessages.nutritionModeRangeLabel
+        ) {
+          rangeModeLabel.parentElement.lastChild.textContent =
+            recipesMessages.nutritionModeRangeLabel;
+        }
+
+        const minLabel = mainElement.querySelector('.recipes-nutrition-min');
+        if (minLabel) {
+          const minLabelText =
+            controlsMessages && typeof controlsMessages.minLabel === 'string'
+              ? controlsMessages.minLabel
+              : '';
+          minLabel.firstChild.textContent = minLabelText;
+        }
+
+        const maxLabel = mainElement.querySelector('.recipes-nutrition-max');
+        if (maxLabel) {
+          const maxLabelText =
+            controlsMessages && typeof controlsMessages.maxLabel === 'string'
+              ? controlsMessages.maxLabel
+              : '';
+          maxLabel.firstChild.textContent = maxLabelText;
+        }
+
+        const searchButton = mainElement.querySelector(
+          `#${CSS.escape(config.ids.recipesSearchSubmitButton)}`,
+        );
+        const searchLabelText =
+          controlsMessages && typeof controlsMessages.searchButton === 'string'
+            ? controlsMessages.searchButton
+            : '';
+        if (searchButton) {
+          searchButton.textContent = searchLabelText;
+        }
+      }
+
+      if (sharedMessages && config.ids && config.ids.templates) {
+        const detailTemplateId = config.ids.templates.recipeDetail;
+        const ingredientTemplateId = config.ids.templates.ingredientDetail;
+        const nutritionTemplateId = config.ids.templates.nutritionDetail;
+
+        if (detailTemplateId) {
+          const detailTemplate = mainElement.querySelector(
+            `#${CSS.escape(detailTemplateId)}`,
+          );
+          const detailRoot =
+            detailTemplate && detailTemplate.content
+              ? detailTemplate.content
+              : null;
+          if (detailRoot) {
+            const ingredientsHeading = detailRoot.querySelector(
+              '.recipe-detail-ingredients h4',
+            );
+            if (
+              ingredientsHeading &&
+              sharedMessages.recipeDetailIngredientsHeading
+            ) {
+              ingredientsHeading.textContent =
+                sharedMessages.recipeDetailIngredientsHeading;
+            }
+
+            const ingredientsHint = detailRoot.querySelector(
+              '.recipe-detail-ingredients-hint',
+            );
+            if (ingredientsHint && sharedMessages.recipeDetailIngredientsHint) {
+              ingredientsHint.textContent =
+                sharedMessages.recipeDetailIngredientsHint;
+            }
+
+            const instructionsHeading = detailRoot.querySelector(
+              '.recipe-detail-instructions h4',
+            );
+            if (
+              instructionsHeading &&
+              sharedMessages.recipeDetailInstructionsHeading
+            ) {
+              instructionsHeading.textContent =
+                sharedMessages.recipeDetailInstructionsHeading;
+            }
+
+            const nutritionButton = detailRoot.querySelector(
+              '.recipe-detail-nutrition-button',
+            );
+            if (nutritionButton && sharedMessages.recipeDetailNutritionButton) {
+              nutritionButton.textContent =
+                sharedMessages.recipeDetailNutritionButton;
+            }
+          }
+        }
+
+        if (ingredientTemplateId) {
+          const ingredientTemplate = mainElement.querySelector(
+            `#${CSS.escape(ingredientTemplateId)}`,
+          );
+          const ingredientRoot =
+            ingredientTemplate && ingredientTemplate.content
+              ? ingredientTemplate.content
+              : null;
+          if (ingredientRoot && sharedMessages.ingredientDetailTitle) {
+            const title = ingredientRoot.querySelector(
+              '.ingredient-detail-title',
+            );
+            if (title) {
+              title.textContent = sharedMessages.ingredientDetailTitle;
+            }
+          }
+        }
+
+        if (nutritionTemplateId) {
+          const nutritionTemplate = mainElement.querySelector(
+            `#${CSS.escape(nutritionTemplateId)}`,
+          );
+          const nutritionRoot =
+            nutritionTemplate && nutritionTemplate.content
+              ? nutritionTemplate.content
+              : null;
+          if (nutritionRoot && sharedMessages.nutritionDetailTitle) {
+            const title = nutritionRoot.querySelector(
+              '.nutrition-detail-title',
+            );
+            if (title) {
+              title.textContent = sharedMessages.nutritionDetailTitle;
+            }
+          }
+        }
+      }
+    }
+    if (mainElement) {
+      const site = window.site instanceof Site ? window.site : null;
+      if (site && typeof site.applyConfiguredAttributesInRoot === 'function') {
+        site.applyConfiguredAttributesInRoot(mainElement, config);
+      }
+    }
+
+    this.log(
+      'afterRender',
+      'info',
+      'recipesPage.afterRender: Completed afterRender lifecycle hook',
+      {
+        hasMainElement: !!mainElement,
+      },
+    );
+    return this.log('afterRender', 'passthroughMethodComplete', undefined);
+  }
+
+  applyRecipesClasses(config, rootElement) {
+    this.log(
+      'applyRecipesClasses',
+      'methodStart',
+      'recipesPage.applyRecipesClasses: Starting',
+      {
+        hasConfig: !!config,
+        hasClasses: !!(config && config.classes),
+        hasIds: !!(config && config.ids),
+        hasRootElement: !!rootElement,
+      },
+    );
+
+    if (!config || !config.classes || !config.ids || !rootElement) {
+      return this.log(
+        'applyRecipesClasses',
+        'passthroughMethodComplete',
+        undefined,
+        {
+          toLogValue: () => ({
+            reason:
+              'recipesPage.applyRecipesClasses: Missing config, classes, ids, or rootElement',
+            hasConfig: !!config,
+            hasClasses: !!(config && config.classes),
+            hasIds: !!(config && config.ids),
+            hasRootElement: !!rootElement,
+          }),
+        },
+      );
+    }
+
+    const { classes, ids } = config;
+
+    let appliedCount = 0;
+    let structuralAppliedCount = 0;
+
+    const mappings = [
+      [ids.recipesSearchBar, classes.homeSearchBar],
+      [ids.recipesSearchSubmitButton, classes.recipesSearchSubmit],
+      [ids.recipesSearchSubmitButton, classes.searchButton],
+      [ids.recipesSearchNameInput, classes.recipesSearchNameInput],
+      [ids.recipesSearchNameInput, classes.searchInput],
+      [ids.recipesSearchIngredientInput, classes.recipesSearchIngredientInput],
+      [ids.recipesSearchIngredientInput, classes.searchInput],
+      [ids.recipesNutritionName, classes.recipesNutritionName],
+      [ids.recipesNutritionMin, classes.recipesNutritionMin],
+      [ids.recipesNutritionMinValue, classes.recipesNutritionMinValue],
+      [ids.recipesNutritionMax, classes.recipesNutritionMax],
+      [ids.recipesNutritionMaxValue, classes.recipesNutritionMaxValue],
+      [ids.recipesSearchControls, classes.recipesSearchControls],
+      [ids.recipesSearchInputs, classes.recipesSearchInputs],
+      [ids.recipesSearchNameContainer, classes.recipesSearchInputName],
+      [
+        ids.recipesSearchIngredientContainer,
+        classes.recipesSearchInputIngredient,
+      ],
+      [
+        ids.recipesSearchNutritionContainer,
+        classes.recipesSearchInputNutrition,
+      ],
+      [ids.recipesNutritionNameRow, classes.recipesNutritionRow],
+      [ids.recipesNutritionModeRow, classes.recipesNutritionRow],
+      [ids.recipesNutritionModeRow, classes.recipesNutritionMode],
+      [ids.recipesNutritionValues, classes.recipesNutritionValues],
+      [ids.recipesRecipeCardsContainer, classes.recipeCards],
+    ];
+
+    mappings.forEach(([idValue, className]) => {
+      if (!idValue || !className) return;
+      const element = rootElement.querySelector(`#${CSS.escape(idValue)}`);
+      if (element && !element.classList.contains(className)) {
+        element.classList.add(className);
+        appliedCount += 1;
+      }
+    });
+
+    // Apply classes for elements that do not have dedicated ids but
+    // still need structural classes for messaging and layout.
+    const typeGroup = rootElement.querySelector(
+      `#${CSS.escape(ids.recipesSearchTypeGroup || 'recipes-search-type-group')}`,
+    );
+    if (typeGroup && classes.recipesSearchTypeGroup) {
+      typeGroup.classList.add(classes.recipesSearchTypeGroup);
+      structuralAppliedCount += 1;
+    }
+
+    // Nutrition mode label span inside the nutrition mode row.
+    if (ids.recipesNutritionModeRow && classes.recipesNutritionModeLabel) {
+      const modeRow = rootElement.querySelector(
+        `#${CSS.escape(ids.recipesNutritionModeRow)}`,
+      );
+      const modeLabelSpan = modeRow ? modeRow.querySelector('span') : null;
+      if (modeLabelSpan) {
+        modeLabelSpan.classList.add(classes.recipesNutritionModeLabel);
+        structuralAppliedCount += 1;
+      }
+    }
+
+    this.log(
+      'applyRecipesClasses',
+      'info',
+      'recipesPage.applyRecipesClasses: Applied classes to Recipes page controls',
+      {
+        appliedCount,
+        structuralAppliedCount,
+      },
+    );
+
+    return this.log(
+      'applyRecipesClasses',
+      'passthroughMethodComplete',
+      undefined,
+    );
   }
 
   async loadRecipeCards(config, filters = null) {
@@ -794,7 +881,15 @@ class RecipesPage {
     }
 
     try {
-      const api = this.recipeApi || RecipeApi.getInstance();
+      const api = this.recipeApi;
+      if (!api) {
+        this.log(
+          'attachRecipesEventListeners',
+          'info',
+          'RecipesPage.ensureRecipesLoaded: No RecipeApi instance available',
+        );
+        return;
+      }
       const dataset = await api.fetchRecipesDataset(config);
       const profile = this.profile;
 
@@ -802,7 +897,7 @@ class RecipesPage {
       Recipes.populateRecipes(dataset);
 
       // State: Use shared recipes collection as the in-memory filter source.
-      let recipeModels = recipes;
+      let recipeModels = Recipes.getAll();
 
       // State: Apply current search filters to in-memory recipes.
       recipeModels = Recipes.filter(recipeModels, filters);
@@ -824,7 +919,20 @@ class RecipesPage {
         pageInstance: this,
       });
     } catch (error) {
-      console.error('Error loading recipe cards (recipes page):', error);
+      this.log(
+        'loadRecipeCards',
+        'error',
+        'RecipesPage.loadRecipeCards: Error loading recipe cards',
+        error,
+      );
+      const messages = (config && config.messages) || {};
+      const sharedMessages = messages.shared || {};
+      const recipesMessages = messages.recipes || {};
+      const errorMessage =
+        sharedMessages.recipesLoadError ||
+        recipesMessages.loadError ||
+        sharedMessages.genericError ||
+        '';
       let messageElement;
       if (messageTemplate && messageTemplate.content) {
         const fragment = messageTemplate.content.cloneNode(true);
@@ -837,8 +945,7 @@ class RecipesPage {
           messageElement.className = config.classes.recipeCardsEmptyMessage;
         }
         // State: Show a fallback error message when recipes fail to load.
-        messageElement.textContent =
-          'Could not load recipes. Please try again later.';
+        messageElement.textContent = errorMessage;
         // State: Replace existing recipe cards with the error message.
         recipeCardContainer.innerHTML = '';
         recipeCardContainer.appendChild(messageElement);
@@ -846,7 +953,83 @@ class RecipesPage {
     }
   }
 
+  showIngredientDetail(config, overlay, recipe, ingredient) {
+    this.log(
+      'showIngredientDetail',
+      'methodStart',
+      'recipesPage.showIngredientDetail: Starting',
+      {
+        recipeId: recipe?.id,
+        ingredientName: ingredient?.name,
+      },
+    );
+    // State: Build configured attributes for ingredient detail controls.
+    const elementAttrs = Site.buildElementAttributes(config);
+    const site = window.site instanceof Site ? window.site : null;
+    const applyAttrs =
+      site && typeof site.applyAttributes === 'function'
+        ? site.applyAttributes.bind(site)
+        : (element, attrs) => {
+            this.log(
+              'showIngredientDetail',
+              'info',
+              'RecipesPage.showIngredientDetail: Site.applyAttributes not available, skipping attribute application',
+              {
+                hasElement: !!element,
+                hasAttrs: !!attrs,
+                hasSite: !!site,
+              },
+            );
+          };
+
+    // State: Swap visible sections to ingredient detail within the overlay.
+    Main.showIngredientDetail(config, {
+      overlay,
+      recipe,
+      ingredient,
+      pageInstance: this,
+      logPrefix: 'recipesPage',
+      scale: 1,
+      elementAttrs,
+      applyAttrs,
+    });
+
+    return this.log(
+      'showIngredientDetail',
+      'passthroughMethodComplete',
+      undefined,
+    );
+  }
+
+  showNutritionDetail(config, overlay, recipe) {
+    this.log(
+      'showNutritionDetail',
+      'methodStart',
+      'recipesPage.showNutritionDetail: Starting',
+      { recipeId: recipe?.id },
+    );
+    // State: Swap visible sections to nutrition detail within the overlay.
+    Main.showNutritionDetail(config, {
+      overlay,
+      recipe,
+      pageInstance: this,
+      logPrefix: 'recipesPage',
+    });
+
+    return this.log(
+      'showNutritionDetail',
+      'passthroughMethodComplete',
+      undefined,
+    );
+  }
+
   showRecipeDetail(config, recipe) {
+    this.log(
+      'showRecipeDetail',
+      'methodStart',
+      'recipesPage.showRecipeDetail: Starting',
+      { id: recipe?.id, title: recipe?.title },
+    );
     this.log(
       'showRecipeDetail',
       'lifecycle',
@@ -877,6 +1060,7 @@ class RecipesPage {
 
     // State: Build configured attributes to apply to detail overlay controls.
     const elementAttrs = Site.buildElementAttributes(config);
+    const site = window.site instanceof Site ? window.site : null;
 
     const profile = this.profile;
 
@@ -894,71 +1078,53 @@ class RecipesPage {
       scale: 1,
       elementAttrs,
       applyAttrs:
-        window.site instanceof Site &&
-        typeof window.site.applyAttributes === 'function'
-          ? window.site.applyAttributes.bind(window.site)
+        site && typeof site.applyAttributes === 'function'
+          ? site.applyAttributes.bind(site)
           : (element, attrs) => {
-              if (!element || !attrs) return;
-              Object.entries(attrs).forEach(([name, value]) => {
-                if (value === false || value == null) {
-                  element.removeAttribute(name);
-                } else {
-                  element.setAttribute(name, String(value));
-                }
-              });
+              this.log(
+                'showRecipeDetail',
+                'info',
+                'RecipesPage.showRecipeDetail: Site.applyAttributes not available, skipping attribute application',
+                {
+                  hasElement: !!element,
+                  hasAttrs: !!attrs,
+                  hasSite: !!site,
+                },
+              );
             },
     });
-  }
 
-  showIngredientDetail(config, overlay, recipe, ingredient) {
-    // State: Build configured attributes for ingredient detail controls.
-    const elementAttrs = Site.buildElementAttributes(config);
-    const site = window.site instanceof Site ? window.site : null;
-    const applyAttrs =
-      site && typeof site.applyAttributes === 'function'
-        ? site.applyAttributes.bind(site)
-        : (element, attrs) => {
-            if (!element || !attrs) return;
-            Object.entries(attrs).forEach(([name, value]) => {
-              if (value === false || value == null) {
-                element.removeAttribute(name);
-              } else {
-                element.setAttribute(name, String(value));
-              }
-            });
-          };
-
-    // State: Swap visible sections to ingredient detail within the overlay.
-    Main.showIngredientDetail(config, {
-      overlay,
-      recipe,
-      ingredient,
-      pageInstance: this,
-      logPrefix: 'recipesPage',
-      scale: 1,
-      elementAttrs,
-      applyAttrs,
-    });
-  }
-
-  showNutritionDetail(config, overlay, recipe) {
-    // State: Swap visible sections to nutrition detail within the overlay.
-    Main.showNutritionDetail(config, {
-      overlay,
-      recipe,
-      pageInstance: this,
-      logPrefix: 'recipesPage',
-    });
+    return this.log('showRecipeDetail', 'passthroughMethodComplete', undefined);
   }
 
   syncFavoriteButtonsForRecipe(recipeId) {
-    if (recipeId == null) return;
+    this.log(
+      'syncFavoriteButtonsForRecipe',
+      'methodStart',
+      'recipesPage.syncFavoriteButtonsForRecipe: Starting',
+      { recipeId },
+    );
+
+    if (recipeId == null) {
+      return this.log(
+        'syncFavoriteButtonsForRecipe',
+        'passthroughMethodComplete',
+        undefined,
+        {
+          toLogValue: () => ({
+            reason:
+              'recipesPage.syncFavoriteButtonsForRecipe: Missing recipeId',
+          }),
+        },
+      );
+    }
 
     const idString = String(recipeId);
     const profile = this.profile;
-    const isFavorite = Array.isArray(profile?.favoriteRecipeIds)
-      ? profile.favoriteRecipeIds.includes(recipeId)
-      : false;
+    const isFavorite =
+      typeof Recipes.isRecipeIdFavoriteForProfile === 'function'
+        ? Recipes.isRecipeIdFavoriteForProfile(recipeId, profile)
+        : false;
 
     const selector = [
       `.recipe-favorite-toggle[data-recipe-id="${CSS.escape(idString)}"]`,
@@ -968,13 +1134,53 @@ class RecipesPage {
     ].join(', ');
 
     const buttons = document.querySelectorAll(selector);
+    const buttonCount = buttons.length;
     buttons.forEach((button) => {
       this.updateFavoriteButtonState(button, isFavorite);
     });
+
+    this.log(
+      'syncFavoriteButtonsForRecipe',
+      'info',
+      'recipesPage.syncFavoriteButtonsForRecipe: Synced favorite buttons for recipe',
+      {
+        recipeId,
+        buttonCount,
+        isFavorite,
+      },
+    );
+
+    return this.log(
+      'syncFavoriteButtonsForRecipe',
+      'passthroughMethodComplete',
+      undefined,
+    );
   }
 
   updateFavoriteButtonState(button, isFavorite) {
-    if (!button) return;
+    this.log(
+      'updateFavoriteButtonState',
+      'methodStart',
+      'recipesPage.updateFavoriteButtonState: Starting',
+      {
+        hasButton: !!button,
+        isFavorite: !!isFavorite,
+      },
+    );
+
+    if (!button) {
+      return this.log(
+        'updateFavoriteButtonState',
+        'passthroughMethodComplete',
+        undefined,
+        {
+          toLogValue: () => ({
+            reason: 'recipesPage.updateFavoriteButtonState: No button provided',
+            isFavorite: !!isFavorite,
+          }),
+        },
+      );
+    }
     const sharedMessages =
       this.config && this.config.messages
         ? this.config.messages.shared || null
@@ -999,6 +1205,48 @@ class RecipesPage {
       if (addLabel) {
         button.setAttribute('aria-label', addLabel);
       }
+    }
+
+    this.log(
+      'updateFavoriteButtonState',
+      'info',
+      'recipesPage.updateFavoriteButtonState: Updated favorite button state',
+      {
+        isFavorite: !!isFavorite,
+        className: button.className,
+      },
+    );
+
+    return this.log(
+      'updateFavoriteButtonState',
+      'passthroughMethodComplete',
+      undefined,
+    );
+  }
+
+  // log: Delegates logging to the shared Logger using RecipesPage conventions.
+  log(methodName, level, ...args) {
+    if (!this.logger) return;
+
+    if (this.logger.isSignatureLevel(level)) {
+      if (typeof methodName === 'string') {
+        if (level.startsWith('passthrough')) {
+          return this.logger.passthroughMethod(
+            'RecipesPage',
+            methodName,
+            ...args,
+          );
+        }
+        this.logger.classMethodLog(level, 'RecipesPage', methodName, ...args);
+      } else if (typeof methodName === 'object' && methodName !== null) {
+        if (level.startsWith('function')) {
+          this.logger.functionLog(level, ...args);
+        } else {
+          this.logger.classLog(level, ...args);
+        }
+      }
+    } else {
+      this.logger.classMethodLog(level, 'RecipesPage', methodName, ...args);
     }
   }
 }

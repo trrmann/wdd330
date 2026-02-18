@@ -1,6 +1,11 @@
 import { bootLogger } from '../models/bootLogger.js';
 
 import { Logger } from '../models/logger.js';
+import { HomePage } from './homePage.js';
+import { RecipesPage } from './recipesPage.js';
+import { MealPlanPage } from './mealPlanPage.js';
+import { ShoppingPage } from './shoppingPage.js';
+import { ToolsPage } from './toolsPage.js';
 
 bootLogger.moduleLoadStarted(import.meta.url);
 
@@ -8,12 +13,23 @@ bootLogger.moduleInfo(import.meta.url, 'Defines Main shell component');
 
 // Main Module
 // Purpose: Manages the main content container wrapper and related styling hooks.
-// Usage: const main = new Main(config, { logger });
+// Usage: const main = new Main(config, { logger, storage, profile, shoppingList, inventory, recipeApi });
 class Main {
   // constructor: Creates the Main container and starts initialization.
   constructor(config, options = {}) {
     Object.defineProperties(this, Main.descriptors);
     this.logger = options.logger || null;
+    this.storage = options.storage || null;
+    this.profile = options.profile || null;
+    this.shoppingList =
+      (this.profile && this.profile.shoppingList) ||
+      options.shoppingList ||
+      null;
+    this.inventory =
+      (this.shoppingList && this.shoppingList.inventory) ||
+      options.inventory ||
+      null;
+    this.recipeApi = options.recipeApi || null;
     this.log('constructor', 'objectCreateStart', 'Main.constructor: Starting');
     this.config = config;
     this.log(
@@ -36,6 +52,7 @@ class Main {
       });
     }
 
+    this.log('init', 'methodStart', 'Main.init: Starting');
     this.log('init', 'objectInitStart', 'Main.init: Starting');
 
     const template = document.getElementById(this.config.ids.templates.main);
@@ -76,6 +93,8 @@ class Main {
     this.element = mainElem;
     // State: Mark Main as fully initialized.
     this.initialized = true;
+    // State: Lazily construct page controllers for routing.
+    this.createPagesIfNeeded();
     this.log('init', 'objectInitComplete', 'Main.init: Completed');
     this.log('init', 'info', 'Main.init: Main initialized');
     return this.log('init', 'passthroughMethodComplete', this.element, {
@@ -110,13 +129,73 @@ class Main {
         enumerable: false,
         configurable: false,
       },
+      storage: {
+        value: null,
+        writable: true,
+        enumerable: false,
+        configurable: false,
+      },
+      profile: {
+        value: null,
+        writable: true,
+        enumerable: false,
+        configurable: false,
+      },
+      shoppingList: {
+        value: null,
+        writable: true,
+        enumerable: false,
+        configurable: false,
+      },
+      inventory: {
+        value: null,
+        writable: true,
+        enumerable: false,
+        configurable: false,
+      },
+      recipeApi: {
+        value: null,
+        writable: true,
+        enumerable: false,
+        configurable: false,
+      },
+      pages: {
+        value: null,
+        writable: true,
+        enumerable: false,
+        configurable: false,
+      },
     };
   }
 
   // applyHeartIconFromConfig: Sets the CSS heart icon mask from config.
   applyHeartIconFromConfig() {
+    this.log(
+      'applyHeartIconFromConfig',
+      'methodStart',
+      'Main.applyHeartIconFromConfig: Starting',
+      {
+        hasConfig: !!this.config,
+        hasImages: !!(this.config && this.config.images),
+        hasHeart: !!(
+          this.config &&
+          this.config.images &&
+          this.config.images.heart
+        ),
+      },
+    );
+
     if (!this.config || !this.config.images || !this.config.images.heart) {
-      return;
+      return this.log(
+        'applyHeartIconFromConfig',
+        'passthroughMethodComplete',
+        undefined,
+        {
+          canLogReturnValue: false,
+          message:
+            'Main.applyHeartIconFromConfig: Skipped - no heart image configured',
+        },
+      );
     }
 
     const heartUrl = this.config.images.heart;
@@ -125,6 +204,133 @@ class Main {
 
     const root = document.documentElement;
     root.style.setProperty('--heart-icon-mask', maskValue);
+
+    this.log(
+      'applyHeartIconFromConfig',
+      'info',
+      'State change: Updated --heart-icon-mask CSS variable',
+      {
+        resolvedUrl,
+      },
+    );
+
+    return this.log(
+      'applyHeartIconFromConfig',
+      'passthroughMethodComplete',
+      undefined,
+      {
+        canLogReturnValue: false,
+        message: 'Main.applyHeartIconFromConfig: Completed',
+      },
+    );
+  }
+
+  // createPagesIfNeeded: Lazily constructs page controllers for routing.
+  createPagesIfNeeded() {
+    if (this.pages) {
+      return this.pages;
+    }
+
+    this.log(
+      'createPagesIfNeeded',
+      'methodStart',
+      'Main.createPagesIfNeeded: Starting',
+    );
+
+    const pageOptions = {
+      logger: this.logger,
+      storage: this.storage,
+      profile: this.profile,
+      shoppingList: this.shoppingList,
+      inventory: this.inventory,
+      recipeApi: this.recipeApi,
+    };
+
+    const value = {
+      home: new HomePage(this.config, pageOptions),
+      recipes: new RecipesPage(this.config, pageOptions),
+      mealplan: new MealPlanPage(this.config, pageOptions),
+      shopping: new ShoppingPage(this.config, pageOptions),
+      more: new ToolsPage(this.config, pageOptions),
+    };
+
+    this.pages = value;
+    return this.log(
+      'createPagesIfNeeded',
+      'passthroughMethodComplete',
+      this.pages,
+      {
+        toLogValue: (obj) => ({ keys: Object.keys(obj) }),
+      },
+    );
+  }
+
+  // loadPage: Initializes a named page and renders it into main.
+  loadPage(pageName, container) {
+    this.log(
+      'loadPage',
+      'pageLoadStart',
+      `Main.loadPage: Starting load for page: ${pageName}`,
+    );
+
+    const pages = this.createPagesIfNeeded() || {};
+
+    let resolvedPageName = pageName;
+    if (!resolvedPageName || !pages[resolvedPageName]) {
+      resolvedPageName = 'home';
+    }
+
+    let page;
+    switch (resolvedPageName) {
+      case 'home':
+        page = pages.home.init(this.config);
+        this.log('loadPage', 'info', "State change: Initialized 'home' page");
+        break;
+      case 'recipes':
+        page = pages.recipes.init(this.config);
+        this.log(
+          'loadPage',
+          'info',
+          "State change: Initialized 'recipes' page",
+        );
+        break;
+      case 'mealplan':
+        page = pages.mealplan.init(this.config);
+        this.log(
+          'loadPage',
+          'info',
+          "State change: Initialized 'mealplan' page",
+        );
+        break;
+      case 'shopping':
+        page = pages.shopping.init(this.config);
+        this.log(
+          'loadPage',
+          'info',
+          "State change: Initialized 'shopping' page",
+        );
+        break;
+      case 'more':
+        page = pages.more.init(this.config);
+        this.log('loadPage', 'info', "State change: Initialized 'more' page");
+        break;
+      default:
+        page = pages.home.init(this.config);
+        this.log(
+          'loadPage',
+          'info',
+          "State change: Initialized default 'home' page",
+        );
+        resolvedPageName = 'home';
+    }
+
+    this.renderPage(resolvedPageName, page, pages, container || this.element);
+
+    return this.log(
+      'loadPage',
+      'pageLoadComplete',
+      `Main.loadPage: Completed load for page: ${resolvedPageName}`,
+    );
   }
 
   // log: Delegates logging to the shared Logger using Main conventions.
@@ -147,6 +353,101 @@ class Main {
     } else {
       this.logger.classMethodLog(level, 'Main', methodName, ...args);
     }
+  }
+
+  // renderPage: Applies page title/content and runs afterRender via Main.
+  renderPage(pageName, page, pages, container) {
+    this.log('renderPage', 'methodStart', 'Main.renderPage: Starting', {
+      pageName,
+    });
+
+    const mainContainer = container || this.element;
+    if (!mainContainer) {
+      return this.log('renderPage', 'passthroughMethodComplete', undefined, {
+        canLogReturnValue: false,
+        toLogValue: undefined,
+        message: 'Main.renderPage: No main container found',
+      });
+    }
+
+    if (this.config && this.config.classes && this.config.classes.main) {
+      mainContainer.className = this.config.classes.main;
+      this.log(
+        'renderPage',
+        'info',
+        'State change: mainContainer className reset',
+      );
+    }
+
+    if (this.config && this.config.classes) {
+      if (pageName === 'home' && this.config.classes.mainHome) {
+        mainContainer.classList.add(this.config.classes.mainHome);
+        this.log(
+          'renderPage',
+          'info',
+          "State change: Added 'home' main class to mainContainer",
+        );
+      } else if (pageName === 'recipes' && this.config.classes.mainRecipes) {
+        mainContainer.classList.add(this.config.classes.mainRecipes);
+        this.log(
+          'renderPage',
+          'info',
+          "State change: Added 'recipes' main class to mainContainer",
+        );
+      }
+    }
+
+    const titleElement = mainContainer.querySelector(
+      this.config && this.config.classes && this.config.classes.mainTitle
+        ? `.${this.config.classes.mainTitle}`
+        : 'h2',
+    );
+    const contentWrapper = mainContainer.querySelector(
+      this.config &&
+        this.config.classes &&
+        this.config.classes.mainContentWrapper
+        ? `.${this.config.classes.mainContentWrapper}`
+        : 'div',
+    );
+
+    if (titleElement && page && typeof page.title === 'string') {
+      titleElement.textContent = page.title;
+      this.log(
+        'renderPage',
+        'info',
+        'State change: Updated titleElement textContent',
+      );
+    }
+
+    if (contentWrapper && page && typeof page.content === 'string') {
+      contentWrapper.innerHTML = page.content;
+      this.log(
+        'renderPage',
+        'info',
+        'State change: Updated contentWrapper innerHTML',
+      );
+
+      const pageInstance =
+        pages &&
+        pageName &&
+        Object.prototype.hasOwnProperty.call(pages, pageName)
+          ? pages[pageName]
+          : null;
+
+      if (pageInstance && typeof pageInstance.afterRender === 'function') {
+        pageInstance.afterRender(this.config);
+        this.log(
+          'renderPage',
+          'info',
+          `State change: Ran ${pageName} page's afterRender hook`,
+        );
+      }
+    }
+
+    return this.log('renderPage', 'passthroughMethodComplete', mainContainer, {
+      toLogValue: (el) =>
+        el ? { tag: el.tagName, class: el.className } : null,
+    });
   }
 
   // renderRecipeCards: Renders standard recipe cards into a container.
@@ -173,6 +474,20 @@ class Main {
     recipeCardContainer.innerHTML = '';
 
     const models = Array.isArray(recipeModels) ? recipeModels : [];
+
+    if (pageInstance && typeof pageInstance.log === 'function') {
+      pageInstance.log(
+        'renderRecipeCards',
+        'functionStart',
+        `${pageInstance.constructor.name}.renderRecipeCards: Starting`,
+        {
+          recipeCount: models.length,
+          hasTemplate: !!template,
+          hasWrapperTemplate: !!wrapperTemplate,
+          containerClassName: recipeCardContainer.className,
+        },
+      );
+    }
 
     if (models.length === 0) {
       let messageElement;
@@ -212,8 +527,8 @@ class Main {
       const titleEl = cardClone.querySelector('h3');
       const descriptionEl = cardClone.querySelector('p');
 
-      if (favoriteButton && config.classes.recipeDetailFavoriteToggle) {
-        favoriteButton.classList.add(config.classes.recipeDetailFavoriteToggle);
+      if (favoriteButton) {
+        favoriteButton.classList.add('recipe-favorite-toggle');
       }
       if (img && config.classes.recipeCardImage) {
         img.classList.add(config.classes.recipeCardImage);
@@ -284,23 +599,21 @@ class Main {
       ) {
         // State: Initialize favorite toggle based on current profile favorites.
         favoriteButton.dataset.recipeId = String(recipe.id);
-        const isFavorite = Array.isArray(profile?.favoriteRecipeIds)
-          ? profile.favoriteRecipeIds.includes(recipe.id)
-          : false;
+        const isFavorite =
+          typeof recipe.isFavoriteForProfile === 'function'
+            ? recipe.isFavoriteForProfile(profile)
+            : false;
         pageInstance.updateFavoriteButtonState(favoriteButton, isFavorite);
         favoriteButton.addEventListener('click', (event) => {
           event.stopPropagation();
-          const currentlyFavorite = Array.isArray(profile?.favoriteRecipeIds)
-            ? profile.favoriteRecipeIds.includes(recipe.id)
-            : false;
-          if (currentlyFavorite) {
-            // State: Remove recipe from user's favorite recipes.
-            profile.removeFavoriteRecipe(recipe.id);
-          } else {
-            // State: Add recipe to user's favorite recipes.
-            profile.addFavoriteRecipe(recipe.id);
-          }
-          const nowFavorite = !currentlyFavorite;
+          const beforeIds =
+            profile && Array.isArray(profile.favoriteRecipeIds)
+              ? [...profile.favoriteRecipeIds]
+              : [];
+          const nowFavorite =
+            typeof recipe.toggleFavoriteForProfile === 'function'
+              ? recipe.toggleFavoriteForProfile(profile)
+              : !isFavorite;
           // State: Sync favorite button visuals across all recipe cards.
           pageInstance.syncFavoriteButtonsForRecipe(recipe.id);
           if (
@@ -311,7 +624,16 @@ class Main {
               'loadRecipeCards',
               'info',
               `${pageInstance.constructor.name}.loadRecipeCards: Toggled favorite for recipe`,
-              { id: recipe.id, title: recipe.title, nowFavorite },
+              {
+                id: recipe.id,
+                title: recipe.title,
+                nowFavorite,
+                beforeFavoriteIds: beforeIds,
+                afterFavoriteIds:
+                  profile && Array.isArray(profile.favoriteRecipeIds)
+                    ? [...profile.favoriteRecipeIds]
+                    : [],
+              },
             );
           }
         });
@@ -339,6 +661,26 @@ class Main {
       // State: Add rendered recipe card to the cards container.
       recipeCardContainer.appendChild(cardWrapper);
     });
+
+    if (pageInstance && typeof pageInstance.log === 'function') {
+      const renderedWrappers = recipeCardContainer.querySelectorAll(
+        `.${config.classes.recipeCard}`,
+      );
+      const favoriteButtons = recipeCardContainer.querySelectorAll(
+        '.recipe-favorite-toggle',
+      );
+      pageInstance.log(
+        'renderRecipeCards',
+        'functionComplete',
+        `${pageInstance.constructor.name}.renderRecipeCards: Completed`,
+        {
+          recipeCount: models.length,
+          containerChildCount: recipeCardContainer.children.length,
+          cardWrapperCount: renderedWrappers.length,
+          favoriteButtonCount: favoriteButtons.length,
+        },
+      );
+    }
   }
 
   // renderRecipeDetailOverlay: Builds standard recipe detail overlay UI.
@@ -401,9 +743,9 @@ class Main {
       if (config.classes.recipeDetail) {
         detailSection.classList.add(config.classes.recipeDetail);
       }
-      const closeBtn = detailSection.querySelector('button');
-      if (closeBtn && config.classes.recipeDetailClose) {
-        closeBtn.classList.add(config.classes.recipeDetailClose);
+      const closeButton = detailSection.querySelector('button');
+      if (closeButton && config.classes.recipeDetailClose) {
+        closeButton.classList.add(config.classes.recipeDetailClose);
       }
       const headerDiv = detailSection.querySelector('div');
       if (headerDiv) {
@@ -449,15 +791,31 @@ class Main {
         }
         const actionsSection = bodyDiv.querySelector('section:nth-of-type(3)');
         if (actionsSection) {
-          const favBtn = actionsSection.querySelector('button');
-          const nutritionBtn = actionsSection.querySelector(
+          if (config.classes.recipeDetailActions) {
+            actionsSection.classList.add(config.classes.recipeDetailActions);
+          }
+          const favoriteButtonElement = actionsSection.querySelector('button');
+          const nutritionButtonElement = actionsSection.querySelector(
             'button:nth-of-type(2)',
           );
-          if (favBtn && config.classes.recipeDetailFavoriteToggle) {
-            favBtn.classList.add(config.classes.recipeDetailFavoriteToggle);
+          if (
+            favoriteButtonElement &&
+            config.classes.recipeDetailFavoriteToggle
+          ) {
+            favoriteButtonElement.classList.add(
+              config.classes.recipeDetailFavoriteToggle,
+            );
+            favoriteButtonElement.classList.add(
+              'recipe-detail-favorite-toggle',
+            );
           }
-          if (nutritionBtn && config.classes.recipeDetailNutritionBtn) {
-            nutritionBtn.classList.add(config.classes.recipeDetailNutritionBtn);
+          if (
+            nutritionButtonElement &&
+            config.classes.recipeDetailNutritionButton
+          ) {
+            nutritionButtonElement.classList.add(
+              config.classes.recipeDetailNutritionButton,
+            );
           }
         }
       }
@@ -467,7 +825,7 @@ class Main {
       `.${config.classes.recipeDetailClose}`,
     );
     const nutritionButton = detailFragment.querySelector(
-      `.${config.classes.recipeDetailNutritionBtn}`,
+      `.${config.classes.recipeDetailNutritionButton}`,
     );
     const favoriteButton = detailFragment.querySelector(
       `.${config.classes.recipeDetailFavoriteToggle}`,
@@ -584,6 +942,53 @@ class Main {
       instructionsEl.textContent = recipe?.instructions || '';
     }
 
+    // State: For MealPlanPage, show a multiplier badge in the detail overlay
+    // when a meaningful scale value is provided.
+    if (
+      logPrefix === 'MealPlanPage' &&
+      typeof scale === 'number' &&
+      Number.isFinite(scale) &&
+      scale !== 1
+    ) {
+      const formatScale = (value) => {
+        const rounded = Math.round(value * 100) / 100;
+        return String(rounded);
+      };
+
+      const detailRoot = detailFragment.querySelector(
+        `.${config.classes.recipeDetail}`,
+      );
+      if (detailRoot) {
+        const actionsContainer = detailRoot.querySelector(
+          `.${config.classes.recipeDetailActions}`,
+        );
+        const badgeContainer = actionsContainer || detailRoot;
+
+        let badge = badgeContainer.querySelector(
+          '.meal-plan-detail-multiplier-badge',
+        );
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.classList.add('meal-plan-detail-multiplier-badge');
+          badgeContainer.appendChild(badge);
+        }
+        badge.textContent = `×${formatScale(scale)}`;
+      }
+    }
+
+    // Ensure the nutrition button has text even if template messages were not applied yet.
+    if (
+      nutritionButton &&
+      (!nutritionButton.textContent || !nutritionButton.textContent.trim())
+    ) {
+      const sharedMessages =
+        config && config.messages ? config.messages.shared || null : null;
+      if (sharedMessages && sharedMessages.recipeDetailNutritionButton) {
+        nutritionButton.textContent =
+          sharedMessages.recipeDetailNutritionButton;
+      }
+    }
+
     if (
       favoriteButton &&
       recipe &&
@@ -594,23 +999,17 @@ class Main {
     ) {
       // State: Initialize favorite toggle within recipe detail overlay.
       favoriteButton.dataset.recipeId = String(recipe.id);
-      const isFavorite = Array.isArray(profile?.favoriteRecipeIds)
-        ? profile.favoriteRecipeIds.includes(recipe.id)
-        : false;
+      const isFavorite =
+        typeof recipe.isFavoriteForProfile === 'function'
+          ? recipe.isFavoriteForProfile(profile)
+          : false;
       pageInstance.updateFavoriteButtonState(favoriteButton, isFavorite);
       favoriteButton.addEventListener('click', (event) => {
         event.stopPropagation();
-        const currentlyFavorite = Array.isArray(profile?.favoriteRecipeIds)
-          ? profile.favoriteRecipeIds.includes(recipe.id)
-          : false;
-        if (currentlyFavorite) {
-          // State: Remove recipe from user's favorite recipes.
-          profile.removeFavoriteRecipe(recipe.id);
-        } else {
-          // State: Add recipe to user's favorite recipes.
-          profile.addFavoriteRecipe(recipe.id);
-        }
-        const nowFavorite = !currentlyFavorite;
+        const nowFavorite =
+          typeof recipe.toggleFavoriteForProfile === 'function'
+            ? recipe.toggleFavoriteForProfile(profile)
+            : !isFavorite;
         // State: Sync favorite button visuals for this recipe across views.
         pageInstance.syncFavoriteButtonsForRecipe(recipe.id);
         if (typeof pageInstance.log === 'function') {
@@ -644,6 +1043,18 @@ class Main {
 
     if (nutritionButton) {
       nutritionButton.addEventListener('click', () => {
+        if (pageInstance && typeof pageInstance.log === 'function') {
+          pageInstance.log(
+            method,
+            'info',
+            'Main.renderRecipeDetailOverlay: Template nutrition button clicked',
+            {
+              logPrefix,
+              id: recipe?.id,
+              title: recipe?.title,
+            },
+          );
+        }
         if (typeof pageInstance.showNutritionDetail === 'function') {
           pageInstance.showNutritionDetail(config, overlay, recipe);
         }
@@ -672,6 +1083,35 @@ class Main {
     }
 
     overlay.appendChild(detailFragment);
+
+    // Ensure nutrition button in the live overlay opens the nutrition view.
+    const liveNutritionButton = overlay.querySelector(
+      `.${config.classes.recipeDetailNutritionBtn}`,
+    );
+    if (liveNutritionButton && !liveNutritionButton.dataset.nutritionListener) {
+      liveNutritionButton.dataset.nutritionListener = 'true';
+      liveNutritionButton.addEventListener('click', () => {
+        if (pageInstance && typeof pageInstance.log === 'function') {
+          pageInstance.log(
+            method,
+            'info',
+            'Main.renderRecipeDetailOverlay: Live nutrition button clicked',
+            {
+              logPrefix,
+              id: recipe?.id,
+              title: recipe?.title,
+            },
+          );
+        }
+        Main.showNutritionDetail(config, {
+          overlay,
+          recipe,
+          pageInstance,
+          logPrefix,
+          scale,
+        });
+      });
+    }
 
     if (ingredientTemplate) {
       const ingredientFragment = ingredientTemplate.content.cloneNode(true);
@@ -732,6 +1172,10 @@ class Main {
       if (nutritionSection) {
         if (config.classes.nutritionDetail) {
           nutritionSection.classList.add(config.classes.nutritionDetail);
+        }
+        const closeBtn = nutritionSection.querySelector('button');
+        if (closeBtn && config.classes.nutritionDetailClose) {
+          closeBtn.classList.add(config.classes.nutritionDetailClose);
         }
         const headerDiv = nutritionSection.querySelector('div');
         if (headerDiv) {
@@ -957,25 +1401,35 @@ class Main {
 
   // showNutritionDetail: Shared implementation for recipe nutrition overlays.
   static showNutritionDetail(config, options = {}) {
-    const { overlay, recipe, pageInstance, logPrefix = 'page' } = options;
+    const {
+      overlay,
+      recipe,
+      pageInstance,
+      logPrefix = 'page',
+      scale = 1,
+    } = options;
     const method = 'showNutritionDetail';
 
     if (!pageInstance || typeof pageInstance.log !== 'function') {
       return;
     }
 
-    pageInstance.log(
-      method,
-      'lifecycle',
-      `${logPrefix}.showNutritionDetail: Starting`,
-      { id: recipe?.id, title: recipe?.title },
-    );
+    pageInstance.log(method, 'info', 'Main.showNutritionDetail: Starting', {
+      logPrefix,
+      hasOverlay: !!overlay,
+      id: recipe?.id,
+      title: recipe?.title,
+      scale,
+    });
 
     if (!overlay) {
       pageInstance.log(
         method,
         'info',
-        `${logPrefix}.showNutritionDetail: No overlay provided`,
+        'Main.showNutritionDetail: No overlay provided',
+        {
+          logPrefix,
+        },
       );
       return;
     }
@@ -991,7 +1445,12 @@ class Main {
       pageInstance.log(
         method,
         'info',
-        `${logPrefix}.showNutritionDetail: Required sections not found`,
+        'Main.showNutritionDetail: Required sections not found',
+        {
+          logPrefix,
+          hasRecipeSection: !!recipeSection,
+          hasNutritionSection: !!nutritionSection,
+        },
       );
       return;
     }
@@ -1019,11 +1478,46 @@ class Main {
     }
 
     if (metaEl) {
-      const servings =
-        typeof recipe?.servings === 'number' ? recipe.servings : 'N/A';
-      metaEl.textContent = recipe?.title
-        ? `For ${servings} serving(s) of ${recipe.title}`
-        : `For ${servings} serving(s)`;
+      const baseServings =
+        typeof recipe?.servings === 'number' && recipe.servings > 0
+          ? recipe.servings
+          : null;
+      const scaleValue =
+        typeof scale === 'number' && Number.isFinite(scale) && scale > 0
+          ? scale
+          : 1;
+
+      const formatNumber = (value) => {
+        if (typeof value !== 'number' || !Number.isFinite(value)) {
+          return String(value);
+        }
+        const rounded = Math.round(value * 100) / 100;
+        return String(rounded);
+      };
+
+      if (baseServings != null) {
+        if (scaleValue !== 1) {
+          const scaledServings = baseServings * scaleValue;
+          const servingsText = formatNumber(scaledServings);
+          const scaleText = formatNumber(scaleValue);
+          metaEl.textContent = recipe?.title
+            ? `For ${servingsText} serving(s) of ${recipe.title} (×${scaleText} from ${formatNumber(
+                baseServings,
+              )})`
+            : `For ${servingsText} serving(s) (×${scaleText} from ${formatNumber(
+                baseServings,
+              )})`;
+        } else {
+          const servingsText = formatNumber(baseServings);
+          metaEl.textContent = recipe?.title
+            ? `For ${servingsText} serving(s) of ${recipe.title}`
+            : `For ${servingsText} serving(s)`;
+        }
+      } else {
+        metaEl.textContent = recipe?.title
+          ? `For N/A serving(s) of ${recipe.title}`
+          : 'For N/A serving(s)';
+      }
     }
 
     if (listEl) {
@@ -1034,13 +1528,33 @@ class Main {
           ? recipe.nutrition.nutrients
           : [];
 
+      const scaleValue =
+        typeof scale === 'number' && Number.isFinite(scale) && scale > 0
+          ? scale
+          : 1;
+
+      const formatAmount = (amount) => {
+        if (typeof amount !== 'number' || !Number.isFinite(amount)) {
+          return '';
+        }
+        const rounded = Math.round(amount * 100) / 100;
+        return String(rounded);
+      };
+
       nutrients.forEach((nutrient) => {
         const li = document.createElement('li');
         const title = nutrient.title || '';
-        const amount =
-          typeof nutrient.amount === 'number' ? nutrient.amount : '';
+        const baseAmount =
+          typeof nutrient.amount === 'number' &&
+          Number.isFinite(nutrient.amount)
+            ? nutrient.amount
+            : null;
+        const scaledAmount =
+          baseAmount != null ? baseAmount * scaleValue : baseAmount;
+        const amountText =
+          scaledAmount != null ? formatAmount(scaledAmount) : '';
         const unit = nutrient.unit || '';
-        li.textContent = `${title}: ${amount} ${unit}`.trim();
+        li.textContent = `${title}: ${amountText} ${unit}`.trim();
         listEl.appendChild(li);
       });
     }

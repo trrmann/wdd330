@@ -3,7 +3,7 @@
 // (shopping list, meal plans, pantry inventory, and API cache), backed by
 // LocalStorage and SessionStorage wrappers.
 // Usage: import { Storage } from './storage.js';
-//        const storage = Storage.getInstance();
+//        const storage = new Storage();
 //        const shopping = storage.loadShoppingList() || { items: [] };
 //        storage.saveShoppingList(shopping);
 
@@ -22,7 +22,12 @@ bootLogger.moduleInfo(
 // Storage facade that hides the underlying LocalStorage / SessionStorage
 // implementations and exposes simple methods for each persisted concern.
 class Storage {
-  constructor() {
+  constructor(internal = {}) {
+    this.logger = internal.logger || this.logger || null;
+    this.init();
+  }
+
+  init() {
     this.localStorage = new LocalStorage();
     this.sessionStorage = new SessionStorage();
   }
@@ -35,21 +40,6 @@ class Storage {
   // Returns the SessionStorage wrapper instance used for per-session data.
   getSessionStorage() {
     return this.sessionStorage;
-  }
-
-  // Safely parses JSON strings, logging and returning null on failure.
-  safeParseJson(raw) {
-    if (!raw || typeof raw !== 'string') return null;
-    try {
-      return JSON.parse(raw);
-    } catch (error) {
-      bootLogger.moduleInfo(
-        import.meta.url,
-        'storage.safeParseJson: Failed to parse JSON',
-        { error: String(error) },
-      );
-      return null;
-    }
   }
 
   // Shopping list – session persistence helpers
@@ -201,14 +191,6 @@ class Storage {
 bootLogger.moduleClassLoaded(import.meta.url, 'Storage');
 
 Logger.instrumentClass(Storage, 'Storage');
-Storage.instance = null;
-
-Storage.getInstance = function getInstance() {
-  if (!Storage.instance) {
-    Storage.instance = new Storage();
-  }
-  return Storage.instance;
-};
 
 bootLogger.moduleInfo(import.meta.url, 'Exports defined.');
 

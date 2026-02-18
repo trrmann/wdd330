@@ -73,11 +73,7 @@
     gap: 1.5rem;
   }
 
-  main.home #shopping-list-btn-bottom {
-    display: none;
-  }
-
-  .shopping-list-btn-mobile {
+  main.home #shopping-list-button-bottom {
     display: none;
   }
 

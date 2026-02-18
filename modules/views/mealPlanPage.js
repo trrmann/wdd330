@@ -2,11 +2,7 @@ import { bootLogger } from '../models/bootLogger.js';
 
 import { Logger } from '../models/logger.js';
 import { Site } from './site.js';
-import { Meal, MealPlan, meals, Profile } from '../models/mealPlan.js';
-import { ShoppingList, Inventory } from '../models/shoppingList.js';
-import { Storage } from '../models/storage.js';
-import { recipes, Recipes } from '../models/recipes.js';
-import { RecipeApi } from '../models/apiAccess.js';
+import { MealPlan } from '../models/mealPlan.js';
 import { Main } from './main.js';
 
 bootLogger.moduleLoadStarted(import.meta.url);
@@ -27,7 +23,17 @@ class MealPlanPage {
       'MealPlanPage.constructor: Starting',
     );
     this.config = config;
-    this.profile = Profile.getInstance();
+    this.profile = options.profile || null;
+    this.storage = options.storage || null;
+    this.shoppingList =
+      (this.profile && this.profile.shoppingList) ||
+      options.shoppingList ||
+      null;
+    this.inventory =
+      (this.shoppingList && this.shoppingList.inventory) ||
+      options.inventory ||
+      null;
+    this.recipeApi = options.recipeApi || null;
     this.log(
       'constructor',
       'objectCreateComplete',
@@ -46,6 +52,11 @@ class MealPlanPage {
 
   // init: Builds the initial Meal Plan page view model from the template.
   init(config) {
+    this.log('init', 'methodStart', 'MealPlanPage.init: Starting', {
+      hasConfig: !!config,
+      alreadyInitialized: !!this.initialized,
+    });
+
     if (this.initialized && this.view) {
       // State: Reuse existing MealPlanPage view model when already initialized.
       return this.log('init', 'passthroughMethodComplete', this.view, {
@@ -121,6 +132,12 @@ class MealPlanPage {
         enumerable: false,
         configurable: false,
       },
+      recipeApi: {
+        value: null,
+        writable: true,
+        enumerable: false,
+        configurable: false,
+      },
     };
   }
 
@@ -151,7 +168,30 @@ class MealPlanPage {
   }
 
   applyMealPlanClasses(config, rootElement) {
-    if (!config || !config.classes || !config.ids || !rootElement) return;
+    this.log(
+      'applyMealPlanClasses',
+      'methodStart',
+      'MealPlanPage.applyMealPlanClasses: Starting',
+      {
+        hasConfig: !!config,
+        hasClasses: !!(config && config.classes),
+        hasIds: !!(config && config.ids),
+        hasRootElement: !!rootElement,
+      },
+    );
+
+    if (!config || !config.classes || !config.ids || !rootElement) {
+      return this.log(
+        'applyMealPlanClasses',
+        'passthroughMethodComplete',
+        undefined,
+        {
+          canLogReturnValue: false,
+          message:
+            'MealPlanPage.applyMealPlanClasses: Skipped - missing config, ids, classes, or rootElement',
+        },
+      );
+    }
 
     const { classes, ids } = config;
 
@@ -189,13 +229,35 @@ class MealPlanPage {
       [ids.mealPlanActions, classes.mealPlanActions],
     ];
 
+    let appliedCount = 0;
+
     mappings.forEach(([idValue, className]) => {
       if (!idValue || !className) return;
       const element = rootElement.querySelector(`#${CSS.escape(idValue)}`);
       if (element && !element.classList.contains(className)) {
         element.classList.add(className);
+        appliedCount += 1;
       }
     });
+
+    this.log(
+      'applyMealPlanClasses',
+      'info',
+      'State change: Applied meal plan classes to elements',
+      {
+        appliedCount,
+      },
+    );
+
+    return this.log(
+      'applyMealPlanClasses',
+      'passthroughMethodComplete',
+      undefined,
+      {
+        canLogReturnValue: false,
+        message: 'MealPlanPage.applyMealPlanClasses: Completed',
+      },
+    );
   }
 
   // afterRender: Wires Meal Plan events and restores state after render.
@@ -377,7 +439,7 @@ class MealPlanPage {
             }
 
             const nutritionButton = detailRoot.querySelector(
-              '.recipe-detail-nutrition-btn',
+              '.recipe-detail-nutrition-button',
             );
             if (nutritionButton && sharedMessages.recipeDetailNutritionButton) {
               nutritionButton.textContent =
@@ -436,63 +498,6 @@ class MealPlanPage {
     );
   }
 
-  // buildRecipesForMeal: Selects recipes for a meal given profile targets.
-  buildRecipesForMeal(
-    targetCaloriesPerPerson,
-    usedRecipeIdsForCurrentPlan = null,
-  ) {
-    const method = 'buildRecipesForMeal';
-
-    this.log(
-      method,
-      'functionStart',
-      'MealPlanPage.buildRecipesForMeal: Starting',
-      {
-        targetCaloriesPerPerson,
-        usedRecipeIdsForCurrentPlanSize:
-          usedRecipeIdsForCurrentPlan instanceof Set
-            ? usedRecipeIdsForCurrentPlan.size
-            : null,
-      },
-    );
-    const availableCount = Array.isArray(recipes) ? recipes.length : 0;
-
-    if (availableCount === 0) {
-      this.log(method, 'info', 'No recipes available to build meal');
-      this.log(
-        method,
-        'functionComplete',
-        'MealPlanPage.buildRecipesForMeal: Completed (no recipes available)',
-      );
-      return [];
-    }
-
-    const selected = MealPlan.buildRecipesForMeal({
-      recipesCollection: recipes,
-      profile: this.profile,
-      targetCaloriesPerPerson,
-      usedRecipeIdsForCurrentPlan,
-    });
-
-    this.log(method, 'info', 'Built recipes for meal', {
-      targetCaloriesPerPerson,
-      totalSelected: Array.isArray(selected) ? selected.length : 0,
-    });
-
-    this.log(
-      method,
-      'functionComplete',
-      'MealPlanPage.buildRecipesForMeal: Completed selection',
-      {
-        selectedRecipeIds: Array.isArray(selected)
-          ? selected.map((r) => r && r.id).filter((id) => id)
-          : [],
-      },
-    );
-
-    return selected;
-  }
-
   showRecipeDetail(config, recipe) {
     const method = 'showRecipeDetail';
     this.log(method, 'lifecycle', 'MealPlanPage.showRecipeDetail: Starting', {
@@ -530,16 +535,27 @@ class MealPlanPage {
       return;
     }
 
-    const ingredientTemplate = contentWrapper
+    let ingredientTemplate = contentWrapper
       ? contentWrapper.querySelector(
           `#${CSS.escape(config.ids.templates.ingredientDetail)}`,
         )
-      : document.getElementById(config.ids.templates.ingredientDetail);
-    const nutritionTemplate = contentWrapper
+      : null;
+    if (!ingredientTemplate) {
+      ingredientTemplate = document.getElementById(
+        config.ids.templates.ingredientDetail,
+      );
+    }
+
+    let nutritionTemplate = contentWrapper
       ? contentWrapper.querySelector(
           `#${CSS.escape(config.ids.templates.nutritionDetail)}`,
         )
-      : document.getElementById(config.ids.templates.nutritionDetail);
+      : null;
+    if (!nutritionTemplate) {
+      nutritionTemplate = document.getElementById(
+        config.ids.templates.nutritionDetail,
+      );
+    }
 
     const peopleCount =
       typeof this.profile?.mealPlanPeopleCount === 'number' &&
@@ -550,10 +566,7 @@ class MealPlanPage {
       typeof recipe?.servings === 'number' && recipe.servings > 0
         ? recipe.servings
         : null;
-    const scale =
-      baseServings && peopleCount && peopleCount > 0
-        ? peopleCount / baseServings
-        : 1;
+    const scale = MealPlan.getRecipeScale({ recipe, peopleCount });
 
     const sharedMessages =
       this.config && this.config.messages
@@ -575,7 +588,12 @@ class MealPlanPage {
         : 0;
 
     let metaText = `Ready in ${ready} · Serves ${servingsValue}`;
-    if (peopleCount && baseServings && peopleCount !== baseServings) {
+    const hasScale =
+      typeof scale === 'number' && Number.isFinite(scale) && scale !== 1;
+    if (hasScale && baseServings) {
+      const scaleText = MealPlan.formatScaledAmount(scale);
+      metaText += ` (×${scaleText} from ${baseServings})`;
+    } else if (peopleCount && baseServings && peopleCount !== baseServings) {
       metaText += ` (scaled from ${baseServings})`;
     }
     metaText += ` · ${likes} likes`;
@@ -587,14 +605,16 @@ class MealPlanPage {
       site && typeof site.applyAttributes === 'function'
         ? site.applyAttributes.bind(site)
         : (element, attrs) => {
-            if (!element || !attrs) return;
-            Object.entries(attrs).forEach(([name, value]) => {
-              if (value === false || value == null) {
-                element.removeAttribute(name);
-              } else {
-                element.setAttribute(name, String(value));
-              }
-            });
+            this.log(
+              'showRecipeDetail',
+              'info',
+              'MealPlanPage.showRecipeDetail: Site.applyAttributes not available, skipping attribute application',
+              {
+                hasElement: !!element,
+                hasAttrs: !!attrs,
+                hasSite: !!site,
+              },
+            );
           };
 
     const buildIngredientLabel = (ingredient, { scale: scaleArg }) => {
@@ -618,7 +638,7 @@ class MealPlanPage {
     };
 
     // State: Render scaled recipe detail overlay and hide meal plan grid.
-    Main.renderRecipeDetailOverlay(config, {
+    const overlay = Main.renderRecipeDetailOverlay(config, {
       pageInstance: this,
       logPrefix: 'MealPlanPage',
       recipe,
@@ -634,6 +654,37 @@ class MealPlanPage {
       elementAttrs,
       applyAttrs,
     });
+
+    // Ensure the nutrition button in this overlay opens the nutrition view.
+    if (overlay && config && config.classes) {
+      const nutritionButton = overlay.querySelector(
+        `.${config.classes.recipeDetailNutritionButton}`,
+      );
+      this.log(
+        'showRecipeDetail',
+        'info',
+        'MealPlanPage.showRecipeDetail: Nutrition button lookup',
+        {
+          hasOverlay: !!overlay,
+          foundButton: !!nutritionButton,
+        },
+      );
+      if (
+        nutritionButton &&
+        !nutritionButton.dataset.mealPlanNutritionListener
+      ) {
+        nutritionButton.dataset.mealPlanNutritionListener = 'true';
+        nutritionButton.addEventListener('click', () => {
+          this.log(
+            'showRecipeDetail',
+            'info',
+            'MealPlanPage.showRecipeDetail: Nutrition button clicked',
+            { id: recipe?.id, title: recipe?.title },
+          );
+          this.showNutritionDetail(config, overlay, recipe);
+        });
+      }
+    }
   }
 
   showIngredientDetail(config, overlay, recipe, ingredient, scale = 1) {
@@ -644,14 +695,16 @@ class MealPlanPage {
       site && typeof site.applyAttributes === 'function'
         ? site.applyAttributes.bind(site)
         : (element, attrs) => {
-            if (!element || !attrs) return;
-            Object.entries(attrs).forEach(([name, value]) => {
-              if (value === false || value == null) {
-                element.removeAttribute(name);
-              } else {
-                element.setAttribute(name, String(value));
-              }
-            });
+            this.log(
+              'showIngredientDetail',
+              'info',
+              'MealPlanPage.showIngredientDetail: Site.applyAttributes not available, skipping attribute application',
+              {
+                hasElement: !!element,
+                hasAttrs: !!attrs,
+                hasSite: !!site,
+              },
+            );
           };
 
     // State: Swap visible sections to ingredient detail within the overlay.
@@ -669,13 +722,46 @@ class MealPlanPage {
   }
 
   showNutritionDetail(config, overlay, recipe) {
+    this.log(
+      'showNutritionDetail',
+      'info',
+      'MealPlanPage.showNutritionDetail: Called',
+      {
+        hasOverlay: !!overlay,
+        id: recipe?.id,
+        title: recipe?.title,
+      },
+    );
+    const peopleCount =
+      typeof this.profile?.mealPlanPeopleCount === 'number' &&
+      this.profile.mealPlanPeopleCount > 0
+        ? this.profile.mealPlanPeopleCount
+        : null;
+    const scale = MealPlan.getRecipeScale({ recipe, peopleCount });
+    this.log(
+      'showNutritionDetail',
+      'info',
+      'MealPlanPage.showNutritionDetail: Scale computed',
+      {
+        peopleCount,
+        scale,
+      },
+    );
+
     // State: Swap visible sections to nutrition detail within the overlay.
     Main.showNutritionDetail(config, {
       overlay,
       recipe,
       pageInstance: this,
       logPrefix: 'MealPlanPage',
+      scale,
     });
+
+    this.log(
+      'showNutritionDetail',
+      'info',
+      'MealPlanPage.showNutritionDetail: Delegated to Main.showNutritionDetail',
+    );
 
     const nutritionSection = overlay.querySelector(
       `.${config.classes.nutritionDetail}`,
@@ -695,14 +781,16 @@ class MealPlanPage {
         site && typeof site.applyAttributes === 'function'
           ? site.applyAttributes.bind(site)
           : (element, attrs) => {
-              if (!element || !attrs) return;
-              Object.entries(attrs).forEach(([name, value]) => {
-                if (value === false || value == null) {
-                  element.removeAttribute(name);
-                } else {
-                  element.setAttribute(name, String(value));
-                }
-              });
+              this.log(
+                'showNutritionDetail',
+                'info',
+                'MealPlanPage.showNutritionDetail: Site.applyAttributes not available, skipping attribute application',
+                {
+                  hasElement: !!element,
+                  hasAttrs: !!attrs,
+                  hasSite: !!site,
+                },
+              );
             };
 
       // State: Apply configured attributes to nutrition close button.
@@ -713,10 +801,33 @@ class MealPlanPage {
   syncFavoriteButtonsForRecipe(recipeId) {
     if (recipeId == null) return;
 
+    this.log(
+      'syncFavoriteButtonsForRecipe',
+      'functionStart',
+      'MealPlanPage.syncFavoriteButtonsForRecipe: Starting',
+      {
+        recipeId,
+        profileFavoriteIds:
+          this.profile && Array.isArray(this.profile.favoriteRecipeIds)
+            ? [...this.profile.favoriteRecipeIds]
+            : [],
+        profileFavoriteIdsAsStrings:
+          this.profile && Array.isArray(this.profile.favoriteRecipeIds)
+            ? this.profile.favoriteRecipeIds.map((id) => String(id))
+            : [],
+        sameProfileAsSite:
+          typeof window !== 'undefined' && window.site instanceof Site
+            ? this.profile === window.site.profile
+            : null,
+      },
+    );
+
     const idString = String(recipeId);
-    const isFavorite = Array.isArray(this.profile.favoriteRecipeIds)
-      ? this.profile.favoriteRecipeIds.includes(recipeId)
-      : false;
+    const profile = this.profile;
+    const isFavorite =
+      typeof MealPlan.isRecipeIdFavoriteForProfile === 'function'
+        ? MealPlan.isRecipeIdFavoriteForProfile(recipeId, profile)
+        : false;
 
     const selector = [
       `.recipe-favorite-toggle[data-recipe-id="${CSS.escape(idString)}"]`,
@@ -729,10 +840,44 @@ class MealPlanPage {
     buttons.forEach((button) => {
       this.updateFavoriteButtonState(button, isFavorite);
     });
+
+    this.log(
+      'syncFavoriteButtonsForRecipe',
+      'functionComplete',
+      'MealPlanPage.syncFavoriteButtonsForRecipe: Completed',
+      {
+        recipeId,
+        isFavorite,
+        buttonCount: buttons.length,
+        profileFavoriteIds:
+          this.profile && Array.isArray(this.profile.favoriteRecipeIds)
+            ? [...this.profile.favoriteRecipeIds]
+            : [],
+        profileFavoriteIdsAsStrings:
+          this.profile && Array.isArray(this.profile.favoriteRecipeIds)
+            ? this.profile.favoriteRecipeIds.map((id) => String(id))
+            : [],
+        sameProfileAsSiteAfter:
+          typeof window !== 'undefined' && window.site instanceof Site
+            ? this.profile === window.site.profile
+            : null,
+      },
+    );
   }
 
   updateFavoriteButtonState(button, isFavorite) {
     if (!button) return;
+    this.log(
+      'updateFavoriteButtonState',
+      'functionStart',
+      'MealPlanPage.updateFavoriteButtonState: Updating button state',
+      {
+        isFavorite,
+        hasFavoriteClass: button.classList.contains(
+          this.config.classes.favoriteActive,
+        ),
+      },
+    );
     const sharedMessages =
       this.config && this.config.messages
         ? this.config.messages.shared || null
@@ -819,9 +964,9 @@ class MealPlanPage {
       `#${CSS.escape(config.ids.mealPlanUsePantryButton)}`,
     );
 
-    const storage = Storage.getInstance();
-    const sharedShoppingList = ShoppingList.getInstance();
-    const sharedInventory = Inventory.getInstance();
+    const storage = this.storage;
+    const sharedShoppingList = this.shoppingList;
+    const sharedInventory = this.inventory;
 
     const getMealPlanMessages = () =>
       this.config && this.config.messages
@@ -834,14 +979,16 @@ class MealPlanPage {
       site && typeof site.applyAttributes === 'function'
         ? site.applyAttributes.bind(site)
         : (element, attrs) => {
-            if (!element || !attrs) return;
-            Object.entries(attrs).forEach(([name, value]) => {
-              if (value === false || value == null) {
-                element.removeAttribute(name);
-              } else {
-                element.setAttribute(name, String(value));
-              }
-            });
+            this.log(
+              'attachMealPlanEventListeners',
+              'info',
+              'MealPlanPage.attachMealPlanEventListeners: Site.applyAttributes not available, skipping attribute application',
+              {
+                hasElement: !!element,
+                hasAttrs: !!attrs,
+                hasSite: !!site,
+              },
+            );
           };
 
     if (peopleDecrement && elementAttrs.mealPlanPeopleDecrement) {
@@ -898,19 +1045,31 @@ class MealPlanPage {
     const renderSummaryGridFromMeals = () => {
       const method = 'renderSummaryGridFromMeals';
 
+      const allMeals = MealPlan.getAllMeals();
+
+      const peopleCountValue =
+        typeof this.profile?.mealPlanPeopleCount === 'number' &&
+        this.profile.mealPlanPeopleCount > 0
+          ? this.profile.mealPlanPeopleCount
+          : null;
+
       const summaryGrid = mainElement.querySelector(
         `.${config.classes.mealPlanGrid}`,
       );
 
+      const mealsLength =
+        Array.isArray(allMeals) && allMeals.length > 0 ? allMeals.length : 0;
+
       this.log(
         method,
         'functionStart',
-        `MealPlanPage.renderSummaryGridFromMeals: Starting (hasMainElement=${!!mainElement}, hasSummaryGrid=${!!summaryGrid}, mealsLength=${
-          Array.isArray(meals) ? meals.length : 'null'
-        })`,
+        `MealPlanPage.renderSummaryGridFromMeals: Starting (hasMainElement=${!!mainElement}, hasSummaryGrid=${!!summaryGrid}, mealsLength=${mealsLength})`,
       );
 
-      if (!summaryGrid || !Array.isArray(meals)) {
+      if (!summaryGrid || !Array.isArray(allMeals)) {
+        if (summaryGrid) {
+          summaryGrid.innerHTML = '';
+        }
         this.log(
           method,
           'functionComplete',
@@ -922,7 +1081,7 @@ class MealPlanPage {
       summaryGrid.innerHTML = '';
 
       const mealsByDay = new Map();
-      meals.forEach((meal) => {
+      allMeals.forEach((meal) => {
         const dayIndexValue =
           meal && typeof meal.dayIndex === 'number' && meal.dayIndex >= 0
             ? meal.dayIndex
@@ -964,7 +1123,7 @@ class MealPlanPage {
 
         const mealsForDay = mealsByDay.get(dayIndexValue) || [];
 
-        mealsForDay.forEach((meal) => {
+        mealsForDay.forEach((meal, mealIndex) => {
           const mealSection = document.createElement('section');
           mealSection.classList.add('meal-plan-meal');
 
@@ -1009,143 +1168,121 @@ class MealPlanPage {
             const contentWrapper = mainElement.querySelector(
               `.${config.classes.mainContentWrapper}`,
             );
-            let cardTemplate = contentWrapper
-              ? contentWrapper.querySelector(
-                  `#${CSS.escape(config.ids.templates.recipeCard)}`,
-                )
-              : null;
-            let cardWrapperTemplate = contentWrapper
-              ? contentWrapper.querySelector(
-                  `#${CSS.escape(config.ids.templates.recipeCardWrapper)}`,
-                )
-              : null;
+            // Use the shared global recipe card templates, consistent with
+            // HomePage and RecipesPage, so MealPlan can render cards
+            // through Main.renderRecipeCards.
+            const cardTemplate = document.getElementById(
+              config.ids.templates.recipeCard,
+            );
+            const cardWrapperTemplate = document.getElementById(
+              config.ids.templates.recipeCardWrapper,
+            );
 
-            if (!cardTemplate) {
-              cardTemplate = document.getElementById(
-                config.ids.templates.recipeCard,
-              );
-            }
-            if (!cardWrapperTemplate) {
-              cardWrapperTemplate = document.getElementById(
-                config.ids.templates.recipeCardWrapper,
-              );
-            }
+            if (cardTemplate && cardWrapperTemplate) {
+              Main.renderRecipeCards(config, {
+                recipeCardContainer: cardsContainer,
+                contentWrapper,
+                template: cardTemplate,
+                wrapperTemplate: cardWrapperTemplate,
+                messageTemplate: null,
+                recipeModels: recipesForMeal,
+                profile: this.profile,
+                pageInstance: this,
+                onCardClick: (recipeForClick) => {
+                  this.showRecipeDetail(this.config, recipeForClick);
+                },
+              });
 
-            recipesForMeal.forEach((recipe) => {
-              if (!recipe || !cardTemplate || !cardWrapperTemplate) {
-                return;
-              }
-
-              const wrapperFragment =
-                cardWrapperTemplate.content.cloneNode(true);
-              let wrapper = wrapperFragment.firstElementChild;
-              if (!wrapper) {
-                wrapper = document.createElement('div');
-              }
-              if (config.classes.recipeCard) {
-                wrapper.classList.add(config.classes.recipeCard);
-              }
-              wrapper.classList.add('meal-plan-recipe-card');
-
-              const cardClone = cardTemplate.content.cloneNode(true);
-
-              const img = cardClone.querySelector(
-                `.${config.classes.recipeCardImage}`,
+              const cardWrappers = cardsContainer.querySelectorAll(
+                `.${config.classes.recipeCard}`,
               );
-              const titleEl = cardClone.querySelector(
-                `.${config.classes.recipeCardTitle}`,
-              );
-              const descriptionEl = cardClone.querySelector(
-                `.${config.classes.recipeCardDescription}`,
-              );
-              const favoriteButton = cardClone.querySelector(
+              const favoriteButtons = cardsContainer.querySelectorAll(
                 '.recipe-favorite-toggle',
               );
+              this.log(
+                method,
+                'info',
+                'MealPlanPage.renderSummaryGridFromMeals: Rendered meal cards',
+                {
+                  dayIndex: dayIndexValue,
+                  mealIndex,
+                  mealLabel,
+                  recipesForMealCount: recipesForMeal.length,
+                  cardWrapperCount: cardWrappers.length,
+                  favoriteButtonCount: favoriteButtons.length,
+                },
+              );
+              const sharedMessages =
+                this.config && this.config.messages
+                  ? this.config.messages.shared || null
+                  : null;
+              const notAvailable =
+                sharedMessages && sharedMessages.notAvailable
+                  ? sharedMessages.notAvailable
+                  : '';
 
-              if (img) {
-                img.src = recipe.image || '';
-                const sharedMessages =
-                  this.config && this.config.messages
-                    ? this.config.messages.shared || null
-                    : null;
-                const imageAltFallback =
-                  sharedMessages && sharedMessages.recipeImageAltFallback
-                    ? sharedMessages.recipeImageAltFallback
-                    : '';
-                if (recipe.title) {
-                  img.alt = recipe.title;
-                } else if (imageAltFallback) {
-                  img.alt = imageAltFallback;
-                } else {
-                  img.removeAttribute('alt');
+              cardWrappers.forEach((wrapper, index) => {
+                const recipe = recipesForMeal[index];
+                if (!recipe) return;
+
+                wrapper.classList.add('meal-plan-recipe-card');
+
+                const descriptionEl = wrapper.querySelector(
+                  `.${config.classes.recipeCardDescription}`,
+                );
+                if (!descriptionEl) {
+                  return;
                 }
-              }
 
-              if (titleEl) {
-                titleEl.textContent = recipe.title || '';
-              }
-
-              if (descriptionEl) {
-                const sharedMessages =
-                  this.config && this.config.messages
-                    ? this.config.messages.shared || null
-                    : null;
-                const notAvailable =
-                  sharedMessages && sharedMessages.notAvailable
-                    ? sharedMessages.notAvailable
-                    : '';
                 const ready =
                   typeof recipe.readyInMinutes === 'number'
                     ? `${recipe.readyInMinutes} min`
                     : notAvailable;
-                const servings =
+                const baseServings =
                   typeof recipe.servings === 'number' && recipe.servings > 0
                     ? recipe.servings
-                    : notAvailable;
-                descriptionEl.textContent = `Ready in ${ready} · Serves ${servings}`;
-              }
-
-              if (
-                favoriteButton &&
-                recipe &&
-                recipe.id != null &&
-                this.profile
-              ) {
-                favoriteButton.dataset.recipeId = String(recipe.id);
-                const isFavorite = Array.isArray(this.profile.favoriteRecipeIds)
-                  ? this.profile.favoriteRecipeIds.includes(recipe.id)
-                  : false;
-                this.updateFavoriteButtonState(favoriteButton, isFavorite);
-                favoriteButton.addEventListener('click', (event) => {
-                  event.stopPropagation();
-                  const currentlyFavorite = Array.isArray(
-                    this.profile.favoriteRecipeIds,
-                  )
-                    ? this.profile.favoriteRecipeIds.includes(recipe.id)
-                    : false;
-                  if (currentlyFavorite) {
-                    this.profile.removeFavoriteRecipe(recipe.id);
-                  } else {
-                    this.profile.addFavoriteRecipe(recipe.id);
-                  }
-                  const nowFavorite = !currentlyFavorite;
-                  this.syncFavoriteButtonsForRecipe(recipe.id);
-                  this.log(
-                    'renderSummaryGridFromMeals',
-                    'info',
-                    'MealPlanPage.renderSummaryGridFromMeals: Toggled favorite from meal plan card',
-                    { id: recipe.id, title: recipe.title, nowFavorite },
-                  );
+                    : null;
+                const scale = MealPlan.getRecipeScale({
+                  recipe,
+                  peopleCount: peopleCountValue,
                 });
-              }
+                const hasScale =
+                  typeof scale === 'number' &&
+                  Number.isFinite(scale) &&
+                  scale !== 1;
 
-              wrapper.addEventListener('click', () => {
-                this.showRecipeDetail(this.config, recipe);
+                let displayServings;
+                if (hasScale && baseServings != null) {
+                  const scaledServings = baseServings * scale;
+                  displayServings = MealPlan.formatScaledAmount(scaledServings);
+                } else if (
+                  typeof peopleCountValue === 'number' &&
+                  Number.isFinite(peopleCountValue) &&
+                  peopleCountValue > 0
+                ) {
+                  displayServings = String(peopleCountValue);
+                } else if (baseServings != null) {
+                  displayServings = String(baseServings);
+                } else {
+                  displayServings = notAvailable;
+                }
+
+                descriptionEl.textContent = `Ready in ${ready} · Serves ${displayServings}`;
+
+                if (hasScale) {
+                  const scaleText = MealPlan.formatScaledAmount(scale);
+                  const existingBadge = wrapper.querySelector(
+                    '.meal-plan-multiplier-badge',
+                  );
+                  const badge = existingBadge || document.createElement('span');
+                  badge.textContent = `×${scaleText}`;
+                  badge.classList.add('meal-plan-multiplier-badge');
+                  if (!existingBadge) {
+                    wrapper.appendChild(badge);
+                  }
+                }
               });
-
-              wrapper.appendChild(cardClone);
-              cardsContainer.appendChild(wrapper);
-            });
+            }
 
             mealSection.appendChild(cardsContainer);
           }
@@ -1156,15 +1293,23 @@ class MealPlanPage {
         summaryGrid.appendChild(dayContainer);
       });
 
+      const totalCards = summaryGrid.querySelectorAll(
+        `.${config.classes.recipeCard}`,
+      ).length;
       this.log(
         method,
         'functionComplete',
-        `MealPlanPage.renderSummaryGridFromMeals: Completed (summaryChildCount=${summaryGrid.childElementCount})`,
+        'MealPlanPage.renderSummaryGridFromMeals: Completed',
+        {
+          summaryChildCount: summaryGrid.childElementCount,
+          totalRecipeCards: totalCards,
+        },
       );
     };
 
     const restoreMealPlanFromSession = () => {
-      if (!Array.isArray(meals) || meals.length > 0) {
+      const existingMeals = MealPlan.getAllMeals();
+      if (Array.isArray(existingMeals) && existingMeals.length > 0) {
         return;
       }
 
@@ -1175,33 +1320,32 @@ class MealPlanPage {
       if (!storedPlanData || !Array.isArray(storedPlanData.mealsForPlan)) {
         return;
       }
-
-      meals.splice(0, meals.length);
-      storedPlanData.mealsForPlan.forEach((mealData) => {
-        meals.push(new Meal(mealData));
+      const plan = MealPlan.applySavedPlanRecord({
+        record: storedPlanData,
+        mealsCollection: existingMeals,
+        profile: this.profile,
       });
 
-      if (typeof MealPlan === 'function') {
-        const restoredPlan = new MealPlan(storedPlanData);
-        MealPlan.setCurrentMealPlan(restoredPlan);
+      if (!plan) {
+        return;
       }
 
       if (
         daysSelect &&
-        typeof storedPlanData.days === 'number' &&
-        Number.isFinite(storedPlanData.days) &&
-        storedPlanData.days > 0
+        typeof plan.days === 'number' &&
+        Number.isFinite(plan.days) &&
+        plan.days > 0
       ) {
-        daysSelect.value = String(storedPlanData.days);
+        daysSelect.value = String(plan.days);
       }
 
       if (
         mealsPerDayInput &&
-        typeof storedPlanData.mealsPerDay === 'number' &&
-        Number.isFinite(storedPlanData.mealsPerDay) &&
-        storedPlanData.mealsPerDay > 0
+        typeof plan.mealsPerDay === 'number' &&
+        Number.isFinite(plan.mealsPerDay) &&
+        plan.mealsPerDay > 0
       ) {
-        mealsPerDayInput.value = String(storedPlanData.mealsPerDay);
+        mealsPerDayInput.value = String(plan.mealsPerDay);
       }
 
       renderSummaryGridFromMeals();
@@ -1670,6 +1814,9 @@ class MealPlanPage {
         if (peopleCount > 1) {
           const sumRowSumCell = document.createElement('td');
           sumRowSumCell.classList.add('meal-plan-calorie-grid-sum-column-cell');
+          // This cell represents the grand total of all per-person, per-meal
+          // calorie entries in the grid.
+          sumRowSumCell.classList.add('meal-plan-calorie-grid-global-sum');
           sumRowSumCell.textContent = '';
           sumRow.appendChild(sumRowSumCell);
 
@@ -1876,80 +2023,40 @@ class MealPlanPage {
 
       table.appendChild(tbody);
 
-      const debugRows = table.querySelectorAll('tr');
-      const totalRows = debugRows.length;
-      debugRows.forEach((row, rowIndex) => {
-        const cells = row.querySelectorAll('th, td');
-        const totalCols = cells.length;
-        cells.forEach((cell, colIndex) => {
-          if (!(cell instanceof HTMLElement)) return;
-          const hasChildElements = cell.children && cell.children.length > 0;
+      const updateGlobalSumCell = () => {
+        const targetCell = table.querySelector(
+          '.meal-plan-calorie-grid-global-sum',
+        );
+        if (!targetCell) return;
 
-          // Only initialize the special 3,3 sum cell; no more debug coordinates.
-          if (!hasChildElements && !cell.textContent) {
-            const displayRow = totalRows - rowIndex;
-            const displayCol = totalCols - colIndex;
-
-            // If this is cell 3,3 (bottom row, third column from right), show the sum of all per-person, per-meal cell values.
-            if (displayRow === 3 && displayCol === 3) {
-              // Find all .meal-plan-calories-meal inputs in the table and sum their numeric values.
-              let total = 0;
-              const mealInputs = table.querySelectorAll(
-                '.meal-plan-calories-meal',
-              );
-              mealInputs.forEach((input) => {
-                if (input instanceof HTMLInputElement) {
-                  const val = Number.parseFloat(input.value);
-                  if (Number.isFinite(val) && val > 0) {
-                    total += val;
-                  }
-                }
-              });
-              cell.textContent = String(total);
+        let total = 0;
+        const mealInputs = table.querySelectorAll(
+          `.${config.classes.mealPlanCaloriesMeal}`,
+        );
+        mealInputs.forEach((input) => {
+          if (input instanceof HTMLInputElement) {
+            const val = Number.parseFloat(input.value);
+            if (Number.isFinite(val) && val > 0) {
+              total += val;
             }
           }
         });
-      });
+
+        targetCell.textContent = String(total);
+      };
+
+      // Initialize the grand total cell once the table is built.
+      updateGlobalSumCell();
 
       calorieGridRows.appendChild(table);
 
-      // Add live update for the sum cell at inverted 3,3
-      const updateSumCell = () => {
-        const debugRows = table.querySelectorAll('tr');
-        const totalRows = debugRows.length;
-        debugRows.forEach((row, rowIndex) => {
-          const cells = row.querySelectorAll('th, td');
-          const totalCols = cells.length;
-          cells.forEach((cell, colIndex) => {
-            const hasChildElements = cell.children && cell.children.length > 0;
-            const displayRow = totalRows - rowIndex;
-            const displayCol = totalCols - colIndex;
-            if (!hasChildElements && displayRow === 3 && displayCol === 3) {
-              let total = 0;
-              const mealInputs = table.querySelectorAll(
-                '.meal-plan-calories-meal',
-              );
-              mealInputs.forEach((input) => {
-                if (input instanceof HTMLInputElement) {
-                  const val = Number.parseFloat(input.value);
-                  if (Number.isFinite(val) && val > 0) {
-                    total += val;
-                  }
-                }
-              });
-              cell.textContent = String(total);
-            }
-          });
-        });
-      };
-
-      // Attach change listeners to all meal inputs
+      // Attach change listeners to all meal inputs so the grand total updates live.
       const mealInputs = table.querySelectorAll(
         `.${config.classes.mealPlanCaloriesMeal}`,
       );
       mealInputs.forEach((input) => {
         if (input instanceof HTMLInputElement) {
-          input.addEventListener('input', updateSumCell);
+          input.addEventListener('input', updateGlobalSumCell);
         }
       });
     };
@@ -2037,6 +2144,16 @@ class MealPlanPage {
       }
 
       if (calorieGridRows) {
+        // Update the grand-total cell at the intersection of the
+        // sum row and sum column to reflect the sum of all
+        // per-person, per-meal calories.
+        const globalSumCell = calorieGridRows.querySelector(
+          '.meal-plan-calorie-grid-global-sum',
+        );
+        if (globalSumCell) {
+          globalSumCell.textContent = String(totalAllPersons);
+        }
+
         const sumDisplays = calorieGridRows.querySelectorAll(
           '.meal-plan-calories-person-sum',
         );
@@ -2365,28 +2482,50 @@ class MealPlanPage {
     }
 
     const ensureRecipesLoaded = async () => {
-      if (Array.isArray(recipes) && recipes.length > 0) {
+      const existingRecipes =
+        typeof MealPlan.getAvailableRecipes === 'function'
+          ? MealPlan.getAvailableRecipes()
+          : null;
+
+      if (Array.isArray(existingRecipes) && existingRecipes.length > 0) {
         this.log(
           'attachMealPlanEventListeners',
           'functionComplete',
           'MealPlanPage.ensureRecipesLoaded: Recipes already loaded',
           {
-            recipeCount: recipes.length,
+            recipeCount: existingRecipes.length,
           },
         );
         return;
       }
 
       try {
-        const api = RecipeApi.getInstance();
+        const api = this.recipeApi;
+        if (!api) {
+          this.log(
+            'attachMealPlanEventListeners',
+            'info',
+            'MealPlanPage.ensureRecipesLoaded: No RecipeApi instance available',
+          );
+          return;
+        }
         const dataset = await api.fetchRecipesDataset(config);
-        Recipes.populateRecipes(dataset);
+        if (typeof MealPlan.populateRecipesFromDataset === 'function') {
+          MealPlan.populateRecipesFromDataset(dataset);
+        }
+
+        const updatedRecipes =
+          typeof MealPlan.getAvailableRecipes === 'function'
+            ? MealPlan.getAvailableRecipes()
+            : null;
         this.log(
           'attachMealPlanEventListeners',
           'info',
           'MealPlanPage.ensureRecipesLoaded: Recipes dataset loaded for meal plan generation',
           {
-            recipeCount: Array.isArray(recipes) ? recipes.length : 0,
+            recipeCount: Array.isArray(updatedRecipes)
+              ? updatedRecipes.length
+              : 0,
           },
         );
         this.log(
@@ -2394,7 +2533,9 @@ class MealPlanPage {
           'functionComplete',
           'MealPlanPage.ensureRecipesLoaded: Completed load',
           {
-            recipeCount: Array.isArray(recipes) ? recipes.length : 0,
+            recipeCount: Array.isArray(updatedRecipes)
+              ? updatedRecipes.length
+              : 0,
           },
         );
       } catch (error) {
@@ -2426,7 +2567,12 @@ class MealPlanPage {
 
       await ensureRecipesLoaded();
 
-      if (!Array.isArray(recipes) || recipes.length === 0) {
+      const availableRecipes =
+        typeof MealPlan.getAvailableRecipes === 'function'
+          ? MealPlan.getAvailableRecipes()
+          : null;
+
+      if (!Array.isArray(availableRecipes) || availableRecipes.length === 0) {
         const mealPlanMessages = getMealPlanMessages();
         const message =
           mealPlanMessages && mealPlanMessages.noRecipesAvailableForPlan
@@ -2506,130 +2652,84 @@ class MealPlanPage {
           generatedMealNames[index] = `Meal ${index + 1}`;
         }
       });
-
-      if (Array.isArray(meals)) {
-        meals.splice(0, meals.length);
-        let idCounter = 1;
-        const usedRecipeIdsForCurrentPlan = new Set();
-
-        for (let dayIndex = 0; dayIndex < days; dayIndex += 1) {
-          for (let mealIndex = 0; mealIndex < mealsPerDay; mealIndex += 1) {
-            const name =
-              generatedMealNames[mealIndex] || `Meal ${mealIndex + 1}`;
-            const perPersonCalories = [];
-            for (
-              let personIndex = 0;
-              personIndex < peopleCount;
-              personIndex += 1
-            ) {
-              const flatIndex = mealIndex * peopleCount + personIndex;
-              const value =
-                typeof slots[flatIndex] === 'number' && slots[flatIndex] > 0
-                  ? slots[flatIndex]
-                  : null;
-              perPersonCalories.push(value);
-            }
-
-            const nonNullPerPerson = perPersonCalories.filter(
-              (value) => typeof value === 'number' && value > 0,
-            );
-            const targetCaloriesPerPerson =
-              nonNullPerPerson.length > 0
-                ? nonNullPerPerson.reduce((sum, value) => sum + value, 0) /
-                  nonNullPerPerson.length
-                : null;
-
-            const recipesForMeal = this.buildRecipesForMeal(
-              targetCaloriesPerPerson,
-              usedRecipeIdsForCurrentPlan,
-            );
-
-            recipesForMeal.forEach((recipe) => {
-              if (recipe && recipe.id != null) {
-                usedRecipeIdsForCurrentPlan.add(recipe.id);
-              }
-            });
-
-            meals.push(
-              new Meal({
-                id: idCounter,
-                name,
-                dayIndex,
-                mealType: name,
-                recipesForMeal,
-                notes: JSON.stringify({ perPersonCalories }),
-              }),
-            );
-            idCounter += 1;
+      const profileSnapshot = this.profile
+        ? {
+            dietType: this.profile.dietType,
+            allergensText: this.profile.allergensText,
+            maxReadyMinutes: this.profile.maxReadyMinutes,
+            mealPlanPeopleCount: this.profile.mealPlanPeopleCount,
+            mealPlanMealsPerDay: this.profile.mealPlanMealsPerDay,
+            mealPlanCaloriesPerPersonPerDay:
+              this.profile.mealPlanCaloriesPerPersonPerDay,
           }
+        : null;
+
+      const mealPlanMessages = getMealPlanMessages();
+      const generatedName =
+        mealPlanMessages && mealPlanMessages.generatedMealPlanName
+          ? mealPlanMessages.generatedMealPlanName
+          : '';
+
+      const recipeCollection = MealPlan.getAvailableRecipes();
+
+      const plan = MealPlan.generatePlanFromSlots({
+        profile: this.profile,
+        profileSnapshot,
+        recipesCollection: recipeCollection,
+        slots,
+        days,
+        mealsPerDay,
+        peopleCount,
+        mealNames: generatedMealNames,
+        planName: generatedName,
+      });
+
+      if (!plan) {
+        const mealPlanMessages = getMealPlanMessages();
+        const message =
+          mealPlanMessages && mealPlanMessages.planGenerationFailedAlert
+            ? mealPlanMessages.planGenerationFailedAlert
+            : 'Unable to generate a meal plan. Please check your calorie slots and other settings, then try again.';
+        if (
+          message &&
+          typeof window !== 'undefined' &&
+          typeof window.alert === 'function'
+        ) {
+          window.alert(message);
         }
         this.log(
           'generateMealPlanFromGrid',
-          'info',
-          'MealPlanPage.generateMealPlanFromGrid: Finished building meals array',
-          {
-            totalMeals: meals.length,
-          },
+          'functionComplete',
+          'MealPlanPage.generateMealPlanFromGrid: Plan generation returned null',
         );
+        return;
       }
 
-      if (typeof MealPlan === 'function') {
-        const profileSnapshot = this.profile
-          ? {
-              dietType: this.profile.dietType,
-              allergensText: this.profile.allergensText,
-              maxReadyMinutes: this.profile.maxReadyMinutes,
-              mealPlanPeopleCount: this.profile.mealPlanPeopleCount,
-              mealPlanMealsPerDay: this.profile.mealPlanMealsPerDay,
-              mealPlanCaloriesPerPersonPerDay:
-                this.profile.mealPlanCaloriesPerPersonPerDay,
-            }
-          : null;
+      this.log(
+        'generateMealPlanFromGrid',
+        'info',
+        'MealPlanPage.generateMealPlanFromGrid: Finished building meals array',
+        {
+          totalMeals: Array.isArray(plan.mealsForPlan)
+            ? plan.mealsForPlan.length
+            : null,
+        },
+      );
 
-        const mealPlanMessages = getMealPlanMessages();
-        const generatedName =
-          mealPlanMessages && mealPlanMessages.generatedMealPlanName
-            ? mealPlanMessages.generatedMealPlanName
-            : '';
-
-        const plan = new MealPlan({
-          id: null,
-          name: generatedName,
-          profileSnapshot,
-          days,
-          mealsPerDay,
-          mealsForPlan: Array.isArray(meals) ? meals : [],
-        });
-
-        // Expose the latest plan via the shared reference
-        MealPlan.setCurrentMealPlan(plan);
-
-        if (storage && typeof storage.saveMealPlan === 'function') {
-          storage.saveMealPlan(plan);
-        }
-
-        this.log(
-          'attachMealPlanEventListeners',
-          'info',
-          'Generated MealPlan object from grid and profile',
-          {
-            days: plan.days,
-            mealsPerDay: plan.mealsPerDay,
-            mealCount: plan.mealsForPlan.length,
-          },
-        );
-      } else {
-        this.log(
-          'attachMealPlanEventListeners',
-          'info',
-          'Generated meal plan from grid and profile',
-          {
-            days,
-            mealsPerDay,
-            mealCount: Array.isArray(meals) ? meals.length : 0,
-          },
-        );
+      if (storage && typeof storage.saveMealPlan === 'function') {
+        storage.saveMealPlan(plan);
       }
+
+      this.log(
+        'attachMealPlanEventListeners',
+        'info',
+        'Generated MealPlan object from grid and profile',
+        {
+          days: plan.days,
+          mealsPerDay: plan.mealsPerDay,
+          mealCount: plan.mealsForPlan.length,
+        },
+      );
       renderSummaryGridFromMeals();
       saveMealPlanPageStateToSession();
 
@@ -2638,7 +2738,9 @@ class MealPlanPage {
         'functionComplete',
         'MealPlanPage.generateMealPlanFromGrid: Completed end-to-end',
         {
-          mealsLength: Array.isArray(meals) ? meals.length : null,
+          mealsLength: Array.isArray(plan.mealsForPlan)
+            ? plan.mealsForPlan.length
+            : null,
         },
       );
     };
@@ -2655,12 +2757,14 @@ class MealPlanPage {
       let plan = existingPlan instanceof MealPlan ? existingPlan : null;
 
       if (!plan) {
-        if (!Array.isArray(meals) || meals.length === 0) {
+        const allMeals = MealPlan.getAllMeals();
+
+        if (!Array.isArray(allMeals) || allMeals.length === 0) {
           return null;
         }
 
         let maxDayIndex = 0;
-        meals.forEach((meal) => {
+        allMeals.forEach((meal) => {
           if (
             meal &&
             typeof meal.dayIndex === 'number' &&
@@ -2673,7 +2777,7 @@ class MealPlanPage {
         const days = maxDayIndex + 1;
 
         const dayCounts = new Map();
-        meals.forEach((meal) => {
+        allMeals.forEach((meal) => {
           if (
             meal &&
             typeof meal.dayIndex === 'number' &&
@@ -2711,7 +2815,7 @@ class MealPlanPage {
           profileSnapshot,
           days,
           mealsPerDay: mealsPerDayCandidate,
-          mealsForPlan: Array.isArray(meals) ? meals : [],
+          mealsForPlan: Array.isArray(allMeals) ? allMeals : [],
         });
       }
 
@@ -2792,57 +2896,15 @@ class MealPlanPage {
           ? storage.loadSavedMealPlans()
           : [];
 
-      const plans = Array.isArray(existing) ? existing.slice() : [];
-
-      let planId =
-        typeof plan.id === 'number' && Number.isFinite(plan.id)
-          ? plan.id
-          : null;
-      let existingIndex = -1;
-
-      if (planId != null) {
-        existingIndex = plans.findIndex(
-          (record) => record && record.id === planId,
-        );
-      }
-
-      if (existingIndex === -1) {
-        const maxId = plans.reduce((max, record) => {
-          const value =
-            record &&
-            typeof record.id === 'number' &&
-            Number.isFinite(record.id)
-              ? record.id
-              : null;
-          return value != null && value > max ? value : max;
-        }, 0);
-        planId = maxId + 1;
-      }
-
-      const record = {
-        id: planId,
+      const { plans, planId } = MealPlan.buildSavedPlanRecord({
+        existingPlans: existing,
+        plan,
         name,
-        profileSnapshot: plan.profileSnapshot || null,
-        days: plan.days,
-        mealsPerDay: plan.mealsPerDay,
-        mealsForPlan: Array.isArray(plan.mealsForPlan)
-          ? plan.mealsForPlan.map((meal) => ({ ...meal }))
-          : [],
-      };
-
-      if (existingIndex >= 0) {
-        plans[existingIndex] = record;
-      } else {
-        plans.push(record);
-      }
+      });
 
       if (storage && typeof storage.saveSavedMealPlans === 'function') {
         storage.saveSavedMealPlans(plans);
       }
-
-      plan.id = planId;
-      plan.name = name;
-      MealPlan.setCurrentMealPlan(plan);
 
       if (this.profile && typeof this.profile.addSavedMealPlan === 'function') {
         this.profile.addSavedMealPlan(planId);
@@ -3000,11 +3062,14 @@ class MealPlanPage {
         chosenRecord = plans[parsed - 1];
       }
 
-      if (
-        !chosenRecord ||
-        !Array.isArray(chosenRecord.mealsForPlan) ||
-        chosenRecord.mealsForPlan.length === 0
-      ) {
+      const planMealsCollection = MealPlan.getAllMeals();
+      const plan = MealPlan.applySavedPlanRecord({
+        record: chosenRecord,
+        mealsCollection: planMealsCollection,
+        profile: this.profile,
+      });
+
+      if (!plan) {
         const failedMessage =
           mealPlanMessages && mealPlanMessages.loadFailedAlert
             ? mealPlanMessages.loadFailedAlert
@@ -3017,34 +3082,6 @@ class MealPlanPage {
           window.alert(failedMessage);
         }
         return;
-      }
-
-      const plan = new MealPlan(chosenRecord);
-
-      if (Array.isArray(meals)) {
-        meals.splice(0, meals.length);
-        plan.mealsForPlan.forEach((meal) => {
-          meals.push(meal instanceof Meal ? meal : new Meal(meal));
-        });
-      }
-
-      const snapshot =
-        plan && plan.profileSnapshot && typeof plan.profileSnapshot === 'object'
-          ? plan.profileSnapshot
-          : null;
-
-      if (this.profile && snapshot) {
-        this.profile.setDietaryPreferences({
-          dietType: snapshot.dietType,
-          allergensText: snapshot.allergensText,
-          maxReadyMinutes: snapshot.maxReadyMinutes,
-        });
-
-        this.profile.setMealPlanSpec({
-          peopleCount: snapshot.mealPlanPeopleCount,
-          mealsPerDay: snapshot.mealPlanMealsPerDay,
-          caloriesPerPersonPerDay: snapshot.mealPlanCaloriesPerPersonPerDay,
-        });
       }
 
       if (
@@ -3074,8 +3111,6 @@ class MealPlanPage {
       ) {
         peopleInput.value = String(this.profile.mealPlanPeopleCount);
       }
-
-      MealPlan.setCurrentMealPlan(plan);
       if (storage && typeof storage.saveMealPlan === 'function') {
         storage.saveMealPlan(plan);
       }
@@ -3116,8 +3151,9 @@ class MealPlanPage {
     if (buildShoppingListButton) {
       buildShoppingListButton.addEventListener('click', (event) => {
         event.preventDefault();
+        const currentMeals = MealPlan.getAllMeals();
 
-        if (!Array.isArray(meals) || meals.length === 0) {
+        if (!Array.isArray(currentMeals) || currentMeals.length === 0) {
           const mealPlanMessages = getMealPlanMessages();
           const message =
             mealPlanMessages && mealPlanMessages.buildShoppingMissingPlanAlert
@@ -3139,12 +3175,14 @@ class MealPlanPage {
             ? this.profile.mealPlanPeopleCount
             : null;
 
-        const aggregate = MealPlan.buildRequiredIngredientsForPlan(
-          meals,
-          peopleCount,
-        );
+        const { aggregate, finalItems } =
+          MealPlan.buildShoppingListItemsFromPlan({
+            planMeals: currentMeals,
+            peopleCount,
+            inventoryItems: sharedInventory ? sharedInventory.items : null,
+          });
 
-        if (aggregate.size === 0) {
+        if (!aggregate || aggregate.size === 0) {
           const mealPlanMessages = getMealPlanMessages();
           const message =
             mealPlanMessages && mealPlanMessages.buildShoppingNoIngredientsAlert
@@ -3159,89 +3197,6 @@ class MealPlanPage {
           }
           return;
         }
-
-        // Ensure pantry inventory is hydrated from persistent storage so
-        // meal-plan-built shopping lists correctly account for existing stock
-        if (
-          sharedInventory &&
-          (!Array.isArray(sharedInventory.items) ||
-            sharedInventory.items.length === 0)
-        ) {
-          const persistedInventory =
-            storage && typeof storage.loadInventory === 'function'
-              ? storage.loadInventory()
-              : null;
-          if (
-            persistedInventory &&
-            Array.isArray(persistedInventory.items) &&
-            persistedInventory.items.length > 0
-          ) {
-            if (!Array.isArray(sharedInventory.items)) {
-              sharedInventory.items = [];
-            }
-            sharedInventory.items.splice(
-              0,
-              sharedInventory.items.length,
-              ...persistedInventory.items,
-            );
-          }
-        }
-
-        // Build a map of pantry quantities for in-stock items keyed by name+unit
-        const pantryTotals = new Map();
-        if (sharedInventory && Array.isArray(sharedInventory.items)) {
-          sharedInventory.items.forEach((entry) => {
-            if (!entry || !entry.inStock) return;
-            const pantryName = (entry.name || '').trim();
-            if (!pantryName) return;
-            const pantryUnit = (entry.unit || '').trim();
-            const pantryQuantity =
-              typeof entry.quantity === 'number' &&
-              Number.isFinite(entry.quantity) &&
-              entry.quantity > 0
-                ? entry.quantity
-                : 0;
-            if (pantryQuantity <= 0) return;
-
-            const pantryKey = MealPlan.makeIngredientKey(
-              pantryName,
-              pantryUnit,
-            );
-            const existingTotal = pantryTotals.get(pantryKey) || 0;
-            pantryTotals.set(pantryKey, existingTotal + pantryQuantity);
-          });
-        }
-
-        // Subtract pantry quantities from aggregated requirements
-        const finalItems = new Map();
-        const epsilon = 1e-6;
-        aggregate.forEach((entry, key) => {
-          const requiredQuantity =
-            typeof entry.quantity === 'number' &&
-            Number.isFinite(entry.quantity) &&
-            entry.quantity > 0
-              ? entry.quantity
-              : 0;
-          if (requiredQuantity <= 0) return;
-
-          const pantryQuantity = pantryTotals.get(key) || 0;
-          let needed = requiredQuantity - pantryQuantity;
-
-          if (needed <= epsilon) return;
-
-          if (!Number.isInteger(needed)) {
-            needed = Math.round(needed * 1000) / 1000;
-          }
-
-          if (needed > 0) {
-            finalItems.set(key, {
-              name: entry.name,
-              quantity: needed,
-              unit: entry.unit,
-            });
-          }
-        });
-
         if (finalItems.size === 0) {
           const mealPlanMessages = getMealPlanMessages();
           const message =
@@ -3281,7 +3236,7 @@ class MealPlanPage {
           'info',
           'Built shopping list from current meal plan (accounting for pantry)',
           {
-            mealCount: Array.isArray(meals) ? meals.length : 0,
+            mealCount: Array.isArray(currentMeals) ? currentMeals.length : 0,
             requestedItemCount: aggregate.size,
             finalItemCount: finalItems.size,
           },
@@ -3310,8 +3265,9 @@ class MealPlanPage {
     if (usePantryButton) {
       usePantryButton.addEventListener('click', (event) => {
         event.preventDefault();
+        const currentMeals = MealPlan.getAllMeals();
 
-        if (!Array.isArray(meals) || meals.length === 0) {
+        if (!Array.isArray(currentMeals) || currentMeals.length === 0) {
           const mealPlanMessages = getMealPlanMessages();
           const message =
             mealPlanMessages && mealPlanMessages.usePantryMissingPlanAlert
@@ -3332,27 +3288,6 @@ class MealPlanPage {
           this.profile.mealPlanPeopleCount > 0
             ? this.profile.mealPlanPeopleCount
             : null;
-
-        const aggregate = MealPlan.buildRequiredIngredientsForPlan(
-          meals,
-          peopleCount,
-        );
-
-        if (!aggregate || aggregate.size === 0) {
-          const mealPlanMessages = getMealPlanMessages();
-          const message =
-            mealPlanMessages && mealPlanMessages.usePantryNoIngredientsAlert
-              ? mealPlanMessages.usePantryNoIngredientsAlert
-              : '';
-          if (
-            message &&
-            typeof window !== 'undefined' &&
-            typeof window.alert === 'function'
-          ) {
-            window.alert(message);
-          }
-          return;
-        }
 
         // Ensure pantry inventory is hydrated from persistent storage
         if (
@@ -3380,48 +3315,27 @@ class MealPlanPage {
           }
         }
 
-        // Build pantry totals by name+unit for in-stock items
-        const pantryTotals = new Map();
-        if (sharedInventory && Array.isArray(sharedInventory.items)) {
-          sharedInventory.items.forEach((entry) => {
-            if (!entry || !entry.inStock) return;
-            const pantryName = (entry.name || '').trim();
-            if (!pantryName) return;
-            const pantryUnit = (entry.unit || '').trim();
-            const pantryQuantity =
-              typeof entry.quantity === 'number' &&
-              Number.isFinite(entry.quantity) &&
-              entry.quantity > 0
-                ? entry.quantity
-                : 0;
-            if (pantryQuantity <= 0) return;
-
-            const pantryKey = MealPlan.makeIngredientKey(
-              pantryName,
-              pantryUnit,
-            );
-            const existingTotal = pantryTotals.get(pantryKey) || 0;
-            pantryTotals.set(pantryKey, existingTotal + pantryQuantity);
-          });
-        }
-
-        let allCovered = true;
-        aggregate.forEach((entry, key) => {
-          const requiredQuantity =
-            typeof entry.quantity === 'number' &&
-            Number.isFinite(entry.quantity) &&
-            entry.quantity > 0
-              ? entry.quantity
-              : 0;
-          if (requiredQuantity <= 0) {
-            return;
-          }
-
-          const pantryQuantity = pantryTotals.get(key) || 0;
-          if (pantryQuantity + 1e-6 < requiredQuantity) {
-            allCovered = false;
-          }
+        const { aggregate, allCovered } = MealPlan.usePantryForPlan({
+          planMeals: currentMeals,
+          peopleCount,
+          inventoryItems: sharedInventory ? sharedInventory.items : null,
         });
+
+        if (!aggregate || aggregate.size === 0) {
+          const mealPlanMessages = getMealPlanMessages();
+          const message =
+            mealPlanMessages && mealPlanMessages.usePantryNoIngredientsAlert
+              ? mealPlanMessages.usePantryNoIngredientsAlert
+              : '';
+          if (
+            message &&
+            typeof window !== 'undefined' &&
+            typeof window.alert === 'function'
+          ) {
+            window.alert(message);
+          }
+          return;
+        }
 
         if (!allCovered) {
           this.log(
@@ -3429,7 +3343,7 @@ class MealPlanPage {
             'info',
             'Pantry does not fully cover ingredients for current meal plan',
             {
-              mealCount: Array.isArray(meals) ? meals.length : 0,
+              mealCount: Array.isArray(currentMeals) ? currentMeals.length : 0,
               requiredItemCount: aggregate.size,
             },
           );
@@ -3465,56 +3379,6 @@ class MealPlanPage {
           return;
         }
 
-        const epsilon = 1e-6;
-
-        if (sharedInventory && Array.isArray(sharedInventory.items)) {
-          aggregate.forEach((entry, key) => {
-            const requiredQuantity =
-              typeof entry.quantity === 'number' &&
-              Number.isFinite(entry.quantity) &&
-              entry.quantity > 0
-                ? entry.quantity
-                : 0;
-            if (requiredQuantity <= 0) {
-              return;
-            }
-
-            let remaining = requiredQuantity;
-
-            sharedInventory.items.forEach((invEntry) => {
-              if (!invEntry || !invEntry.inStock) return;
-              const pantryName = (invEntry.name || '').trim();
-              if (!pantryName) return;
-              const pantryUnit = (invEntry.unit || '').trim();
-              const pantryKey = MealPlan.makeIngredientKey(
-                pantryName,
-                pantryUnit,
-              );
-              if (pantryKey !== key) return;
-
-              const currentQuantity =
-                typeof invEntry.quantity === 'number' &&
-                Number.isFinite(invEntry.quantity) &&
-                invEntry.quantity > 0
-                  ? invEntry.quantity
-                  : 0;
-              if (currentQuantity <= 0 || remaining <= epsilon) return;
-
-              const subtract =
-                currentQuantity < remaining ? currentQuantity : remaining;
-              const nextQuantity = currentQuantity - subtract;
-              invEntry.quantity = nextQuantity > epsilon ? nextQuantity : 0;
-              if (!invEntry.quantity || invEntry.quantity <= epsilon) {
-                invEntry.inStock = false;
-              }
-              invEntry.partialQuantity = 0;
-              invEntry.selected = false;
-
-              remaining -= subtract;
-            });
-          });
-        }
-
         if (storage && typeof storage.saveInventory === 'function') {
           storage.saveInventory(sharedInventory);
         }
@@ -3524,7 +3388,7 @@ class MealPlanPage {
           'info',
           'Pantry fully covers ingredients for current meal plan; inventory updated to reflect usage',
           {
-            mealCount: Array.isArray(meals) ? meals.length : 0,
+            mealCount: Array.isArray(currentMeals) ? currentMeals.length : 0,
             requiredItemCount: aggregate.size,
           },
         );

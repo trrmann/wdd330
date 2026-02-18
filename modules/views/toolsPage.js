@@ -2,10 +2,8 @@ import { bootLogger } from '../models/bootLogger.js';
 
 import { Logger } from '../models/logger.js';
 import { Site } from './site.js';
-import { ShoppingList, Inventory } from '../models/shoppingList.js';
-import { Storage } from '../models/storage.js';
-import { recipes } from '../models/recipes.js';
-import { meals, Meal, Profile } from '../models/mealPlan.js';
+import { ShoppingList } from '../models/shoppingList.js';
+import { MealPlan, Meal } from '../models/mealPlan.js';
 
 bootLogger.moduleLoadStarted(import.meta.url);
 
@@ -23,9 +21,26 @@ class ToolsPage {
       'ToolsPage.constructor: Starting',
     );
     this.config = config;
-    this.profile = Profile.getInstance();
-    this.shoppingList = ShoppingList.getInstance();
-    this.inventory = Inventory.getInstance();
+    this.profile = options.profile || null;
+    this.shoppingList =
+      (this.profile && this.profile.shoppingList) ||
+      options.shoppingList ||
+      null;
+
+    if (options.inventory) {
+      if (!this.shoppingList) {
+        this.shoppingList = new ShoppingList();
+        if (this.profile) {
+          this.profile.shoppingList = this.shoppingList;
+        }
+      }
+      if (!this.shoppingList.inventory) {
+        this.shoppingList.inventory = options.inventory;
+      }
+    }
+
+    this.inventory = this.shoppingList ? this.shoppingList.inventory : null;
+    this.storage = options.storage || null;
     this.log(
       'constructor',
       'objectCreateComplete',
@@ -38,8 +53,37 @@ class ToolsPage {
     }
   }
 
+  getOrCreateInventory() {
+    if (!this.shoppingList) {
+      this.shoppingList = new ShoppingList();
+      if (this.profile) {
+        this.profile.shoppingList = this.shoppingList;
+      }
+    }
+
+    if (!this.shoppingList.inventory) {
+      this.shoppingList.inventory =
+        typeof ShoppingList.createEmptyInventory === 'function'
+          ? ShoppingList.createEmptyInventory()
+          : { items: [] };
+    }
+
+    this.inventory = this.shoppingList.inventory;
+
+    if (!Array.isArray(this.inventory.items)) {
+      this.inventory.items = [];
+    }
+
+    return this.inventory;
+  }
+
   // init: Builds the initial Tools page view model from the template.
   init(config) {
+    this.log('init', 'methodStart', 'ToolsPage.init: Starting', {
+      hasConfig: !!config,
+      alreadyInitialized: !!this.initialized,
+    });
+
     if (this.initialized && this.view) {
       // State: Reuse existing ToolsPage view model when already initialized.
       return this.log('init', 'passthroughMethodComplete', this.view, {
@@ -157,7 +201,30 @@ class ToolsPage {
   }
 
   applyToolsClasses(config, rootElement) {
-    if (!config || !config.classes || !config.ids || !rootElement) return;
+    this.log(
+      'applyToolsClasses',
+      'methodStart',
+      'ToolsPage.applyToolsClasses: Starting',
+      {
+        hasConfig: !!config,
+        hasClasses: !!(config && config.classes),
+        hasIds: !!(config && config.ids),
+        hasRootElement: !!rootElement,
+      },
+    );
+
+    if (!config || !config.classes || !config.ids || !rootElement) {
+      return this.log(
+        'applyToolsClasses',
+        'passthroughMethodComplete',
+        undefined,
+        {
+          canLogReturnValue: false,
+          message:
+            'ToolsPage.applyToolsClasses: Skipped - missing config, ids, classes, or rootElement',
+        },
+      );
+    }
 
     const { classes, ids } = config;
 
@@ -166,6 +233,8 @@ class ToolsPage {
       [ids.importMealplanButton, classes.importMealplanBtn],
       [ids.exportShoppingButton, classes.exportShoppingBtn],
       [ids.importShoppingButton, classes.importShoppingBtn],
+      [ids.exportPantryButton, classes.exportPantryBtn],
+      [ids.importPantryButton, classes.importPantryBtn],
       [ids.clearFavoritesButton, classes.clearFavoritesBtn],
       [ids.clearPlansButton, classes.clearPlansBtn],
       [ids.clearAllDataButton, classes.clearAllDataBtn],
@@ -177,11 +246,14 @@ class ToolsPage {
       [ids.chowToolsGrid, classes.chowToolsGrid],
     ];
 
+    let appliedCount = 0;
+
     mappings.forEach(([idValue, className]) => {
       if (!idValue || !className) return;
       const element = rootElement.querySelector(`#${CSS.escape(idValue)}`);
       if (element && !element.classList.contains(className)) {
         element.classList.add(className);
+        appliedCount += 1;
       }
     });
 
@@ -258,6 +330,26 @@ class ToolsPage {
         }
       }
     });
+
+    this.log(
+      'applyToolsClasses',
+      'info',
+      'State change: Applied tools classes to elements and tool cards',
+      {
+        appliedCount,
+        toolCardCount: toolCards.length,
+      },
+    );
+
+    return this.log(
+      'applyToolsClasses',
+      'passthroughMethodComplete',
+      undefined,
+      {
+        canLogReturnValue: false,
+        message: 'ToolsPage.applyToolsClasses: Completed',
+      },
+    );
   }
 
   // afterRender: Wires profile/tools events and syncs UI after render.
@@ -272,7 +364,7 @@ class ToolsPage {
       this.applyToolsClasses(config, mainElement);
     }
     this.attachToolsPageEventListeners(config);
-    this.syncProfileToUi(config);
+    this.syncProfileToUserInterface(config);
     if (mainElement && config.titles) {
       const toolCards = mainElement.querySelectorAll('.tool-card');
       if (toolCards[0]) {
@@ -410,32 +502,50 @@ class ToolsPage {
             hint.textContent = toolsMessages.exportSharingHint;
           }
 
-          const exportMealplanBtn = mainElement.querySelector(
+          const exportMealplanButton = mainElement.querySelector(
             `#${CSS.escape(config.ids.exportMealplanButton)}`,
           );
-          if (exportMealplanBtn && toolsMessages.exportMealPlanButton) {
-            exportMealplanBtn.textContent = toolsMessages.exportMealPlanButton;
+          if (exportMealplanButton && toolsMessages.exportMealPlanButton) {
+            exportMealplanButton.textContent =
+              toolsMessages.exportMealPlanButton;
           }
 
-          const importMealplanBtn = mainElement.querySelector(
+          const importMealplanButton = mainElement.querySelector(
             `#${CSS.escape(config.ids.importMealplanButton)}`,
           );
-          if (importMealplanBtn && toolsMessages.importMealPlanButton) {
-            importMealplanBtn.textContent = toolsMessages.importMealPlanButton;
+          if (importMealplanButton && toolsMessages.importMealPlanButton) {
+            importMealplanButton.textContent =
+              toolsMessages.importMealPlanButton;
           }
 
-          const exportShoppingBtn = mainElement.querySelector(
+          const exportShoppingButton = mainElement.querySelector(
             `#${CSS.escape(config.ids.exportShoppingButton)}`,
           );
-          if (exportShoppingBtn && toolsMessages.exportShoppingButton) {
-            exportShoppingBtn.textContent = toolsMessages.exportShoppingButton;
+          if (exportShoppingButton && toolsMessages.exportShoppingButton) {
+            exportShoppingButton.textContent =
+              toolsMessages.exportShoppingButton;
           }
 
-          const importShoppingBtn = mainElement.querySelector(
+          const importShoppingButton = mainElement.querySelector(
             `#${CSS.escape(config.ids.importShoppingButton)}`,
           );
-          if (importShoppingBtn && toolsMessages.importShoppingButton) {
-            importShoppingBtn.textContent = toolsMessages.importShoppingButton;
+          if (importShoppingButton && toolsMessages.importShoppingButton) {
+            importShoppingButton.textContent =
+              toolsMessages.importShoppingButton;
+          }
+
+          const exportPantryButton = mainElement.querySelector(
+            `#${CSS.escape(config.ids.exportPantryButton)}`,
+          );
+          if (exportPantryButton && toolsMessages.exportPantryButton) {
+            exportPantryButton.textContent = toolsMessages.exportPantryButton;
+          }
+
+          const importPantryButton = mainElement.querySelector(
+            `#${CSS.escape(config.ids.importPantryButton)}`,
+          );
+          if (importPantryButton && toolsMessages.importPantryButton) {
+            importPantryButton.textContent = toolsMessages.importPantryButton;
           }
         }
 
@@ -445,25 +555,26 @@ class ToolsPage {
             hint.textContent = toolsMessages.dataManagementHint;
           }
 
-          const clearFavoritesBtn = mainElement.querySelector(
+          const clearFavoritesButton = mainElement.querySelector(
             `#${CSS.escape(config.ids.clearFavoritesButton)}`,
           );
-          if (clearFavoritesBtn && toolsMessages.clearFavoritesButton) {
-            clearFavoritesBtn.textContent = toolsMessages.clearFavoritesButton;
+          if (clearFavoritesButton && toolsMessages.clearFavoritesButton) {
+            clearFavoritesButton.textContent =
+              toolsMessages.clearFavoritesButton;
           }
 
-          const clearPlansBtn = mainElement.querySelector(
+          const clearPlansButton = mainElement.querySelector(
             `#${CSS.escape(config.ids.clearPlansButton)}`,
           );
-          if (clearPlansBtn && toolsMessages.clearPlansButton) {
-            clearPlansBtn.textContent = toolsMessages.clearPlansButton;
+          if (clearPlansButton && toolsMessages.clearPlansButton) {
+            clearPlansButton.textContent = toolsMessages.clearPlansButton;
           }
 
-          const clearAllDataBtn = mainElement.querySelector(
+          const clearAllDataButton = mainElement.querySelector(
             `#${CSS.escape(config.ids.clearAllDataButton)}`,
           );
-          if (clearAllDataBtn && toolsMessages.clearAllDataButton) {
-            clearAllDataBtn.textContent = toolsMessages.clearAllDataButton;
+          if (clearAllDataButton && toolsMessages.clearAllDataButton) {
+            clearAllDataButton.textContent = toolsMessages.clearAllDataButton;
           }
         }
       }
@@ -505,17 +616,23 @@ class ToolsPage {
       '.favorites-mealplans-list',
     );
 
-    const exportMealplanBtn = mainElement.querySelector(
+    const exportMealplanButton = mainElement.querySelector(
       `#${CSS.escape(config.ids.exportMealplanButton)}`,
     );
-    const importMealplanBtn = mainElement.querySelector(
+    const importMealplanButton = mainElement.querySelector(
       `#${CSS.escape(config.ids.importMealplanButton)}`,
     );
-    const exportShoppingBtn = mainElement.querySelector(
+    const exportShoppingButton = mainElement.querySelector(
       `#${CSS.escape(config.ids.exportShoppingButton)}`,
     );
-    const importShoppingBtn = mainElement.querySelector(
+    const importShoppingButton = mainElement.querySelector(
       `#${CSS.escape(config.ids.importShoppingButton)}`,
+    );
+    const exportPantryButton = mainElement.querySelector(
+      `#${CSS.escape(config.ids.exportPantryButton)}`,
+    );
+    const importPantryButton = mainElement.querySelector(
+      `#${CSS.escape(config.ids.importPantryButton)}`,
     );
     const importMealplanFileInput = mainElement.querySelector(
       `#${CSS.escape(config.ids.importMealplanFile)}`,
@@ -523,14 +640,17 @@ class ToolsPage {
     const importShoppingFileInput = mainElement.querySelector(
       `#${CSS.escape(config.ids.importShoppingFile)}`,
     );
+    const importPantryFileInput = mainElement.querySelector(
+      `#${CSS.escape(config.ids.importPantryFile)}`,
+    );
 
-    const clearFavoritesBtn = mainElement.querySelector(
+    const clearFavoritesButton = mainElement.querySelector(
       `#${CSS.escape(config.ids.clearFavoritesButton)}`,
     );
-    const clearPlansBtn = mainElement.querySelector(
+    const clearPlansButton = mainElement.querySelector(
       `#${CSS.escape(config.ids.clearPlansButton)}`,
     );
-    const clearAllDataBtn = mainElement.querySelector(
+    const clearAllDataButton = mainElement.querySelector(
       `#${CSS.escape(config.ids.clearAllDataButton)}`,
     );
 
@@ -577,8 +697,8 @@ class ToolsPage {
       });
     }
 
-    if (clearFavoritesBtn) {
-      clearFavoritesBtn.addEventListener('click', () => {
+    if (clearFavoritesButton) {
+      clearFavoritesButton.addEventListener('click', () => {
         const previousIds =
           this.profile && Array.isArray(this.profile.favoriteRecipeIds)
             ? [...this.profile.favoriteRecipeIds]
@@ -598,13 +718,13 @@ class ToolsPage {
       });
     }
 
-    if (clearPlansBtn) {
-      clearPlansBtn.addEventListener('click', () => {
+    if (clearPlansButton) {
+      clearPlansButton.addEventListener('click', () => {
         if (this.profile) {
           this.profile.clearSavedMealPlans();
         }
 
-        const storage = Storage.getInstance();
+        const storage = this.storage;
         if (storage && typeof storage.saveMealPlan === 'function') {
           storage.saveMealPlan(null);
         }
@@ -622,8 +742,8 @@ class ToolsPage {
       });
     }
 
-    if (clearAllDataBtn) {
-      clearAllDataBtn.addEventListener('click', () => {
+    if (clearAllDataButton) {
+      clearAllDataButton.addEventListener('click', () => {
         const previousIds =
           this.profile && Array.isArray(this.profile.favoriteRecipeIds)
             ? [...this.profile.favoriteRecipeIds]
@@ -638,17 +758,17 @@ class ToolsPage {
         ) {
           this.shoppingList.clearItems();
         }
-        if (this.inventory && typeof this.inventory.clearItems === 'function') {
-          this.inventory.clearItems();
+
+        const inventory = this.getOrCreateInventory();
+        if (inventory && typeof inventory.clearItems === 'function') {
+          inventory.clearItems();
         }
         // Clear shared meals collection
-        if (Array.isArray(meals)) {
-          meals.splice(0, meals.length);
-        }
+        MealPlan.clearAllMeals();
 
         // Clear any session-backed meal plan so the current
         // browser session no longer restores an old plan.
-        const storage = Storage.getInstance();
+        const storage = this.storage;
         if (storage && typeof storage.saveMealPlan === 'function') {
           storage.saveMealPlan(null);
         }
@@ -699,8 +819,8 @@ class ToolsPage {
     // Populate favorites and saved meal plans lists on initial render
     this.renderFavoritesLists(favoritesRecipesList, favoritesMealplansList);
 
-    if (exportMealplanBtn) {
-      exportMealplanBtn.addEventListener('click', async () => {
+    if (exportMealplanButton) {
+      exportMealplanButton.addEventListener('click', async () => {
         const json = this.exportMealPlanToJson();
         if (!json) {
           this.log(
@@ -750,8 +870,8 @@ class ToolsPage {
       });
     }
 
-    if (importMealplanBtn && importMealplanFileInput) {
-      importMealplanBtn.addEventListener('click', () => {
+    if (importMealplanButton && importMealplanFileInput) {
+      importMealplanButton.addEventListener('click', () => {
         importMealplanFileInput.click();
       });
 
@@ -787,8 +907,8 @@ class ToolsPage {
       });
     }
 
-    if (exportShoppingBtn) {
-      exportShoppingBtn.addEventListener('click', async () => {
+    if (exportShoppingButton) {
+      exportShoppingButton.addEventListener('click', async () => {
         const json = this.exportShoppingListToJson();
         if (!json) {
           this.log(
@@ -838,8 +958,8 @@ class ToolsPage {
       });
     }
 
-    if (importShoppingBtn && importShoppingFileInput) {
-      importShoppingBtn.addEventListener('click', () => {
+    if (importShoppingButton && importShoppingFileInput) {
+      importShoppingButton.addEventListener('click', () => {
         importShoppingFileInput.click();
       });
 
@@ -875,16 +995,105 @@ class ToolsPage {
       });
     }
 
+    if (exportPantryButton) {
+      exportPantryButton.addEventListener('click', async () => {
+        const json = this.exportPantryToJson();
+        if (!json) {
+          this.log(
+            'attachToolsPageEventListeners',
+            'info',
+            'Export pantry requested but no items were available',
+          );
+          return;
+        }
+
+        try {
+          if (typeof document !== 'undefined') {
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const toolsMessages =
+              this.config && this.config.messages
+                ? this.config.messages.tools || null
+                : null;
+            const filename =
+              toolsMessages && toolsMessages.exportPantryFilename
+                ? toolsMessages.exportPantryFilename
+                : '';
+            if (filename) {
+              a.download = filename;
+            }
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            this.log(
+              'attachToolsPageEventListeners',
+              'info',
+              'Triggered pantry JSON download link',
+              { length: json.length },
+            );
+          }
+        } catch (error) {
+          this.log(
+            'attachToolsPageEventListeners',
+            'info',
+            'Failed to export pantry JSON',
+            { error: String(error) },
+          );
+        }
+      });
+    }
+
+    if (importPantryButton && importPantryFileInput) {
+      importPantryButton.addEventListener('click', () => {
+        importPantryFileInput.click();
+      });
+
+      importPantryFileInput.addEventListener('change', async () => {
+        const file = importPantryFileInput.files
+          ? importPantryFileInput.files[0]
+          : null;
+        if (!file) {
+          return;
+        }
+
+        try {
+          const text = await (file.text
+            ? file.text()
+            : this.readFileAsText(file));
+          const success = this.importPantryFromJson(text);
+          this.log(
+            'attachToolsPageEventListeners',
+            'info',
+            'Pantry import requested from file picker',
+            { success, fileName: file.name, size: file.size },
+          );
+        } catch (error) {
+          this.log(
+            'attachToolsPageEventListeners',
+            'info',
+            'Pantry file import failed',
+            { error: String(error) },
+          );
+        } finally {
+          importPantryFileInput.value = '';
+        }
+      });
+    }
+
     this.renderFavoritesLists(favoritesRecipesList, favoritesMealplansList);
   }
 
   exportMealPlanToJson() {
-    if (!Array.isArray(meals) || meals.length === 0) {
+    const allMeals = MealPlan.getAllMeals();
+    if (!Array.isArray(allMeals) || allMeals.length === 0) {
       return '';
     }
 
     const payload = {
-      meals: meals.map((meal) => ({ ...meal })),
+      meals: allMeals.map((meal) => ({ ...meal })),
     };
 
     const json = JSON.stringify(payload);
@@ -917,6 +1126,25 @@ class ToolsPage {
         length: json.length,
       },
     );
+    return json;
+  }
+
+  exportPantryToJson() {
+    const inventory = this.getOrCreateInventory();
+
+    if (!inventory || !Array.isArray(inventory.items)) {
+      return '';
+    }
+
+    const payload = {
+      items: inventory.items.map((item) => ({ ...item })),
+    };
+
+    const json = JSON.stringify(payload);
+    this.log('exportPantryToJson', 'info', 'Exported pantry to JSON', {
+      itemCount: Array.isArray(payload.items) ? payload.items.length : 0,
+      length: json.length,
+    });
     return json;
   }
 
@@ -953,17 +1181,12 @@ class ToolsPage {
       return false;
     }
 
-    if (!Array.isArray(meals)) {
-      return false;
-    }
-
-    meals.splice(0, meals.length);
-    incoming.forEach((raw) => {
-      meals.push(new Meal(raw));
-    });
+    MealPlan.replaceAllMeals(incoming);
 
     this.log('importMealPlanFromJson', 'info', 'Imported meal plan from JSON', {
-      mealCount: meals.length,
+      mealCount: Array.isArray(MealPlan.getAllMeals())
+        ? MealPlan.getAllMeals().length
+        : 0,
     });
     return true;
   }
@@ -1028,6 +1251,58 @@ class ToolsPage {
     return true;
   }
 
+  importPantryFromJson(jsonText) {
+    if (!jsonText) {
+      return false;
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(jsonText);
+    } catch (error) {
+      this.log('importPantryFromJson', 'info', 'Failed to parse pantry JSON', {
+        error: String(error),
+      });
+      return false;
+    }
+
+    const incomingItems = Array.isArray(parsed?.items)
+      ? parsed.items
+      : Array.isArray(parsed)
+        ? parsed
+        : null;
+
+    if (!incomingItems) {
+      this.log(
+        'importPantryFromJson',
+        'info',
+        'Parsed pantry JSON did not contain an items array',
+      );
+      return false;
+    }
+
+    const inventory = this.getOrCreateInventory();
+
+    const nextInventory =
+      typeof ShoppingList.createInventoryFromPersisted === 'function'
+        ? ShoppingList.createInventoryFromPersisted({ items: incomingItems })
+        : { items: incomingItems };
+
+    inventory.items = Array.isArray(nextInventory.items)
+      ? nextInventory.items
+      : [];
+
+    const storage = this.storage;
+    if (storage && typeof storage.saveInventory === 'function') {
+      storage.saveInventory(inventory);
+    }
+
+    this.log('importPantryFromJson', 'info', 'Imported pantry from JSON', {
+      itemCount: Array.isArray(inventory.items) ? inventory.items.length : 0,
+    });
+    return true;
+  }
+
   readFileAsText(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -1067,7 +1342,7 @@ class ToolsPage {
       Array.isArray(this.profile.favoriteRecipeIds)
     ) {
       this.profile.favoriteRecipeIds.forEach((id) => {
-        const recipe = recipes.find((r) => r && r.id === id);
+        const recipe = Meal.findRecipeById(id);
         const li = document.createElement('li');
         const icon = document.createElement('span');
         icon.className = `${this.config.classes.favoriteListIcon} tool-mealplan-remove-icon`;
@@ -1084,7 +1359,13 @@ class ToolsPage {
         text.textContent = displayName;
         const removeFavorite = (event) => {
           event.stopPropagation();
-          if (this.profile) {
+          if (
+            this.profile &&
+            recipe &&
+            typeof recipe.toggleFavoriteForProfile === 'function'
+          ) {
+            recipe.toggleFavoriteForProfile(this.profile);
+          } else if (this.profile) {
             this.profile.removeFavoriteRecipe(id);
           }
           this.syncFavoriteButtonsForRecipe(id);
@@ -1114,7 +1395,7 @@ class ToolsPage {
 
     if (this.profile && mealPlansListElement) {
       const savedPlans = (() => {
-        const storage = Storage.getInstance();
+        const storage = this.storage;
         return storage && typeof storage.loadSavedMealPlans === 'function'
           ? storage.loadSavedMealPlans()
           : [];
@@ -1179,7 +1460,7 @@ class ToolsPage {
             (planRecord) => !(planRecord && planRecord.id === id),
           );
 
-          const storage = Storage.getInstance();
+          const storage = this.storage;
           if (storage && typeof storage.saveSavedMealPlans === 'function') {
             storage.saveSavedMealPlans(updatedPlans);
           }
@@ -1229,7 +1510,7 @@ class ToolsPage {
             return;
           }
 
-          const storage = Storage.getInstance();
+          const storage = this.storage;
           if (storage && typeof storage.saveMealPlan === 'function') {
             storage.saveMealPlan(record);
           }
@@ -1272,9 +1553,10 @@ class ToolsPage {
     if (typeof document === 'undefined') return;
 
     const idString = String(recipeId);
+    const profile = this.profile;
     const isFavorite =
-      this.profile && Array.isArray(this.profile.favoriteRecipeIds)
-        ? this.profile.favoriteRecipeIds.includes(recipeId)
+      typeof Meal.isRecipeIdFavoriteForProfile === 'function'
+        ? Meal.isRecipeIdFavoriteForProfile(recipeId, profile)
         : false;
 
     const selector = [
@@ -1290,7 +1572,7 @@ class ToolsPage {
     });
   }
 
-  syncProfileToUi(config) {
+  syncProfileToUserInterface(config) {
     const mainElement = document.querySelector(`.${config.classes.main}`);
     if (!mainElement || !this.profile) return;
 

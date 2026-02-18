@@ -1,14 +1,16 @@
 // Purpose: Manages the header DOM, logo, and hamburger/menu behavior
-// for the Chow Time site shell.
+// for the Chow Time site shell, including constructing and owning
+// the navigation Menu.
 //
 // Usage:
 //   import { Header } from './modules/views/header.js';
-//   const header = new Header(config, menuElement, logger);
+//   const header = new Header(config, { logger, onNavigate });
 
 import { bootLogger } from '../models/bootLogger.js';
 
 import { Logger } from '../models/logger.js';
 import { Site } from './site.js';
+import { Menu } from './menu.js';
 
 bootLogger.moduleLoadStarted(import.meta.url);
 
@@ -16,16 +18,18 @@ bootLogger.moduleInfo(import.meta.url, 'Defines Header shell component');
 
 class Header {
   // constructor: Creates the Header and starts initialization.
-  constructor(config, menuElement, logger) {
+  constructor(config, options = {}) {
     Object.defineProperties(this, Header.descriptors);
-    this.logger = logger || null;
+    this.logger = options.logger || null;
     this.log(
       'constructor',
       'objectCreateStart',
       'Header.constructor: Starting',
     );
     this.config = config;
-    this.menuElement = menuElement || null;
+    this.onNavigate =
+      typeof options.onNavigate === 'function' ? options.onNavigate : null;
+    this.menuElement = null;
     this.log(
       'constructor',
       'objectCreateComplete',
@@ -107,14 +111,17 @@ class Header {
       site && typeof site.applyAttributes === 'function'
         ? site.applyAttributes.bind(site)
         : (el, attrs) => {
-            if (!el || !attrs) return;
-            Object.entries(attrs).forEach(([name, value]) => {
-              if (value === false || value == null) {
-                el.removeAttribute(name);
-              } else {
-                el.setAttribute(name, String(value));
-              }
-            });
+            if (!this.logger) return;
+            this.logger.classMethodLog(
+              'info',
+              'Header',
+              'init',
+              'Header.init: Site.applyAttributes not available; skipping attribute application',
+              {
+                hasElement: !!el,
+                hasAttrs: !!attrs,
+              },
+            );
           };
 
     // State: Apply config-driven attributes to logo and hamburger elements.
@@ -137,7 +144,12 @@ class Header {
       }
     }
 
-    // State: Attach configured menu DOM into the header.
+    // State: Construct and attach the navigation Menu into the header.
+    const menu = new Menu(this.config, {
+      logger: this.logger,
+      onNavigate: this.onNavigate,
+    });
+    this.menuElement = menu.element;
     if (this.menuElement) {
       headerElem.appendChild(this.menuElement);
     }
@@ -229,7 +241,24 @@ class Header {
 
   // cacheInteractiveElements: Caches key interactive header elements.
   cacheInteractiveElements() {
-    if (!this.element) return;
+    this.log(
+      'cacheInteractiveElements',
+      'methodStart',
+      'Header.cacheInteractiveElements: Starting',
+    );
+
+    if (!this.element) {
+      return this.log(
+        'cacheInteractiveElements',
+        'passthroughMethodComplete',
+        undefined,
+        {
+          canLogReturnValue: false,
+          message:
+            'Header.cacheInteractiveElements: Skipped - no header element',
+        },
+      );
+    }
 
     this.hamburgerBtn = this.element.querySelector(
       `.${this.config.classes.hamburger}`,
@@ -240,11 +269,38 @@ class Header {
     this.menuList = this.menuElement
       ? this.menuElement.querySelector(`.${this.config.classes.menuList}`)
       : null;
+
+    return this.log(
+      'cacheInteractiveElements',
+      'passthroughMethodComplete',
+      undefined,
+      {
+        canLogReturnValue: false,
+        message: 'Header.cacheInteractiveElements: Completed',
+      },
+    );
   }
 
   // initializeHamburgerBehavior: Wires the hamburger toggle and ARIA state.
   initializeHamburgerBehavior() {
-    if (!this.hamburgerBtn || !this.menuList || !this.hamburgerIcon) return;
+    this.log(
+      'initializeHamburgerBehavior',
+      'methodStart',
+      'Header.initializeHamburgerBehavior: Starting',
+    );
+
+    if (!this.hamburgerBtn || !this.menuList || !this.hamburgerIcon) {
+      return this.log(
+        'initializeHamburgerBehavior',
+        'passthroughMethodComplete',
+        undefined,
+        {
+          canLogReturnValue: false,
+          message:
+            'Header.initializeHamburgerBehavior: Skipped - missing hamburger or menu elements',
+        },
+      );
+    }
 
     this.setHamburgerIcon(false);
 
@@ -262,6 +318,16 @@ class Header {
       );
       this.setHamburgerIcon(isActive);
     });
+
+    return this.log(
+      'initializeHamburgerBehavior',
+      'passthroughMethodComplete',
+      undefined,
+      {
+        canLogReturnValue: false,
+        message: 'Header.initializeHamburgerBehavior: Completed',
+      },
+    );
   }
 
   // log: Delegates logging to the shared Logger using Header conventions.
@@ -288,14 +354,54 @@ class Header {
 
   // setHamburgerIcon: Updates hamburger icon source based on open state.
   setHamburgerIcon(isActive) {
-    if (!this.hamburgerIcon) return;
+    this.log(
+      'setHamburgerIcon',
+      'methodStart',
+      'Header.setHamburgerIcon: Starting',
+      {
+        isActive: !!isActive,
+      },
+    );
+
+    if (!this.hamburgerIcon) {
+      return this.log(
+        'setHamburgerIcon',
+        'passthroughMethodComplete',
+        undefined,
+        {
+          canLogReturnValue: false,
+          message: 'Header.setHamburgerIcon: Skipped - no hamburger icon',
+        },
+      );
+    }
     const images = this.config && this.config.images ? this.config.images : {};
     const closedSrc = images.hamburgerClosed;
     const openSrc = images.hamburgerOpen;
 
-    if (!closedSrc || !openSrc) return;
+    if (!closedSrc || !openSrc) {
+      return this.log(
+        'setHamburgerIcon',
+        'passthroughMethodComplete',
+        undefined,
+        {
+          canLogReturnValue: false,
+          message:
+            'Header.setHamburgerIcon: Skipped - hamburger images not configured',
+        },
+      );
+    }
 
     this.hamburgerIcon.src = isActive ? openSrc : closedSrc;
+
+    return this.log(
+      'setHamburgerIcon',
+      'passthroughMethodComplete',
+      undefined,
+      {
+        canLogReturnValue: false,
+        message: 'Header.setHamburgerIcon: Completed',
+      },
+    );
   }
 }
 

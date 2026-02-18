@@ -2,11 +2,11 @@
 // Purpose: Manages all communication with external recipe APIs, including
 // constructing requests, handling responses, error management, and integrating
 // with a localStorage-backed cache for recipe data.
-// Usage: import { getRecipeApi } from './apiAccess.js';
-//        const api = getRecipeApi(); const dataset = await api.fetchRecipesDataset(config);
+// Usage: import { RecipeApi } from './apiAccess.js';
+//        const api = new RecipeApi(storage); const dataset = await api.fetchRecipesDataset(config);
 
 import { bootLogger } from './bootLogger.js';
-import { Storage } from './storage.js';
+import { Logger } from './logger.js';
 
 bootLogger.moduleLoadStarted(import.meta.url);
 
@@ -21,6 +21,10 @@ const RECIPES_CACHE_KEY = 'recipes.v1';
 // when the real API is unavailable or disabled.
 class MockApi {
   constructor(owner) {
+    this.init(owner);
+  }
+
+  init(owner) {
     this.owner = owner;
   }
 
@@ -32,7 +36,13 @@ class MockApi {
 // Handles all recipe API requests, including cache lookups,
 // fallbacks to mock data, and normalization of response shape.
 class RecipeApi {
-  constructor() {
+  constructor(storage, internal = {}) {
+    this.logger = internal.logger || this.logger || null;
+    this.init(storage);
+  }
+
+  init(storage) {
+    this.storage = storage;
     this.mockApi = new MockApi(this);
   }
   canUseRecipesApi(config) {
@@ -84,7 +94,7 @@ class RecipeApi {
     );
 
     const ttlMs = this.getRecipesCacheTtlMs(config);
-    const storage = Storage.getInstance();
+    const storage = this.storage;
     const cached = storage.loadApiCacheEntry(RECIPES_CACHE_KEY);
     if (cached && cached.results && Array.isArray(cached.results)) {
       bootLogger.moduleInfo(
@@ -209,14 +219,7 @@ class RecipeApi {
   }
 }
 
-RecipeApi.instance = null;
-
-RecipeApi.getInstance = function getInstance() {
-  if (!RecipeApi.instance) {
-    RecipeApi.instance = new RecipeApi();
-  }
-  return RecipeApi.instance;
-};
+Logger.instrumentClass(RecipeApi, 'RecipeApi');
 
 bootLogger.moduleLoadCompleted(import.meta.url);
 

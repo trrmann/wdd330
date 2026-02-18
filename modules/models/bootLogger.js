@@ -6,6 +6,15 @@ import { bootLogConfig } from './bootLogConfig.js';
 // Usage: import { bootLogger } from './bootLogger.js';
 //        bootLogger.moduleInfo(import.meta.url, 'MyModule loaded');
 class BootLogger {
+  constructor(config = null) {
+    this.init(config);
+  }
+
+  init(config = null) {
+    Object.defineProperties(this, BootLogger.descriptors);
+    this.config = config;
+  }
+
   static get descriptors() {
     return {
       config: {
@@ -15,11 +24,6 @@ class BootLogger {
         configurable: false,
       },
     };
-  }
-
-  constructor(config = null) {
-    Object.defineProperties(this, BootLogger.descriptors);
-    this.config = config;
   }
 
   setConfig(config) {
@@ -160,17 +164,7 @@ class BootLogger {
     }
   }
 }
-
-BootLogger.instance = null;
-
-BootLogger.getInstance = function getInstance() {
-  if (!BootLogger.instance) {
-    BootLogger.instance = new BootLogger(bootLogConfig);
-  }
-  return BootLogger.instance;
-};
-
-const bootLogger = BootLogger.getInstance();
+const bootLogger = new BootLogger(bootLogConfig);
 
 bootLogger.moduleLoadStarted(import.meta.url);
 

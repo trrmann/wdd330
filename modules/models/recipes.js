@@ -1,12 +1,12 @@
 // Recipes Module
-// Purpose: Encapsulates recipe models, nutrition, and search/filter behavior.
+// Purpose: Encapsulates recipe models and search/filter behavior.
 // Usage: import { recipes, Recipes } from './recipes.js';
 //        const filtered = Recipes.filter(recipes, { nameTerm: 'pasta' });
 
 import { bootLogger } from './bootLogger.js';
-import { Nutrition } from './nutrition.js';
 import { Recipe } from './recipe.js';
-import { Ingredient, ingredients } from './shoppingList.js';
+import { Ingredient } from './ingredient.js';
+import { ingredients } from './shoppingList.js';
 
 bootLogger.moduleLoadStarted(import.meta.url);
 
@@ -132,9 +132,27 @@ class Recipes {
 
     ingredients.splice(0, ingredients.length, ...allIngredients);
   }
+
+  static ensureRecipeModel(raw) {
+    if (raw instanceof Recipe) {
+      return raw;
+    }
+    return new Recipe(raw);
+  }
+
+  static getAll() {
+    return recipes;
+  }
+
+  static isRecipeIdFavoriteForProfile(recipeId, profile) {
+    if (typeof Recipe.isIdFavoriteForProfile === 'function') {
+      return Recipe.isIdFavoriteForProfile(recipeId, profile);
+    }
+    return false;
+  }
 }
 
-export { recipes, Recipes, Recipe, Nutrition };
+export { recipes, Recipes, Recipe };
 
 bootLogger.moduleInfo(import.meta.url, 'Exports defined.');
 

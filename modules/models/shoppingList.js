@@ -3,7 +3,6 @@
 
 import { bootLogger } from './bootLogger.js';
 import { Logger } from './logger.js';
-import { Ingredient } from './ingredient.js';
 import { Inventory } from './inventory.js';
 
 bootLogger.moduleLoadStarted(import.meta.url);
@@ -16,7 +15,13 @@ bootLogger.moduleInfo(
 // Represents a shopping list with items and quantities and
 // provides helpers to add, remove, toggle, and adjust items.
 class ShoppingList {
-  constructor({ id = null, name = '', items = [] } = {}) {
+  constructor(options = {}, internal = {}) {
+    this.logger = internal.logger || this.logger || null;
+    this.inventory = internal.inventory || this.inventory || null;
+    this.init(options);
+  }
+
+  init({ id = null, name = '', items = [] } = {}) {
     this.id = id;
     this.name = name;
     this.items = Array.isArray(items)
@@ -84,20 +89,6 @@ class ShoppingList {
     });
   }
 
-  setQuantity(idOrText, quantity) {
-    if (!idOrText && idOrText !== 0) return;
-    const key = String(idOrText).toLowerCase();
-    const item = this.items.find((entry) => {
-      if (entry.id != null && String(entry.id).toLowerCase() === key)
-        return true;
-      return entry.text && entry.text.toLowerCase() === key;
-    });
-    if (!item) return;
-    const safeQuantity =
-      typeof quantity === 'number' && quantity > 0 ? quantity : 1;
-    item.quantity = safeQuantity;
-  }
-
   toggleItem(idOrText) {
     if (!idOrText && idOrText !== 0) return;
     const key = String(idOrText).toLowerCase();
@@ -109,34 +100,40 @@ class ShoppingList {
     if (!item) return;
     item.inStock = !item.inStock;
   }
+
+  static getSharedIngredients() {
+    return ingredients;
+  }
+
+  static createEmptyInventory() {
+    return new Inventory();
+  }
+
+  static createInventoryFromPersisted(persisted = {}) {
+    return new Inventory(persisted);
+  }
+
+  static buildKnownItemMetadataForShopping({
+    ingredientsCollection = [],
+    shoppingItems = [],
+    inventoryItems = [],
+  } = {}) {
+    return Inventory.buildKnownItemMetadata({
+      ingredientsCollection,
+      shoppingItems,
+      inventoryItems,
+    });
+  }
 }
 
 // Shared ingredients collection used across recipes and shopping features
 const ingredients = [];
 
-ShoppingList.instance = null;
-
-ShoppingList.getInstance = function getInstance() {
-  if (!ShoppingList.instance) {
-    ShoppingList.instance = new ShoppingList();
-  }
-  return ShoppingList.instance;
-};
-
-Inventory.instance = null;
-
-Inventory.getInstance = function getInstance() {
-  if (!Inventory.instance) {
-    Inventory.instance = new Inventory();
-  }
-  return Inventory.instance;
-};
-
 bootLogger.moduleClassLoaded(import.meta.url, 'ShoppingList');
 
 Logger.instrumentClass(ShoppingList, 'ShoppingList');
 
-export { Ingredient, Inventory, ShoppingList, ingredients };
+export { Inventory, ShoppingList, ingredients };
 
 bootLogger.moduleInfo(import.meta.url, 'Exports defined.');
 

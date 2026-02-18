@@ -166,10 +166,12 @@ tr:nth-child(even) {
   max-width: 700px;
   width: 90%;
   max-height: 90vh;
+  min-height: 60vh;
   overflow-y: auto;
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  position: relative;
 }
 
 .recipe-detail-header,
@@ -207,6 +209,12 @@ tr:nth-child(even) {
 .nutrition-detail-body {
   display: grid;
   gap: 1rem;
+}
+
+/* In recipe detail view, treat the body as a column so actions can sit at the bottom. */
+.recipe-detail .recipe-detail-body {
+  display: flex;
+  flex-direction: column;
 }
 
 .recipe-detail-ingredients ul {
@@ -500,13 +508,33 @@ main.recipes .search-bar {
 }
 
 .meal-plan-recipe-card {
+  position: relative;
   padding: 0.5rem;
 }
 
 .meal-plan-recipe-card .recipe-card-image {
   max-width: 100%;
   max-height: 90px;
+  margin-top: 1.75rem;
   object-fit: cover;
+}
+
+.meal-plan-recipe-card .meal-plan-multiplier-badge {
+  position: absolute;
+  top: 0.25rem;
+  left: 0.25rem;
+  min-width: 1.75rem;
+  height: 1.75rem;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--neutral-secondary-color);
+  background-color: #ffffff;
+  color: var(--neutral-secondary-color);
+  font-size: 0.8rem;
+  font-family: var(--heading-font);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .meal-plan-recipe-card .recipe-card-title {
@@ -515,6 +543,25 @@ main.recipes .search-bar {
 
 .meal-plan-recipe-card .recipe-card-meta {
   font-size: 0.8rem;
+}
+
+.meal-plan-detail-multiplier-badge {
+  position: absolute;
+  left: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  min-width: 1.75rem;
+  height: 1.75rem;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--neutral-secondary-color);
+  background-color: #ffffff;
+  color: var(--neutral-secondary-color);
+  font-size: 0.9rem;
+  font-family: var(--heading-font);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .recipe-favorite-toggle {
@@ -554,13 +601,11 @@ main.recipes .search-bar {
   border: 1px solid var(--neutral-secondary-color);
 }
 
-.recipe-detail-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
 .recipe-detail-favorite-toggle {
+  position: absolute;
+  right: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
   width: 1.75rem;
   height: 1.75rem;
   padding: 0;
@@ -592,6 +637,32 @@ main.recipes .search-bar {
   background-color: #ffffff;
   border-radius: 999px;
   border: 1px solid var(--neutral-secondary-color);
+}
+
+.recipe-detail-actions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: auto; /* Push actions to bottom of the detail body */
+  width: 100%;
+}
+
+.recipe-detail-nutrition-button {
+  padding: 0.5rem 1.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--primary-color);
+  background-color: var(--primary-color);
+  color: var(--neutral-color);
+  font-family: var(--heading-font);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.recipe-detail-nutrition-button:hover {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
 }
 
 .favorites-recipes-list {
@@ -674,7 +745,7 @@ main.recipes .search-bar {
   line-height: 1;
 }
 
-.shopping-list-btn {
+.shopping-list-button {
   display: block;
   width: 100%;
   background-color: var(--secondary-color);
@@ -690,7 +761,7 @@ main.recipes .search-bar {
   margin-bottom: 1rem;
 }
 
-.shopping-list-btn:hover {
+.shopping-list-button:hover {
   background-color: var(--secondary-color);
   color: var(--neutral-secondary-color);
 }

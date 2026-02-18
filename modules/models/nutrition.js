@@ -7,7 +7,11 @@ bootLogger.moduleInfo(import.meta.url, 'Defines Nutrition model');
 // Nutrition model that normalizes nutrient arrays from API/mock data.
 // Usage: const nutrition = Nutrition.fromMock(rawNutrition);
 class Nutrition {
-  constructor({ nutrients = [] } = {}) {
+  constructor(options = {}) {
+    this.init(options);
+  }
+
+  init({ nutrients = [] } = {}) {
     this.nutrients = Array.isArray(nutrients)
       ? nutrients.map((nutrient) => ({
           title: nutrient.title || '',

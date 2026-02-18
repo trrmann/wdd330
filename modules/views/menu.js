@@ -38,6 +38,7 @@ class Menu {
       });
     }
 
+    this.log('init', 'methodStart', 'Menu.init: Starting');
     this.log('init', 'objectInitStart', 'Menu.init: Starting');
 
     const template = document.getElementById(this.config.ids.templates.menu);
@@ -122,6 +123,10 @@ class Menu {
         event.preventDefault();
         const rawPageName = event.target.hash.substring(1);
         const pageName = rawPageName === 'tools' ? 'more' : rawPageName;
+        this.log('init', 'info', 'Menu.init: Navigation click', {
+          rawPageName,
+          pageName,
+        });
         if (this.onNavigate) {
           this.onNavigate(pageName);
         }

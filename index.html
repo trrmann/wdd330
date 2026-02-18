@@ -70,13 +70,13 @@
       </div>
       <div id="home-actions">
         <button id="home-meal-plan-summary" type="button"></button>
-        <button id="shopping-list-btn-top" type="button"></button>
+        <button id="shopping-list-button-top" type="button"></button>
       </div>
       <div id="home-recipe-cards">
         <!-- Recipe cards will be dynamically inserted here -->
       </div>
 
-      <button id="shopping-list-btn-bottom" type="button"></button>
+      <button id="shopping-list-button-bottom" type="button"></button>
     </template>
     <template id="recipesPageTemplate">
       <div id="recipes-search-bar">
@@ -246,8 +246,14 @@
           <p></p>
         </div>
         <div id="shopping-add-item">
-          <label for="shopping-qty"></label>
-          <input id="shopping-qty" type="number" min="1" step="1" value="1" >
+          <label for="shopping-quantity"></label>
+          <input
+            id="shopping-quantity"
+            type="number"
+            min="1"
+            step="1"
+            value="1"
+          >
           <label for="shopping-unit"></label>
           <input id="shopping-unit" type="text" >
           <label for="shopping-new-item"></label>
@@ -349,6 +355,8 @@
               <button id="import-mealplan-button"></button>
               <button id="export-shopping-button"></button>
               <button id="import-shopping-button"></button>
+              <button id="export-pantry-button"></button>
+              <button id="import-pantry-button"></button>
               <input
                 id="import-mealplan-file"
                 type="file"
@@ -357,6 +365,12 @@
               >
               <input
                 id="import-shopping-file"
+                type="file"
+                accept="application/json,.json"
+                hidden
+              >
+              <input
+                id="import-pantry-file"
                 type="file"
                 accept="application/json,.json"
                 hidden

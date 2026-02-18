@@ -19,6 +19,10 @@ const API_CACHE_PREFIX = 'chow.apiCache.';
 // entries, with safe JSON parsing/stringifying and logging.
 class LocalStorage {
   constructor() {
+    this.init();
+  }
+
+  init() {
     this.name = 'LocalStorage';
     this.storage = null;
 

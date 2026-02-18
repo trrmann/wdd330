@@ -40,6 +40,7 @@ class Footer {
       });
     }
 
+    this.log('init', 'methodStart', 'Footer.init: Starting');
     this.log('init', 'objectInitStart', 'Footer.init: Starting');
 
     const template = document.getElementById(this.config.ids.templates.footer);

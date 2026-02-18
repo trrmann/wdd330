@@ -11,6 +11,10 @@ bootLogger.moduleInfo(import.meta.url, 'Defines app Logger (siteConfig.debug)');
 //        const logger = new Logger(config); logger.classMethodLog('info', 'MyClass', 'myMethod', 'message');
 class Logger {
   constructor(config = null) {
+    this.init(config);
+  }
+
+  init(config = null) {
     Object.defineProperties(this, Logger.descriptors);
     this.config = config;
 

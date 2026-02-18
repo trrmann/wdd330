@@ -7,7 +7,11 @@ bootLogger.moduleInfo(import.meta.url, 'Defines Ingredient model');
 // Ingredient model for recipe and shopping features.
 // Usage: const ingredient = Ingredient.fromApi(rawIngredient);
 class Ingredient {
-  constructor({
+  constructor(options = {}) {
+    this.init(options);
+  }
+
+  init({
     id = null,
     name = '',
     amount = null,

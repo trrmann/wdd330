@@ -1,5 +1,8 @@
 import { bootLogger } from './bootLogger.js';
 import { Logger } from './logger.js';
+import { Storage } from './storage.js';
+import { RecipeApi } from './apiAccess.js';
+import { ShoppingList } from './shoppingList.js';
 
 bootLogger.moduleLoadStarted(import.meta.url);
 
@@ -7,7 +10,51 @@ bootLogger.moduleInfo(import.meta.url, 'Defines Profile model');
 // Profile model for per-user dietary preferences and favorites.
 // Usage: const profile = new Profile({ dietType: 'vegetarian' });
 class Profile {
-  constructor({
+  constructor(options = {}, internal = {}) {
+    this.logger = internal.logger || this.logger || null;
+
+    this.storage =
+      internal.storage ||
+      this.storage ||
+      new Storage({
+        logger: this.logger,
+      });
+
+    this.recipeApi =
+      internal.recipeApi ||
+      this.recipeApi ||
+      new RecipeApi(this.storage, {
+        logger: this.logger,
+      });
+
+    const incomingShoppingList =
+      internal.shoppingList || this.shoppingList || null;
+
+    let inventoryInstance;
+
+    if (incomingShoppingList && incomingShoppingList.inventory) {
+      inventoryInstance = incomingShoppingList.inventory;
+    } else if (internal.inventory) {
+      inventoryInstance = ShoppingList.createInventoryFromPersisted(
+        internal.inventory,
+      );
+    } else {
+      inventoryInstance = ShoppingList.createEmptyInventory();
+    }
+
+    const shoppingListInstance =
+      incomingShoppingList ||
+      new ShoppingList(undefined, {
+        logger: this.logger,
+        inventory: inventoryInstance,
+      });
+
+    this.shoppingList = shoppingListInstance;
+    this.inventory = shoppingListInstance.inventory;
+    this.init(options);
+  }
+
+  init({
     dietType = '',
     allergensText = '',
     maxReadyMinutes = null,
@@ -61,15 +108,57 @@ class Profile {
 
   addFavoriteRecipe(recipeId) {
     if (recipeId == null) return;
+
+    const beforeIds = Array.isArray(this.favoriteRecipeIds)
+      ? [...this.favoriteRecipeIds]
+      : [];
+
     if (!this.favoriteRecipeIds.includes(recipeId)) {
       this.favoriteRecipeIds.push(recipeId);
     }
+
+    const afterIds = Array.isArray(this.favoriteRecipeIds)
+      ? [...this.favoriteRecipeIds]
+      : [];
+
+    Logger.staticClassMethodLog(
+      'info',
+      'Profile',
+      'addFavoriteRecipe',
+      'Profile.addFavoriteRecipe: Added favorite recipeId',
+      {
+        recipeId,
+        beforeFavoriteRecipeIds: beforeIds,
+        afterFavoriteRecipeIds: afterIds,
+      },
+    );
   }
 
   removeFavoriteRecipe(recipeId) {
     if (recipeId == null) return;
+
+    const beforeIds = Array.isArray(this.favoriteRecipeIds)
+      ? [...this.favoriteRecipeIds]
+      : [];
+
     this.favoriteRecipeIds = this.favoriteRecipeIds.filter(
       (id) => id !== recipeId,
+    );
+
+    const afterIds = Array.isArray(this.favoriteRecipeIds)
+      ? [...this.favoriteRecipeIds]
+      : [];
+
+    Logger.staticClassMethodLog(
+      'info',
+      'Profile',
+      'removeFavoriteRecipe',
+      'Profile.removeFavoriteRecipe: Removed favorite recipeId',
+      {
+        recipeId,
+        beforeFavoriteRecipeIds: beforeIds,
+        afterFavoriteRecipeIds: afterIds,
+      },
     );
   }
 

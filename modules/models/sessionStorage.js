@@ -20,6 +20,10 @@ const MEALPLAN_STATE_SESSION_KEY = 'chow.mealPlan.state.session';
 
 class SessionStorage {
   constructor() {
+    this.init();
+  }
+
+  init() {
     this.name = 'SessionStorage';
     this.storage = null;
 

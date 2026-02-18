@@ -10,16 +10,11 @@
 
 import { bootLogger } from '../models/bootLogger.js';
 
-import { HomePage } from './homePage.js';
-import { RecipesPage } from './recipesPage.js';
-import { MealPlanPage } from './mealPlanPage.js';
-import { ShoppingPage } from './shoppingPage.js';
-import { ToolsPage } from './toolsPage.js';
 import { Header } from './header.js';
-import { Menu } from './menu.js';
 import { Main } from './main.js';
 import { Footer } from './footer.js';
 import { Logger } from '../models/logger.js';
+import { Profile } from '../models/profile.js';
 
 bootLogger.moduleLoadStarted(import.meta.url);
 
@@ -38,6 +33,21 @@ class Site {
         const config = await Site.loadSiteConfig();
 
         this.logger = new Logger(config);
+
+        // Shared model instances owned by the Site shell and
+        // injected into page controllers instead of using singletons.
+        // Each receives the shared logger so Logger.instrumentClass
+        // instrumentation on models can emit logs.
+        this.profile = new Profile(undefined, {
+          logger: this.logger,
+        });
+        this.storage = this.profile.storage;
+        this.shoppingList = this.profile.shoppingList;
+        this.inventory =
+          (this.profile && this.profile.inventory) ||
+          (this.shoppingList && this.shoppingList.inventory) ||
+          null;
+        this.recipeApi = this.profile.recipeApi;
 
         this.log(
           'constructor',
@@ -78,11 +88,6 @@ class Site {
       this.logger = new Logger(config);
     } else {
       this.logger.setConfig(config);
-    }
-
-    // State: lazily construct page controllers once per Site instance.
-    if (!this.pages) {
-      this.pages = this.createPages(config);
     }
 
     if (this.initialized) {
@@ -190,22 +195,6 @@ class Site {
   }
 
   // elements: Returns the top-level header, main, and footer elements.
-  get elements() {
-    this.log('elements', 'methodStart', 'Site.elements: Starting');
-    return this.log(
-      'elements',
-      'passthroughMethodComplete',
-      {
-        header: this.headerElement,
-        main: this.mainElement,
-        footer: this.footerElement,
-      },
-      {
-        toLogValue: (obj) => ({ keys: Object.keys(obj) }),
-      },
-    );
-  }
-
   // descriptors: Defines non-enumerable instance properties for Site.
   static get descriptors() {
     Logger.staticClassMethodLog(
@@ -279,12 +268,6 @@ class Site {
           enumerable: false,
           configurable: false,
         },
-        pages: {
-          value: null,
-          writable: true,
-          enumerable: false,
-          configurable: false,
-        },
       },
       {
         toLogValue: (desc) => ({ keys: Object.keys(desc) }),
@@ -294,7 +277,23 @@ class Site {
 
   // applyAttributes: Applies or removes attributes on a single element.
   applyAttributes(element, attrs) {
-    if (!element || !attrs) return;
+    if (!element || !attrs) {
+      this.log(
+        'applyAttributes',
+        'info',
+        'Site.applyAttributes: Skipped - missing element or attrs',
+      );
+      return;
+    }
+
+    this.log(
+      'applyAttributes',
+      'methodStart',
+      'Site.applyAttributes: Starting',
+      {
+        attrCount: Object.keys(attrs || {}).length,
+      },
+    );
     Object.entries(attrs).forEach(([name, value]) => {
       if (value === false || value == null) {
         element.removeAttribute(name);
@@ -302,14 +301,49 @@ class Site {
         element.setAttribute(name, String(value));
       }
     });
+
+    return this.log('applyAttributes', 'passthroughMethodComplete', undefined, {
+      canLogReturnValue: false,
+      message: 'Site.applyAttributes: Completed',
+    });
   }
 
   // applyConfiguredAttributesInRoot: Applies config-driven attributes within a DOM root.
   applyConfiguredAttributesInRoot(root, config = this.config) {
-    if (!root || !config) return;
+    if (!root || !config) {
+      this.log(
+        'applyConfiguredAttributesInRoot',
+        'info',
+        'Site.applyConfiguredAttributesInRoot: Skipped - missing root or config',
+      );
+      return;
+    }
+
+    this.log(
+      'applyConfiguredAttributesInRoot',
+      'methodStart',
+      'Site.applyConfiguredAttributesInRoot: Starting',
+      {
+        hasElementAttributes: !!(
+          config &&
+          (config.elementAttributes || config.elementAttributeGroups)
+        ),
+      },
+    );
 
     const elementAttrs = Site.buildElementAttributes(config);
-    if (Object.keys(elementAttrs).length === 0) return;
+    if (Object.keys(elementAttrs).length === 0) {
+      return this.log(
+        'applyConfiguredAttributesInRoot',
+        'passthroughMethodComplete',
+        undefined,
+        {
+          canLogReturnValue: false,
+          message:
+            'Site.applyConfiguredAttributesInRoot: Completed - no element attributes to apply',
+        },
+      );
+    }
 
     Object.entries(elementAttrs).forEach(([key, attrs]) => {
       if (!attrs) return;
@@ -337,6 +371,16 @@ class Site {
         }
       });
     }
+
+    return this.log(
+      'applyConfiguredAttributesInRoot',
+      'passthroughMethodComplete',
+      undefined,
+      {
+        canLogReturnValue: false,
+        message: 'Site.applyConfiguredAttributesInRoot: Completed',
+      },
+    );
   }
 
   // createFooter: Creates and returns the configured Footer element.
@@ -356,17 +400,13 @@ class Site {
     );
   }
 
-  // createHeader: Creates the Header and wires it to the Menu.
+  // createHeader: Creates the Header and wires navigation callbacks.
   createHeader() {
     this.log('createHeader', 'methodStart', 'Site.createHeader: Starting');
-    this.log(
-      'createHeader',
-      'info',
-      'Site.createHeader: Creating menu element',
-    );
-    const menuElement = this.createMenu();
-    this.log('createHeader', 'info', 'Site.createHeader: Created menu element');
-    this.header = new Header(this.config, menuElement, this.logger);
+    this.header = new Header(this.config, {
+      logger: this.logger,
+      onNavigate: (pageName) => this.loadPage(pageName),
+    });
     return this.log(
       'createHeader',
       'passthroughMethodComplete',
@@ -377,12 +417,16 @@ class Site {
       },
     );
   }
-
   // createMain: Creates the Main content container element.
   createMain() {
     this.log('createMain', 'methodStart', 'Site.createMain: Starting');
     this.main = new Main(this.config, {
       logger: this.logger,
+      storage: this.storage,
+      profile: this.profile,
+      shoppingList: this.shoppingList,
+      inventory: this.inventory,
+      recipeApi: this.recipeApi,
     });
     return this.log(
       'createMain',
@@ -395,200 +439,26 @@ class Site {
     );
   }
 
-  // createMenu: Creates the navigation Menu and its click handler.
-  createMenu() {
-    this.log('createMenu', 'methodStart', 'Site.createMenu: Starting');
-    this.menu = new Menu(this.config, {
-      logger: this.logger,
-      onNavigate: (pageName) => this.loadPage(pageName),
-    });
-    return this.log(
-      'createMenu',
-      'passthroughMethodComplete',
-      this.menu.element,
-      {
-        toLogValue: (el) =>
-          el ? { tag: el.tagName, class: el.className } : null,
-      },
-    );
-  }
-
-  // createPages: Constructs all page controllers used for routing.
-  createPages(config) {
-    this.log('createPages', 'methodStart', 'Site.createPages: Starting');
-    const pageOptions = { logger: this.logger };
-    const value = {
-      home: new HomePage(config, pageOptions),
-      recipes: new RecipesPage(config, pageOptions),
-      mealplan: new MealPlanPage(config, pageOptions),
-      shopping: new ShoppingPage(config, pageOptions),
-      more: new ToolsPage(config, pageOptions),
-    };
-    return this.log('createPages', 'passthroughMethodComplete', value, {
-      toLogValue: (obj) => ({ keys: Object.keys(obj) }),
-    });
-  }
-
-  // loadPage: Loads a named page into main and runs its afterRender hook.
+  // loadPage: Delegates loading of a named page to Main.
   loadPage(pageName, container) {
-    this.log(
-      'loadPage',
-      'pageLoadStart',
-      `loadPageStart: Loading page: ${pageName}`,
-    );
+    this.log('loadPage', 'methodStart', 'Site.loadPage: Delegating to Main', {
+      pageName,
+    });
 
-    const mainContainer = container || this.mainElement;
-    if (!mainContainer) {
-      return this.log('loadPage', 'passthroughMethodComplete', undefined, {
-        canLogReturnValue: false,
-        toLogValue: undefined,
-        message: 'Site.loadPage: No main container found',
-      });
-    }
-
-    mainContainer.className = this.config.classes.main;
-    this.log('loadPage', 'info', 'State change: mainContainer className reset');
-
-    let page;
-    switch (pageName) {
-      case 'home':
-        page = this.pages.home.init(this.config);
-        if (this.config.classes.mainHome) {
-          mainContainer.classList.add(this.config.classes.mainHome);
-        }
-        this.log(
-          'loadPage',
-          'info',
-          `State change: Initialized 'home' page and added 'home' class to mainContainer`,
-        );
-        break;
-      case 'recipes':
-        page = this.pages.recipes.init(this.config);
-        if (this.config.classes.mainRecipes) {
-          mainContainer.classList.add(this.config.classes.mainRecipes);
-        }
-        this.log(
-          'loadPage',
-          'info',
-          `State change: Initialized 'recipes' page`,
-        );
-        break;
-      case 'mealplan':
-        page = this.pages.mealplan.init(this.config);
-        this.log(
-          'loadPage',
-          'info',
-          `State change: Initialized 'mealplan' page`,
-        );
-        break;
-      case 'shopping':
-        page = this.pages.shopping.init(this.config);
-        this.log(
-          'loadPage',
-          'info',
-          `State change: Initialized 'shopping' page`,
-        );
-        break;
-      case 'more':
-        page = this.pages.more.init(this.config);
-        this.log('loadPage', 'info', `State change: Initialized 'more' page`);
-        break;
-      default:
-        page = this.pages.home.init(this.config);
-        this.log(
-          'loadPage',
-          'info',
-          `State change: Initialized default 'home' page`,
-        );
-    }
-
-    const titleElement = mainContainer.querySelector(
-      `.${this.config.classes.mainTitle}`,
-    );
-    const contentWrapper = mainContainer.querySelector(
-      `.${this.config.classes.mainContentWrapper}`,
-    );
-
-    if (titleElement && page && typeof page.title === 'string') {
-      titleElement.textContent = page.title;
+    if (this.main && typeof this.main.loadPage === 'function') {
+      this.main.loadPage(pageName, container || this.mainElement);
+    } else {
       this.log(
         'loadPage',
         'info',
-        'State change: Updated titleElement textContent',
+        'Site.loadPage: Main is not ready to load page',
       );
     }
 
-    if (contentWrapper && page && typeof page.content === 'string') {
-      contentWrapper.innerHTML = page.content;
-      this.log(
-        'loadPage',
-        'info',
-        'State change: Updated contentWrapper innerHTML',
-      );
-
-      if (
-        pageName === 'home' &&
-        this.pages.home &&
-        typeof this.pages.home.afterRender === 'function'
-      ) {
-        this.pages.home.afterRender(this.config);
-        this.log(
-          'loadPage',
-          'info',
-          "State change: Ran home page's afterRender hook",
-        );
-      } else if (
-        pageName === 'recipes' &&
-        this.pages.recipes &&
-        typeof this.pages.recipes.afterRender === 'function'
-      ) {
-        this.pages.recipes.afterRender(this.config);
-        this.log(
-          'loadPage',
-          'info',
-          "State change: Ran recipes page's afterRender hook",
-        );
-      } else if (
-        pageName === 'mealplan' &&
-        this.pages.mealplan &&
-        typeof this.pages.mealplan.afterRender === 'function'
-      ) {
-        this.pages.mealplan.afterRender(this.config);
-        this.log(
-          'loadPage',
-          'info',
-          "State change: Ran mealplan page's afterRender hook",
-        );
-      } else if (
-        pageName === 'shopping' &&
-        this.pages.shopping &&
-        typeof this.pages.shopping.afterRender === 'function'
-      ) {
-        this.pages.shopping.afterRender(this.config);
-        this.log(
-          'loadPage',
-          'info',
-          "State change: Ran shopping page's afterRender hook",
-        );
-      } else if (
-        pageName === 'more' &&
-        this.pages.more &&
-        typeof this.pages.more.afterRender === 'function'
-      ) {
-        this.pages.more.afterRender(this.config);
-        this.log(
-          'loadPage',
-          'info',
-          "State change: Ran tools page's afterRender hook",
-        );
-      }
-    }
-
-    this.log(
-      'loadPage',
-      'pageLoadComplete',
-      `loadPageComplete: Loaded page: ${pageName}`,
-    );
+    return this.log('loadPage', 'passthroughMethodComplete', undefined, {
+      canLogReturnValue: false,
+      toLogValue: undefined,
+    });
   }
 
   // log: Delegates logging to the shared Logger using Site conventions.
@@ -615,17 +485,74 @@ class Site {
 
   // applyBrowserTitleFromConfig: Sets document.title from config, if present.
   static applyBrowserTitleFromConfig(config) {
+    Logger.staticClassMethodLog(
+      'methodStart',
+      'Site',
+      'applyBrowserTitleFromConfig',
+      'Site.applyBrowserTitleFromConfig: Starting',
+      {
+        hasConfig: !!config,
+        hasBrowserTitle: !!(
+          config &&
+          config.titles &&
+          config.titles.browserTitle
+        ),
+      },
+    );
+
     if (!config || !config.titles || !config.titles.browserTitle) {
-      return;
+      return Logger.staticClassMethodPassthrough(
+        'passthroughMethodComplete',
+        'Site',
+        'applyBrowserTitleFromConfig',
+        undefined,
+        {
+          canLogReturnValue: false,
+          message:
+            'Site.applyBrowserTitleFromConfig: Skipped - no browserTitle in config',
+        },
+      );
     }
 
     document.title = config.titles.browserTitle;
+
+    return Logger.staticClassMethodPassthrough(
+      'passthroughMethodComplete',
+      'Site',
+      'applyBrowserTitleFromConfig',
+      undefined,
+      {
+        canLogReturnValue: false,
+        message: 'Site.applyBrowserTitleFromConfig: Completed',
+      },
+    );
   }
 
   // applyFaviconFromConfig: Updates the favicon link based on config logo.
   static applyFaviconFromConfig(config) {
+    Logger.staticClassMethodLog(
+      'methodStart',
+      'Site',
+      'applyFaviconFromConfig',
+      'Site.applyFaviconFromConfig: Starting',
+      {
+        hasConfig: !!config,
+        hasLogo: !!(config && config.images && config.images.logo),
+      },
+    );
+
     if (!config || !config.images || !config.images.logo) {
-      return;
+      return Logger.staticClassMethodPassthrough(
+        'passthroughMethodComplete',
+        'Site',
+        'applyFaviconFromConfig',
+        undefined,
+        {
+          canLogReturnValue: false,
+          message:
+            'Site.applyFaviconFromConfig: Skipped - no logo image configured',
+        },
+      );
     }
 
     const logoHref = config.images.logo;
@@ -633,11 +560,44 @@ class Site {
     if (link && logoHref) {
       link.href = logoHref;
     }
+
+    return Logger.staticClassMethodPassthrough(
+      'passthroughMethodComplete',
+      'Site',
+      'applyFaviconFromConfig',
+      undefined,
+      {
+        canLogReturnValue: false,
+        message: 'Site.applyFaviconFromConfig: Completed',
+      },
+    );
   }
 
   // buildElementAttributes: Builds per-key attribute maps from config groups.
   static buildElementAttributes(config) {
-    if (!config) return {};
+    Logger.staticClassMethodLog(
+      'methodStart',
+      'Site',
+      'buildElementAttributes',
+      'Site.buildElementAttributes: Starting',
+      {
+        hasConfig: !!config,
+      },
+    );
+
+    if (!config) {
+      return Logger.staticClassMethodPassthrough(
+        'passthroughMethodComplete',
+        'Site',
+        'buildElementAttributes',
+        {},
+        {
+          toLogValue: (attrs) => ({ keys: Object.keys(attrs) }),
+          message:
+            'Site.buildElementAttributes: Completed - no config provided',
+        },
+      );
+    }
 
     const baseElementAttrs = config.elementAttributes || {};
     const elementAttrs = { ...baseElementAttrs };
@@ -667,12 +627,39 @@ class Site {
       });
     }
 
-    return elementAttrs;
+    return Logger.staticClassMethodPassthrough(
+      'passthroughMethodComplete',
+      'Site',
+      'buildElementAttributes',
+      elementAttrs,
+      {
+        toLogValue: (attrs) => ({ keys: Object.keys(attrs) }),
+        message: 'Site.buildElementAttributes: Completed',
+      },
+    );
   }
 
   // loadSiteConfig: Fetches and returns the siteConfig.json object.
   static async loadSiteConfig() {
-    const response = await fetch('./data/siteConfig.json', {
+    Logger.staticClassMethodLog(
+      'functionStart',
+      'Site',
+      'loadSiteConfig',
+      'Site.loadSiteConfig: Starting',
+    );
+    let configUrl = './data/siteConfig.json';
+    if (typeof window !== 'undefined' && window.location) {
+      try {
+        const basePath = window.location.pathname.replace(/[^/]*$/, '/');
+        const baseUrl = `${window.location.origin}${basePath}`;
+        configUrl = new URL('data/siteConfig.json', baseUrl).toString();
+      } catch {
+        // Fallback to relative path when URL construction fails.
+        configUrl = './data/siteConfig.json';
+      }
+    }
+
+    const response = await fetch(configUrl, {
       headers: {
         Accept: 'application/json',
       },
@@ -685,7 +672,19 @@ class Site {
     }
 
     const config = await response.json();
-    return config || {};
+    return Logger.staticClassMethodPassthrough(
+      'passthroughFunctionComplete',
+      'Site',
+      'loadSiteConfig',
+      config || {},
+      {
+        toLogValue: (configForLog) => ({
+          hasDebug: !!(configForLog && configForLog.debug),
+          hasClasses: !!(configForLog && configForLog.classes),
+        }),
+        message: 'Site.loadSiteConfig: Completed',
+      },
+    );
   }
 }
 

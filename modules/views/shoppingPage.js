@@ -2,12 +2,7 @@ import { bootLogger } from '../models/bootLogger.js';
 
 import { Logger } from '../models/logger.js';
 import { Site } from './site.js';
-import {
-  ShoppingList,
-  Inventory,
-  ingredients as sharedIngredients,
-} from '../models/shoppingList.js';
-import { Storage } from '../models/storage.js';
+import { ShoppingList } from '../models/shoppingList.js';
 
 bootLogger.moduleLoadStarted(import.meta.url);
 
@@ -17,53 +12,6 @@ bootLogger.moduleInfo(import.meta.url, 'Defines ShoppingPage');
 // inventory views and persistence.
 // Usage: const page = new ShoppingPage(config, { logger }); page.init(config);
 class ShoppingPage {
-  static get descriptors() {
-    return {
-      config: {
-        value: null,
-        writable: true,
-        enumerable: false,
-        configurable: false,
-      },
-      logger: {
-        value: null,
-        writable: true,
-        enumerable: false,
-        configurable: false,
-      },
-      initialized: {
-        value: false,
-        writable: true,
-        enumerable: false,
-        configurable: false,
-      },
-      view: {
-        value: null,
-        writable: true,
-        enumerable: false,
-        configurable: false,
-      },
-      shoppingList: {
-        value: null,
-        writable: true,
-        enumerable: false,
-        configurable: false,
-      },
-      inventory: {
-        value: null,
-        writable: true,
-        enumerable: false,
-        configurable: false,
-      },
-      knownItemUnits: {
-        value: null,
-        writable: true,
-        enumerable: false,
-        configurable: false,
-      },
-    };
-  }
-
   // constructor: Creates the ShoppingPage controller and optionally initializes.
   constructor(config = null, options = {}) {
     Object.defineProperties(this, ShoppingPage.descriptors);
@@ -74,8 +22,26 @@ class ShoppingPage {
       'ShoppingPage.constructor: Starting',
     );
     this.config = config;
-    this.shoppingList = ShoppingList.getInstance();
-    this.inventory = Inventory.getInstance();
+    this.profile = options.profile || null;
+    this.storage = options.storage || null;
+    this.shoppingList =
+      (this.profile && this.profile.shoppingList) ||
+      options.shoppingList ||
+      null;
+
+    if (options.inventory) {
+      if (!this.shoppingList) {
+        this.shoppingList = new ShoppingList();
+        if (this.profile) {
+          this.profile.shoppingList = this.shoppingList;
+        }
+      }
+      if (!this.shoppingList.inventory) {
+        this.shoppingList.inventory = options.inventory;
+      }
+    }
+
+    this.inventory = this.shoppingList ? this.shoppingList.inventory : null;
     this.knownItemUnits = {};
     this.log(
       'constructor',
@@ -93,34 +59,37 @@ class ShoppingPage {
     }
   }
 
-  // log: Delegates logging to the shared Logger using ShoppingPage conventions.
-  log(methodName, level, ...args) {
-    if (!this.logger) return;
-
-    if (this.logger.isSignatureLevel(level)) {
-      if (typeof methodName === 'string') {
-        if (level.startsWith('passthrough')) {
-          return this.logger.passthroughMethod(
-            'ShoppingPage',
-            methodName,
-            ...args,
-          );
-        }
-        this.logger.classMethodLog(level, 'ShoppingPage', methodName, ...args);
-      } else if (typeof methodName === 'object' && methodName !== null) {
-        if (level.startsWith('function')) {
-          this.logger.functionLog(level, ...args);
-        } else {
-          this.logger.classLog(level, ...args);
-        }
+  getOrCreateInventory() {
+    if (!this.shoppingList) {
+      this.shoppingList = new ShoppingList();
+      if (this.profile) {
+        this.profile.shoppingList = this.shoppingList;
       }
-    } else {
-      this.logger.classMethodLog(level, 'ShoppingPage', methodName, ...args);
     }
+
+    if (!this.shoppingList.inventory) {
+      this.shoppingList.inventory =
+        typeof ShoppingList.createEmptyInventory === 'function'
+          ? ShoppingList.createEmptyInventory()
+          : { items: [] };
+    }
+
+    this.inventory = this.shoppingList.inventory;
+
+    if (!Array.isArray(this.inventory.items)) {
+      this.inventory.items = [];
+    }
+
+    return this.inventory;
   }
 
   // init: Builds the initial Shopping page view model from the template.
   init(config) {
+    this.log('init', 'methodStart', 'ShoppingPage.init: Starting', {
+      hasConfig: !!config,
+      alreadyInitialized: !!this.initialized,
+    });
+
     if (this.initialized && this.view) {
       // State: Reuse existing ShoppingPage view model when already initialized.
       return this.log('init', 'passthroughMethodComplete', this.view, {
@@ -164,23 +133,125 @@ class ShoppingPage {
     });
   }
 
+  static get descriptors() {
+    return {
+      config: {
+        value: null,
+        writable: true,
+        enumerable: false,
+        configurable: false,
+      },
+      logger: {
+        value: null,
+        writable: true,
+        enumerable: false,
+        configurable: false,
+      },
+      initialized: {
+        value: false,
+        writable: true,
+        enumerable: false,
+        configurable: false,
+      },
+      view: {
+        value: null,
+        writable: true,
+        enumerable: false,
+        configurable: false,
+      },
+      profile: {
+        value: null,
+        writable: true,
+        enumerable: false,
+        configurable: false,
+      },
+      shoppingList: {
+        value: null,
+        writable: true,
+        enumerable: false,
+        configurable: false,
+      },
+      inventory: {
+        value: null,
+        writable: true,
+        enumerable: false,
+        configurable: false,
+      },
+      knownItemUnits: {
+        value: null,
+        writable: true,
+        enumerable: false,
+        configurable: false,
+      },
+    };
+  }
+
+  // log: Delegates logging to the shared Logger using ShoppingPage conventions.
+  log(methodName, level, ...args) {
+    if (!this.logger) return;
+
+    if (this.logger.isSignatureLevel(level)) {
+      if (typeof methodName === 'string') {
+        if (level.startsWith('passthrough')) {
+          return this.logger.passthroughMethod(
+            'ShoppingPage',
+            methodName,
+            ...args,
+          );
+        }
+        this.logger.classMethodLog(level, 'ShoppingPage', methodName, ...args);
+      } else if (typeof methodName === 'object' && methodName !== null) {
+        if (level.startsWith('function')) {
+          this.logger.functionLog(level, ...args);
+        } else {
+          this.logger.classLog(level, ...args);
+        }
+      }
+    } else {
+      this.logger.classMethodLog(level, 'ShoppingPage', methodName, ...args);
+    }
+  }
+
   applyShoppingClasses(config, rootElement) {
-    if (!config || !config.classes || !config.ids || !rootElement) return;
+    this.log(
+      'applyShoppingClasses',
+      'methodStart',
+      'ShoppingPage.applyShoppingClasses: Starting',
+      {
+        hasConfig: !!config,
+        hasClasses: !!(config && config.classes),
+        hasIds: !!(config && config.ids),
+        hasRootElement: !!rootElement,
+      },
+    );
+
+    if (!config || !config.classes || !config.ids || !rootElement) {
+      return this.log(
+        'applyShoppingClasses',
+        'passthroughMethodComplete',
+        undefined,
+        {
+          canLogReturnValue: false,
+          message:
+            'ShoppingPage.applyShoppingClasses: Skipped - missing config, ids, classes, or rootElement',
+        },
+      );
+    }
 
     const { classes, ids } = config;
 
     const mappings = [
-      [ids.shoppingQtyInput, classes.shoppingQty],
+      [ids.shoppingQuantityInput, classes.shoppingQuantity],
       [ids.shoppingUnitInput, classes.shoppingUnit],
       [ids.shoppingNewItemInput, classes.shoppingNewItem],
       [ids.shoppingKnownToggleButton, classes.shoppingKnownToggle],
       [ids.shoppingKnownMenu, classes.shoppingKnownMenu],
-      [ids.shoppingAddButton, classes.shoppingAddBtn],
-      [ids.shoppingMoveToPantryButton, classes.shoppingMoveToPantryBtn],
-      [ids.shoppingBuyMoreButton, classes.shoppingBuyMoreBtn],
-      [ids.shoppingDontBuyButton, classes.shoppingDontBuyBtn],
-      [ids.shoppingMoveToShoppingButton, classes.shoppingMoveToShoppingBtn],
-      [ids.shoppingDiscardButton, classes.shoppingDiscardBtn],
+      [ids.shoppingAddButton, classes.shoppingAddButton],
+      [ids.shoppingMoveToPantryButton, classes.shoppingMoveToPantryButton],
+      [ids.shoppingBuyMoreButton, classes.shoppingBuyMoreButton],
+      [ids.shoppingDontBuyButton, classes.shoppingDontBuyButton],
+      [ids.shoppingMoveToShoppingButton, classes.shoppingMoveToShoppingButton],
+      [ids.shoppingDiscardButton, classes.shoppingDiscardButton],
       [ids.shoppingPageSection, classes.shoppingPage],
       [ids.shoppingHeader, classes.shoppingHeader],
       [ids.shoppingAddItem, classes.shoppingAddItem],
@@ -200,13 +271,35 @@ class ShoppingPage {
       [ids.shoppingListItemsPantry, classes.shoppingListItemsPantry],
     ];
 
+    let appliedCount = 0;
+
     mappings.forEach(([idValue, className]) => {
       if (!idValue || !className) return;
       const element = rootElement.querySelector(`#${CSS.escape(idValue)}`);
       if (element && !element.classList.contains(className)) {
         element.classList.add(className);
+        appliedCount += 1;
       }
     });
+
+    this.log(
+      'applyShoppingClasses',
+      'info',
+      'State change: Applied shopping classes to elements',
+      {
+        appliedCount,
+      },
+    );
+
+    return this.log(
+      'applyShoppingClasses',
+      'passthroughMethodComplete',
+      undefined,
+      {
+        canLogReturnValue: false,
+        message: 'ShoppingPage.applyShoppingClasses: Completed',
+      },
+    );
   }
 
   // afterRender: Wires Shopping page event handlers and accessibility tweaks.
@@ -237,12 +330,14 @@ class ShoppingPage {
       }
     }
     if (mainElement && config.classes && config.classes.visuallyHidden) {
-      ['shopping-qty', 'shopping-unit', 'shopping-new-item'].forEach((id) => {
-        const label = mainElement.querySelector(`label[for="${id}"]`);
-        if (label) {
-          label.classList.add(config.classes.visuallyHidden);
-        }
-      });
+      ['shopping-quantity', 'shopping-unit', 'shopping-new-item'].forEach(
+        (id) => {
+          const label = mainElement.querySelector(`label[for="${id}"]`);
+          if (label) {
+            label.classList.add(config.classes.visuallyHidden);
+          }
+        },
+      );
     }
     if (mainElement && config.messages) {
       const shoppingMessages = config.messages.shopping || null;
@@ -253,7 +348,9 @@ class ShoppingPage {
           headerIntro.textContent = shoppingMessages.headerIntro;
         }
 
-        const qtyLabel = mainElement.querySelector('label[for="shopping-qty"]');
+        const qtyLabel = mainElement.querySelector(
+          'label[for="shopping-quantity"]',
+        );
         if (qtyLabel && shoppingMessages.qtyLabel) {
           qtyLabel.textContent = shoppingMessages.qtyLabel;
         }
@@ -346,7 +443,7 @@ class ShoppingPage {
     const input = mainElement.querySelector(
       `#${CSS.escape(config.ids.shoppingNewItemInput)}`,
     );
-    const qtyInput = mainElement.querySelector(
+    const quantityInput = mainElement.querySelector(
       `#${CSS.escape(config.ids.shoppingQtyInput)}`,
     );
     const unitInput = mainElement.querySelector(
@@ -390,14 +487,16 @@ class ShoppingPage {
         site && typeof site.applyAttributes === 'function'
           ? site.applyAttributes.bind(site)
           : (element, attrs) => {
-              if (!element || !attrs) return;
-              Object.entries(attrs).forEach(([name, value]) => {
-                if (value === false || value == null) {
-                  element.removeAttribute(name);
-                } else {
-                  element.setAttribute(name, String(value));
-                }
-              });
+              this.log(
+                'attachShoppingEventListeners',
+                'info',
+                'ShoppingPage.attachShoppingEventListeners: Site.applyAttributes not available, skipping attribute application',
+                {
+                  hasElement: !!element,
+                  hasAttrs: !!attrs,
+                  hasSite: !!site,
+                },
+              );
             };
 
       applyAttrs(knownToggle, elementAttrs.shoppingKnownToggle);
@@ -406,7 +505,7 @@ class ShoppingPage {
     if (!shoppingListElement || !pantryListElement) return;
 
     // Hydrate shopping list and pantry inventory from storage on first attach
-    const storage = Storage.getInstance();
+    const storage = this.storage;
     const persistedShopping = storage.loadShoppingList();
     if (
       persistedShopping &&
@@ -415,7 +514,10 @@ class ShoppingPage {
     ) {
       const restored = new ShoppingList(persistedShopping);
       if (!this.shoppingList) {
-        this.shoppingList = ShoppingList.getInstance();
+        this.shoppingList = new ShoppingList();
+        if (this.profile) {
+          this.profile.shoppingList = this.shoppingList;
+        }
       }
       if (!Array.isArray(this.shoppingList.items)) {
         this.shoppingList.items = [];
@@ -433,18 +535,18 @@ class ShoppingPage {
       Array.isArray(persistedInventory.items) &&
       persistedInventory.items.length > 0
     ) {
-      const restoredInventory = new Inventory(persistedInventory);
-      if (!this.inventory) {
-        this.inventory = Inventory.getInstance();
-      }
-      if (!Array.isArray(this.inventory.items)) {
-        this.inventory.items = [];
-      }
-      this.inventory.items.splice(
-        0,
-        this.inventory.items.length,
-        ...restoredInventory.items,
-      );
+      const restoredInventory =
+        typeof ShoppingList.createInventoryFromPersisted === 'function'
+          ? ShoppingList.createInventoryFromPersisted(persistedInventory)
+          : persistedInventory;
+
+      const inventory = this.getOrCreateInventory();
+
+      const restoredItems = Array.isArray(restoredInventory.items)
+        ? restoredInventory.items
+        : [];
+
+      inventory.items.splice(0, inventory.items.length, ...restoredItems);
     }
 
     const addItem = () => {
@@ -454,14 +556,20 @@ class ShoppingPage {
         return;
       }
 
-      const rawQty = qtyInput ? qtyInput.value : '';
-      const parsedQty = rawQty === '' ? 1 : Number.parseInt(rawQty, 10);
+      const rawQuantity = quantityInput ? quantityInput.value : '';
+      const parsedQuantity =
+        rawQuantity === '' ? 1 : Number.parseInt(rawQuantity, 10);
       const quantity =
-        Number.isNaN(parsedQty) || parsedQty <= 0 ? 1 : parsedQty;
+        Number.isNaN(parsedQuantity) || parsedQuantity <= 0
+          ? 1
+          : parsedQuantity;
       const unit = unitInput ? (unitInput.value || '').trim() : '';
 
       if (!this.shoppingList) {
-        this.shoppingList = ShoppingList.getInstance();
+        this.shoppingList = new ShoppingList();
+        if (this.profile) {
+          this.profile.shoppingList = this.shoppingList;
+        }
       }
 
       this.shoppingList.addItem(text, { quantity, unit });
@@ -469,8 +577,8 @@ class ShoppingPage {
       if (input) {
         input.value = '';
       }
-      if (qtyInput) {
-        qtyInput.value = '1';
+      if (quantityInput) {
+        quantityInput.value = '1';
       }
       if (unitInput) {
         unitInput.value = '';
@@ -564,11 +672,12 @@ class ShoppingPage {
     if (moveToPantryButton) {
       moveToPantryButton.addEventListener('click', () => {
         if (!this.shoppingList) {
-          this.shoppingList = ShoppingList.getInstance();
+          this.shoppingList = new ShoppingList();
+          if (this.profile) {
+            this.profile.shoppingList = this.shoppingList;
+          }
         }
-        if (!this.inventory) {
-          this.inventory = Inventory.getInstance();
-        }
+        const inventory = this.getOrCreateInventory();
 
         const items = Array.isArray(this.shoppingList.items)
           ? this.shoppingList.items
@@ -596,10 +705,10 @@ class ShoppingPage {
 
           const unit = item.unit || '';
           const lowered = name.toLowerCase();
-          if (!Array.isArray(this.inventory.items)) {
-            this.inventory.items = [];
+          if (!Array.isArray(inventory.items)) {
+            inventory.items = [];
           }
-          let entry = this.inventory.items.find(
+          let entry = inventory.items.find(
             (inv) => inv.name && inv.name.toLowerCase() === lowered,
           );
           if (!entry) {
@@ -612,7 +721,7 @@ class ShoppingPage {
               selected: false,
               partialQuantity: 0,
             };
-            this.inventory.items.push(entry);
+            inventory.items.push(entry);
           } else {
             entry.inStock = true;
             if (typeof entry.quantity === 'number') {
@@ -633,11 +742,11 @@ class ShoppingPage {
         });
 
         this.shoppingList.items = items.filter((item) => {
-          const qty =
+          const quantityValue =
             typeof item.quantity === 'number' && item.quantity > 0
               ? item.quantity
               : 0;
-          return qty > 0;
+          return quantityValue > 0;
         });
 
         this.log(
@@ -647,7 +756,7 @@ class ShoppingPage {
           { count: movedCount },
         );
         storage.saveShoppingList(this.shoppingList);
-        storage.saveInventory(this.inventory);
+        storage.saveInventory(inventory);
         this.renderShoppingList(shoppingListElement, pantryListElement);
       });
     }
@@ -655,7 +764,10 @@ class ShoppingPage {
     if (buyMoreButton) {
       buyMoreButton.addEventListener('click', () => {
         if (!this.shoppingList) {
-          this.shoppingList = ShoppingList.getInstance();
+          this.shoppingList = new ShoppingList();
+          if (this.profile) {
+            this.profile.shoppingList = this.shoppingList;
+          }
         }
 
         const items = Array.isArray(this.shoppingList.items)
@@ -673,13 +785,12 @@ class ShoppingPage {
               : 0;
           if (partial <= 0) return;
 
-          const baseQuantity =
-            typeof item.quantity === 'number' && item.quantity > 0
-              ? item.quantity
-              : 0;
+          const idOrText =
+            item.id != null && item.id !== '' ? item.id : item.text;
 
-          const next = baseQuantity + partial;
-          item.quantity = next > 0 ? next : 0;
+          if (!idOrText) return;
+
+          this.shoppingList.adjustQuantity(idOrText, partial);
           item.partialQuantity = 0;
           updatedCount += 1;
         });
@@ -698,7 +809,10 @@ class ShoppingPage {
     if (dontBuyButton) {
       dontBuyButton.addEventListener('click', () => {
         if (!this.shoppingList) {
-          this.shoppingList = ShoppingList.getInstance();
+          this.shoppingList = new ShoppingList();
+          if (this.profile) {
+            this.profile.shoppingList = this.shoppingList;
+          }
         }
 
         const items = Array.isArray(this.shoppingList.items)
@@ -716,13 +830,12 @@ class ShoppingPage {
               : 0;
           if (partial <= 0) return;
 
-          const baseQuantity =
-            typeof item.quantity === 'number' && item.quantity > 0
-              ? item.quantity
-              : 0;
+          const idOrText =
+            item.id != null && item.id !== '' ? item.id : item.text;
 
-          const next = baseQuantity - partial;
-          item.quantity = next > 0 ? next : 0;
+          if (!idOrText) return;
+
+          this.shoppingList.adjustQuantity(idOrText, -partial);
           item.partialQuantity = 0;
           updatedCount += 1;
         });
@@ -741,14 +854,15 @@ class ShoppingPage {
     if (moveToShoppingButton) {
       moveToShoppingButton.addEventListener('click', () => {
         if (!this.shoppingList) {
-          this.shoppingList = ShoppingList.getInstance();
+          this.shoppingList = new ShoppingList();
+          if (this.profile) {
+            this.profile.shoppingList = this.shoppingList;
+          }
         }
-        if (!this.inventory) {
-          this.inventory = Inventory.getInstance();
-        }
+        const inventory = this.getOrCreateInventory();
 
-        const pantryItems = Array.isArray(this.inventory.items)
-          ? this.inventory.items
+        const pantryItems = Array.isArray(inventory.items)
+          ? inventory.items
           : [];
         let movedCount = 0;
 
@@ -809,19 +923,17 @@ class ShoppingPage {
           { count: movedCount },
         );
         storage.saveShoppingList(this.shoppingList);
-        storage.saveInventory(this.inventory);
+        storage.saveInventory(inventory);
         this.renderShoppingList(shoppingListElement, pantryListElement);
       });
     }
 
     if (discardPantryButton) {
       discardPantryButton.addEventListener('click', () => {
-        if (!this.inventory) {
-          this.inventory = Inventory.getInstance();
-        }
+        const inventory = this.getOrCreateInventory();
 
-        const pantryItems = Array.isArray(this.inventory.items)
-          ? this.inventory.items
+        const pantryItems = Array.isArray(inventory.items)
+          ? inventory.items
           : [];
         let discardedCount = 0;
 
@@ -860,7 +972,7 @@ class ShoppingPage {
           'Marked selected pantry items as used',
           { count: discardedCount },
         );
-        storage.saveInventory(this.inventory);
+        storage.saveInventory(inventory);
         this.renderShoppingList(shoppingListElement, pantryListElement);
       });
     }
@@ -871,7 +983,7 @@ class ShoppingPage {
   renderShoppingList(shoppingListElement, pantryListElement) {
     if (!shoppingListElement || !pantryListElement) return;
 
-    const storage = Storage.getInstance();
+    const storage = this.storage;
 
     const shoppingMessages =
       this.config && this.config.messages
@@ -900,53 +1012,24 @@ class ShoppingPage {
       `.${this.config.classes.shoppingNewItem}`,
     );
     if (knownItemsDatalist || knownMenu) {
-      const knownNames = new Set();
-      const knownUnits = {};
+      const ingredientsCollection =
+        typeof ShoppingList.getSharedIngredients === 'function'
+          ? ShoppingList.getSharedIngredients()
+          : [];
 
-      if (Array.isArray(sharedIngredients) && sharedIngredients.length > 0) {
-        sharedIngredients.forEach((ingredient) => {
-          const name = (ingredient && ingredient.name) || '';
-          if (!name) return;
-          knownNames.add(name);
+      const inventory = this.getOrCreateInventory();
+      const inventoryItems = Array.isArray(inventory.items)
+        ? inventory.items
+        : [];
 
-          let unit = (ingredient && ingredient.unit) || '';
-          if (!unit) {
-            const aisle = (ingredient && ingredient.aisle) || '';
-            if (aisle && aisle.toLowerCase() === 'produce') {
-              unit = 'pcs';
-            }
-          }
-
-          const key = name.toLowerCase();
-          if (unit && !knownUnits[key]) {
-            knownUnits[key] = unit;
-          }
-        });
-      }
-
-      shoppingItems.forEach((item) => {
-        const name = (item && item.text) || '';
-        if (!name) return;
-        knownNames.add(name);
-        const unit = (item && item.unit) || '';
-        const key = name.toLowerCase();
-        if (unit && !knownUnits[key]) {
-          knownUnits[key] = unit;
-        }
-      });
-
-      if (this.inventory && Array.isArray(this.inventory.items)) {
-        this.inventory.items.forEach((entry) => {
-          const name = (entry && entry.name) || '';
-          if (!name) return;
-          knownNames.add(name);
-          const unit = (entry && entry.unit) || '';
-          const key = name.toLowerCase();
-          if (unit && !knownUnits[key]) {
-            knownUnits[key] = unit;
-          }
-        });
-      }
+      const { knownNames, knownUnits } =
+        typeof ShoppingList.buildKnownItemMetadataForShopping === 'function'
+          ? ShoppingList.buildKnownItemMetadataForShopping({
+              ingredientsCollection,
+              shoppingItems,
+              inventoryItems,
+            })
+          : { knownNames: new Set(), knownUnits: {} };
 
       this.knownItemUnits = knownUnits;
 
@@ -1045,7 +1128,10 @@ class ShoppingPage {
       checkbox.addEventListener('change', () => {
         const newSelected = checkbox.checked;
         if (!this.shoppingList) {
-          this.shoppingList = ShoppingList.getInstance();
+          this.shoppingList = new ShoppingList();
+          if (this.profile) {
+            this.profile.shoppingList = this.shoppingList;
+          }
         }
         this.shoppingList.toggleItem(item.id ?? item.text);
         this.log(
@@ -1066,10 +1152,10 @@ class ShoppingPage {
       quantityContainer.className =
         this.config.classes.shoppingListItemQuantity;
 
-      const decrementBtn = document.createElement('button');
-      decrementBtn.type = 'button';
-      decrementBtn.className = this.config.classes.shoppingListItemQtyDec;
-      decrementBtn.textContent = '-';
+      const decrementButton = document.createElement('button');
+      decrementButton.type = 'button';
+      decrementButton.className = this.config.classes.shoppingListItemQtyDec;
+      decrementButton.textContent = '-';
 
       const quantitySpan = document.createElement('span');
       quantitySpan.className = this.config.classes.shoppingListItemQtyValue;
@@ -1087,14 +1173,17 @@ class ShoppingPage {
       unitSpan.className = this.config.classes.shoppingListItemQtyUnit;
       unitSpan.textContent = item.unit || '';
 
-      const incrementBtn = document.createElement('button');
-      incrementBtn.type = 'button';
-      incrementBtn.className = this.config.classes.shoppingListItemQtyInc;
-      incrementBtn.textContent = '+';
+      const incrementButton = document.createElement('button');
+      incrementButton.type = 'button';
+      incrementButton.className = this.config.classes.shoppingListItemQtyInc;
+      incrementButton.textContent = '+';
 
-      decrementBtn.addEventListener('click', () => {
+      decrementButton.addEventListener('click', () => {
         if (!this.shoppingList) {
-          this.shoppingList = ShoppingList.getInstance();
+          this.shoppingList = new ShoppingList();
+          if (this.profile) {
+            this.profile.shoppingList = this.shoppingList;
+          }
         }
         const current =
           typeof item.partialQuantity === 'number' && item.partialQuantity > 0
@@ -1112,9 +1201,12 @@ class ShoppingPage {
         this.renderShoppingList(shoppingListElement, pantryListElement);
       });
 
-      incrementBtn.addEventListener('click', () => {
+      incrementButton.addEventListener('click', () => {
         if (!this.shoppingList) {
-          this.shoppingList = ShoppingList.getInstance();
+          this.shoppingList = new ShoppingList();
+          if (this.profile) {
+            this.profile.shoppingList = this.shoppingList;
+          }
         }
         const current =
           typeof item.partialQuantity === 'number' && item.partialQuantity > 0
@@ -1136,9 +1228,9 @@ class ShoppingPage {
         this.renderShoppingList(shoppingListElement, pantryListElement);
       });
 
-      quantityContainer.appendChild(decrementBtn);
+      quantityContainer.appendChild(decrementButton);
       quantityContainer.appendChild(quantitySpan);
-      quantityContainer.appendChild(incrementBtn);
+      quantityContainer.appendChild(incrementButton);
       quantityContainer.appendChild(unitSpan);
 
       const removeButton = document.createElement('button');
@@ -1148,7 +1240,10 @@ class ShoppingPage {
 
       removeButton.addEventListener('click', () => {
         if (!this.shoppingList) {
-          this.shoppingList = ShoppingList.getInstance();
+          this.shoppingList = new ShoppingList();
+          if (this.profile) {
+            this.profile.shoppingList = this.shoppingList;
+          }
         }
         this.shoppingList.removeItem(item.id ?? item.text);
         this.log('renderShoppingList', 'info', 'Removed shopping list item', {
@@ -1212,9 +1307,7 @@ class ShoppingPage {
       checkbox.checked = Boolean(entry.selected);
 
       checkbox.addEventListener('change', () => {
-        if (!this.inventory) {
-          this.inventory = Inventory.getInstance();
-        }
+        this.getOrCreateInventory();
         entry.selected = checkbox.checked;
         this.log('renderShoppingList', 'info', 'Toggled pantry selection', {
           name: entry.name,
@@ -1232,10 +1325,10 @@ class ShoppingPage {
       quantityContainer.className =
         this.config.classes.shoppingListItemQuantity;
 
-      const decrementBtn = document.createElement('button');
-      decrementBtn.type = 'button';
-      decrementBtn.className = this.config.classes.shoppingListItemQtyDec;
-      decrementBtn.textContent = '-';
+      const decrementButton = document.createElement('button');
+      decrementButton.type = 'button';
+      decrementButton.className = this.config.classes.shoppingListItemQtyDec;
+      decrementButton.textContent = '-';
 
       const quantitySpan = document.createElement('span');
       quantitySpan.className = this.config.classes.shoppingListItemQtyValue;
@@ -1253,15 +1346,13 @@ class ShoppingPage {
       unitSpan.className = this.config.classes.shoppingListItemQtyUnit;
       unitSpan.textContent = entry.unit || '';
 
-      const incrementBtn = document.createElement('button');
-      incrementBtn.type = 'button';
-      incrementBtn.className = this.config.classes.shoppingListItemQtyInc;
-      incrementBtn.textContent = '+';
+      const incrementButton = document.createElement('button');
+      incrementButton.type = 'button';
+      incrementButton.className = this.config.classes.shoppingListItemQtyInc;
+      incrementButton.textContent = '+';
 
-      decrementBtn.addEventListener('click', () => {
-        if (!this.inventory) {
-          this.inventory = Inventory.getInstance();
-        }
+      decrementButton.addEventListener('click', () => {
+        this.getOrCreateInventory();
         const target = getInStockEntry(entry.name);
         if (!target) return;
         const current =
@@ -1278,10 +1369,8 @@ class ShoppingPage {
         this.renderShoppingList(shoppingListElement, pantryListElement);
       });
 
-      incrementBtn.addEventListener('click', () => {
-        if (!this.inventory) {
-          this.inventory = Inventory.getInstance();
-        }
+      incrementButton.addEventListener('click', () => {
+        this.getOrCreateInventory();
         const target = getInStockEntry(entry.name);
         if (!target) return;
         const current =
@@ -1302,9 +1391,9 @@ class ShoppingPage {
         this.renderShoppingList(shoppingListElement, pantryListElement);
       });
 
-      quantityContainer.appendChild(decrementBtn);
+      quantityContainer.appendChild(decrementButton);
       quantityContainer.appendChild(quantitySpan);
-      quantityContainer.appendChild(incrementBtn);
+      quantityContainer.appendChild(incrementButton);
       quantityContainer.appendChild(unitSpan);
 
       const totalSpan = document.createElement('span');
@@ -1319,9 +1408,7 @@ class ShoppingPage {
       removeButton.textContent = removeLabel || '';
 
       removeButton.addEventListener('click', () => {
-        if (!this.inventory) {
-          this.inventory = Inventory.getInstance();
-        }
+        this.getOrCreateInventory();
         const target = getInStockEntry(entry.name);
         if (target) {
           target.quantity = 0;
